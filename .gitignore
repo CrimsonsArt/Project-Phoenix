@@ -1,0 +1,14 @@
+# Ignore ALL .pdf files.
+*.pdf
+
+# Ignore ALL .code-workspace files.
+# *.code-workspace
+
+# Ignore the Notes.md file.
+Notes.md
+
+# Ignore ALL files in ANY directory named documents.
+documents/
+
+# Ignore ALL files in ANY directory named bakcups.
+.backups/
