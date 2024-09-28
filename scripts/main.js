@@ -1,3 +1,4 @@
+/*-------------------------- USER DATA & FUNCTIONS ---------------------------*/
 const user = {
     /**
      * User data.
@@ -24,7 +25,6 @@ const user = {
         const userData = JSON.stringify(this);
         localStorage.setItem("user", userData);
         console.log("User data saved to local storage.");
-        // TODO: Show what has been saved.
     },
 
     // Load user object from local storage.
@@ -58,6 +58,9 @@ const user = {
         // Click the link to download the file, and remove it from the DOM.
         tempLink.click();
         URL.revokeObjectURL(url);
+
+        // Toast success message.
+        toast.show("User data exported successfully.", "success");
     },
     import: function() {
         const file = document.getElementById("import-data").files[0];
@@ -111,6 +114,42 @@ const user = {
     }
 };
 
+/*----------------------------- TOAST FUNCTIONS ------------------------------*/
+const toast = {
+    /**
+     * Show toast messages.
+     * 
+     * TODO: Add animation for timeout.
+     * TODO: Add close button.
+     * TODO: Add a progress bar for timeout.
+     * TODO: Add a toast-log for the user.
+     */
+    show: function(message, type = 'info'){
+        // Create toast container.
+        let toastContainer = document.getElementsByTagName("header")[0];
+        let toast = document.createElement("div");
+
+        // Add info to toast.
+        toast.classList.add('toast', type, 'show');
+        toast.innerHTML = `<h2>${type.charAt(0).toUpperCase() + type.slice(1)}:</h2><p>${message}</p>`;
+
+        // Add toast to container.
+        toastContainer.appendChild(toast);
+
+        // TODO: Pause the removal timer on hover.
+
+        // Remove toast after 5 seconds.
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 500);
+        }, 60000);
+
+        // Log the toast message to the console.
+        console.log(`[Toast - ${type}] ${message}`);
+    }
+};
+
+/*---------------------------- CALENDAR FUNCTIONS ----------------------------*/
 const calendar = {
     /**
      * Calendar data and functions.
@@ -134,18 +173,33 @@ const calendar = {
     addEvent: function() {
         let eventTitle = document.getElementById("event-title").value;
         let eventDate = document.getElementById("event-date").value;
+        let eventDescription = document.getElementById("event-description").value;
 
         // Add event to the calendar.
         if (eventTitle && eventDate) {
             // Create an event object.
             const event = {
                 title: eventTitle,
-                date: eventDate
+                date: eventDate,
+                description: ""
+            };
+
+            // Add event description if provided.
+            if (eventDescription) {
+                event.description = eventDescription;
             };
 
             // Add the event to the user object.
             user.events.push(event);
             user.save();
+
+            // TODO: Remove data from input fields.
+
+            // Re-render the calendar.
+            calendar.renderCalendar(calendar.thisMonth, calendar.thisYear);
+
+            // Toast success message.
+            toast.show("Calendar event added successfully.", "success");
         } else {
             // Show error toast.
             toast.show("Please enter an event title and date.", "error");
@@ -154,11 +208,12 @@ const calendar = {
     isEventDay: function(dateString) {
         // Check if the date is in the user's events.
         return user.events.some(event => event.date === dateString);
+        // TODO: Toast for event day!
     },
     renderCalendar: function(month, year) {
         // Grab the calendar body.
-        let title = document.getElementById("calendar-title");
-        let table = document.getElementById("calendar-body");
+        let title = document.getElementById("cal-title");
+        let table = document.getElementById("cal-body");
         let firstDay = (((new Date(year, month)).getDay() - 1) + 7) % 7;
         let date = 1;
         
@@ -179,6 +234,7 @@ const calendar = {
 
                 // Add empty cells for previous month's days.
                 if (i === 0 && j < firstDay) {
+                    // TODO: Add previous month's days, and have them look faded out.
                     day.appendChild(dayNum);
                     week.appendChild(day);
 
@@ -202,10 +258,14 @@ const calendar = {
                         // Add a class to the day if it has an event.
                         day.classList.add('event-day');
                         // TODO: Ensure that the event is visible.
+                        // TODO: Show event title and description in cell.
                     };
 
                     // Add the date to the day, and add the day to the week.
-                    dayNum = document.createTextNode(date);
+                    // TODO: Turn date into a date object.
+                    // TODO: Turn date into a title.
+                    // TODO: Show event title below date.
+                    dayNum = document.createTextNode(`${date}`);
                     day.appendChild(dayNum);
                     week.appendChild(day);
                     date++;
@@ -242,6 +302,7 @@ const calendar = {
     }
 };
 
+/*--------------------------- TO-DO LIST FUNCTIONS ---------------------------*/
 const tasks = {
     /**
      * To-do list data and functions.
@@ -260,8 +321,13 @@ const tasks = {
         user.tasks.push(task);
         user.save();
 
+        // TODO: Clear input field.
+
         // Re-render tasks.
         tasks.renderTasks();
+
+        // Toast success message.
+        toast.show("Task added successfully.", "success");
     },
     renderTasks: function() {
         let taskList = document.getElementById("todo-list");
@@ -322,36 +388,6 @@ const tasks = {
     }
 };
 
-const toast = {
-    /**
-     * Show toast messages.
-     */
-    show: function(message, type = 'info'){
-        // Create toast container.
-        let toastContainer = document.getElementsByTagName("header")[0];
-        let toast = document.createElement("div");
-
-        // Add info to toast.
-        toast.classList.add('toast', type, 'show');
-        toast.innerHTML = `<h2>${type.charAt(0).toUpperCase() + type.slice(1)}</h2><p>${message}</p>`;
-
-        // Add toast to container.
-        toastContainer.appendChild(toast);
-
-        // Remove toast after 5 seconds.
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 500);
-        }, 5000);
-
-        // Log the toast message to the console.
-        console.log(`[Toast - ${type}] ${message}`);
-
-        // TODO: Add animation for timeout.
-        // TODO: Add close button.
-    }
-};
-
 // Load user data from local storage.
 window.onload = function() {
     user.load();
@@ -359,5 +395,5 @@ window.onload = function() {
     tasks.renderTasks();
 
     // Testing area
-    toast.show("This is a test toast!");
+    toast.show("Welcome back!");
 };

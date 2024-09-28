@@ -3,43 +3,33 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="CrimsonsArt">
+        <meta name="description" content="A daily planner to notice and manage ADHD burnout and other related issues.">
         <title>Project Phoenix</title>
         <link rel="stylesheet" href="style/style.css">
     </head>
 
     <body>
         <header>
+            <a href="#main" class="skip">Skip to main content</a>
             <nav>
                 <ul>
                     <li><h1><a href="index.html">Project Phoenix</a></h1></li>
                 </ul>
             </nav>
-            <div id="settings">
-                <input type="file" name="import-data" id="import-data" accept=".json">
-                <button id="import" onclick="user.import()">Import</button>
-                <button id="export" onclick="user.export()">Export</button>
-            </div>
         </header>
 
         <main>
-            <section id="calendar-container">
+            <section id="calendar" class="container">
                 <h2>Calendar</h2>
-                <div id="calendar-controller">
-                    <button onclick="calendar.previous()">Previous</button>
-                    <button onclick="calendar.next()">Next</button>
+                <!-- TODO: Add jump to add-event link for screen readers. -->
+                <div id="cal-controller">
+                    <button onclick="calendar.previous()" aria-label="Previous month">Previous</button>
+                    <button onclick="calendar.next()" aria-label="Next month">Next</button>
                 </div>
 
-                <div id="calendar-events">
-                    <!-- TODO: Add event form. -->
-                    <label for="event-title">Event title:</label>
-                    <input type="text" id="event-title">
-                    <label for="event-date">Event date:</label>
-                    <input type="date" name="event-date" id="event-date">
-                    <button id="add-event" type="button" onclick="calendar.addEvent()">Add event</button>
-                </div>
-
-                <table id="calendar">
-                    <caption id="calendar-title"></caption>
+                <table id="cal-table">
+                    <caption id="cal-title"></caption>
                     <thead>
                         <tr id="weekdays">
                             <th>Monday</th>
@@ -51,23 +41,39 @@
                             <th>Sunday</th>
                         </tr>
                     </thead>
-                    <tbody id="calendar-body">
+                    <tbody id="cal-body">
                     </tbody>
                 </table>
+
+                <form id="cal-events" action="">
+                    <label for="event-title">Event title:</label>
+                    <input type="text" id="event-title">
+                    <label for="event-date">Event date:</label>
+                    <input type="date" name="event-date" id="event-date">
+                    <label for="event-description">Event description:</label>
+                    <textarea name="event-description" id="event-description"></textarea>
+                    <button id="add-event" type="button" onclick="calendar.addEvent()">Add event</button>
+                </form>
             </section>
 
-            <section id="todo-container">
+            <section id="todo" class="container">
                 <h2>Todo list</h2>
-                <div id="todo-controller">
+                <form id="todo-controller" action="">
                     <!-- TODO: Add task form. -->
                     <label for="todo-task">New task: </label>
                     <input type="text" id="todo-task" placeholder="New task">
-                    <button onclick="tasks.addTask()">Add task</button>
-                </div>
+                    <button id="add-task" type="button" onclick="tasks.addTask()">Add task</button>
+                </form>
                 <ul id="todo-list">
                     <!-- List will show up here. -->
                 </ul>
             </section>
+            <section id="settings" class="container">
+                <!-- TODO: Have this be part of a dropdown menu? -->
+                <input type="file" name="import-data" id="import-data" accept=".json">
+                <button id="import" onclick="user.import()">Import</button>
+                <button id="export" onclick="user.export()">Export</button>
+                </div>
         </main>
 
         <footer>

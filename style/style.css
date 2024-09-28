@@ -1,68 +1,128 @@
+/* IMPORTS */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap'); /* Open Sans - Google Fonts: Primary font. */
+
 /* VARIABLES */
 :root {
-    --main-bg-color: #f5f5f5;
-    --main-font-color: #000000;
-    --secondary-bg-color: #ffffff;
-    --secondary-font-color: #000000;
+    --main-bg-color: #0d1b2a;
+    --main-font-color: #e0e1dd;
+    --secondary-bg-color: #778da9;
+    --secondary-font-color: #1b263b;
 
-    --borders: 1px solid red;
+    --borders: 1px solid #415a77;
 }
 
-/* COMMON RULES */
-* {
-    margin: 0;
-    padding: 0;
-};
+/* ACCESSIBILITY */
+.skip { /* Hide "skip to main content"-link. */
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+.skip:focus { /* Show "skip to main content"-link when focused. */
+    position: static;
+    width: auto;
+    height: auto;
+}
 
-/* HEADER */
+/* GENERAL */
+html {
+    background-color: var(--main-bg-color);
+    color: var(--main-font-color);
+    font-family: 'Open Sans', sans-serif;
+}
+a:visited {
+    color: var(--main-font-color); /* TODO: Change color. */
+}
 
+h2 {
+    text-align: center;
+}
 
 /* BODY */
 body {
-    height: 100%;
+    height: 100vh;
+    margin: 50px 0 0 0;
+    padding: 0;
+    width: 100vw;
+}
+header {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    height: 50px;
+    left: 0;
+    position: fixed;
+    top: 0;
     width: 100%;
-};
+}
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+main, section {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    margin: auto;
+    width: 100%;
+}
+section {
+    width: 75%;
+}
 
-main {
+/* CONTENT */
+.toast {
+    background-color: var(--secondary-bg-color);
+    color: var(--secondary-font-color);
+    padding: 0 2%;;
+    position: fixed;
+    right: 1%;
+    top: 1%;
+    z-index: 999; /* Ensure that toast is always on top. */
+}
+#calendar {
     border: var(--borders);
-};
-
-/* CALENDAR */
-
-/* TOASTS */
-.toast {};
-.toast-show {};
-.toast-info {};
-.toast-success {};
-.toast-warning {};
-.toast-error {};
-
-/* FOOTER */
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+}
+#cal-controller, #cal-events {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+}
+#cal-body tr td {
+    border: var(--borders);
+    text-align: center;
+}
 
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
-};
+}
 
 
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (min-width: 600px) {
-};
+}
 
 
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
-};
+}
 
 
 
 /* Large devices (laptops/desktops, 992px and up) */
 @media only screen and (min-width: 992px) {
-};
+}
 
 
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {
-};
+}
