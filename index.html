@@ -11,7 +11,7 @@
 
     <body>
         <header>
-            <a href="#main" class="skip">Skip to main content</a>
+            <a href="#main" class="sr-only">Skip to main content</a>
             <nav>
                 <ul>
                     <li><h1><a href="index.html">Project Phoenix</a></h1></li>
@@ -24,8 +24,9 @@
                 <h2>Calendar</h2>
                 <!-- TODO: Add jump to add-event link for screen readers. -->
                 <div id="cal-controller">
-                    <button onclick="calendar.previous()" aria-label="Previous month">Previous</button>
-                    <button onclick="calendar.next()" aria-label="Next month">Next</button>
+                    <!-- TODO: Add navigation icons. -->
+                    <button id="cal-prev" type="button" onclick="calendar.previous()" aria-label="Previous month">Previous</button>
+                    <button id="cal-next" type="button" onclick="calendar.next()" aria-label="Next month">Next</button>
                 </div>
 
                 <table id="cal-table">
@@ -47,9 +48,12 @@
 
                 <form id="cal-events" action="">
                     <label for="event-title">Event title:</label>
-                    <input type="text" id="event-title">
+                    <input type="text" id="event-title" required>
                     <label for="event-date">Event date:</label>
-                    <input type="date" name="event-date" id="event-date">
+                    <input type="date" name="event-date" id="event-date" required>
+                    <!-- TODO: Add intuitive time picker. -->
+                    <label for="event-time">Event time:</label>
+                    <input type="time" name="event-time" id="event-time">
                     <label for="event-description">Event description:</label>
                     <textarea name="event-description" id="event-description"></textarea>
                     <button id="add-event" type="button" onclick="calendar.addEvent()">Add event</button>
@@ -61,11 +65,23 @@
                 <form id="todo-controller" action="">
                     <!-- TODO: Add task form. -->
                     <label for="todo-task">New task: </label>
-                    <input type="text" id="todo-task" placeholder="New task">
+                    <input type="text" id="todo-task" placeholder="New task" required>
                     <button id="add-task" type="button" onclick="tasks.addTask()">Add task</button>
                 </form>
+                <!-- TODO: Add way to sort tasks. -->
+                <!-- TODO: Add way to filter tasks. -->
+                <!-- TODO: Add way to add tags to tasks. -->
                 <ul id="todo-list">
-                    <!-- List will show up here. -->
+                    <!-- List will show up here, following this pattern: -->
+                    <li>
+                        <p>Task</p>
+                        <label for="task-check">Mark as done:</label>
+                        <input type="checkbox" name="task-check">
+                        <div class="todo-actions">
+                            <button id="todo-edit" type="button" onclick="">Edit</button>
+                            <button id="todo-delete" type="button" onclick="">Delete</button>
+                        </div>
+                    </li>
                 </ul>
             </section>
             <section id="settings" class="container">
@@ -73,7 +89,7 @@
                 <input type="file" name="import-data" id="import-data" accept=".json">
                 <button id="import" onclick="user.import()">Import</button>
                 <button id="export" onclick="user.export()">Export</button>
-                </div>
+            </section>
         </main>
 
         <footer>

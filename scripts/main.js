@@ -107,8 +107,8 @@ const user = {
     // See all of the user's tasks in the console.
     showTasks: function() {
         console.log("User's tasks:")
-        this.tasks.forEach((task, index) => {
-            console.log(`[${index + 1}]: ${task}`);	
+        this.tasks.forEach((task) => {
+            console.log(`[${task.id}]: ${task.title} - ${task.completed ? "Complete" : "Incomplete"}`);	
             // TODO: Count tasks and return number of tasks.
         });
     }
@@ -181,6 +181,7 @@ const calendar = {
             const event = {
                 title: eventTitle,
                 date: eventDate,
+                time: "",
                 description: ""
             };
 
@@ -313,21 +314,41 @@ const tasks = {
      * @returns {object} - The functions for the to-do list.
      */
     addTask: function() {
-        // TODO: Turn task into an object that holds date and title.
-        // TODO: Add hierarchy options.
-        let task = document.getElementById("todo-task").value;
+        // Create a new task object
+        let task = {
+            id: 0,
+            title: document.getElementById("todo-task").value,
+            completed: false
+        };
 
-        // Save to user object.
-        user.tasks.push(task);
-        user.save();
+        // Check if the ID counter exists in localStorage, if not, initialize it to 1
+        if (!localStorage.getItem('taskIdCounter')) {
+            localStorage.setItem('taskIdCounter', '1'); // Initialize counter to 1
+        };
 
-        // TODO: Clear input field.
+        // Fallback check if task title is empty.
+        if (task.title !== "") {
+            // Get the current task ID from localStorage.
+            let currentId = parseInt(localStorage.getItem('taskIdCounter'));
 
-        // Re-render tasks.
-        tasks.renderTasks();
+            // Update the task object with new data.
+            task.id = currentId;
 
-        // Toast success message.
-        toast.show("Task added successfully.", "success");
+            // Increment the ID and save it back to localStorage.
+            currentId++;
+            localStorage.setItem('taskIdCounter', currentId.toString());
+
+            // Save to user object, and re-render tasks.
+            user.tasks.push(task);
+            user.save();
+            tasks.renderTasks();
+
+            // Toast success message.
+            toast.show("Task added successfully.", "success");
+        } else {
+            // Toast error message.
+            toast.show("Please enter a task title.", "error");
+        };
     },
     renderTasks: function() {
         let taskList = document.getElementById("todo-list");
@@ -336,55 +357,65 @@ const tasks = {
         taskList.innerHTML = "";
 
         // Add tasks to list.
-        user.tasks.forEach((task, index) => {
+        user.tasks.forEach((task) => {
             let taskItem = document.createElement("li");
 
-            // FIXME: Delete not working.
-            /*
-            taskItem.innerHTML = `${task} <button class="task-delete" data-index="${index}">Delete</button>`;
-            */
+            //taskItem.IdName = `task-${task.id}`;
+            taskItem.id = `task-${task.id}`;
 
-            taskItem.innerHTML = task;
+            // Generate the task item and add data to it.
+            taskItem.innerHTML = `<p class="todo-task">${task.title}</p>
+            <label for="task-${task.id}-check" class="sr-only">${task.complete ? "Mark task as incomplete" : "Mark task as completed"}:</label>
+            <input class="todo-check" type="checkbox" name="task-${task.id}-check" onclick="tasks.completeTask(${task.id})" ${task.completed ? "checked" : ""}>
+            <div class="todo-actions">
+                <button class="todo-edit" type="button" onclick="tasks.editTasks(${task.id})">Edit</button>
+                <button class="todo-delete" type="button" onclick="tasks.deleteTask(${task.id})">Delete</button>
+            </div>`;
 
-            //taskItem.textContent = task;
+            // Add task to list.
             taskList.appendChild(taskItem);
         });
-
-        // FIXME: Delete not working.
-        /*
-        // Add event listeners to delete buttons.
-        const deleteButtons = taskList.querySelectorAll(".task-delete");
-        deleteButtons.forEach((button) => {
-            deleteButtons.forEach (button => {
-                button.addEventListener('click', this.deleteTask.bind(this));
-            });
-        });
-        */
     },
-    deleteTask: function(event) {
-        // FIXME: Delete not working.
-        /*
-        // 
-        const taskIndex = event.target.getAttribute('data-index');
+    deleteTask: function(id) {
+        // Remove the array item in the user.tasks object..
+        user.tasks.splice(id, 1);
 
-        // Remove task from the array.
-        user.tasks.splice(taskIndex, 1);
-
-        // Save to user object.
+        // Save the updated user object, and reload tasks.
         user.save();
-
-        // Re-render tasks.
         tasks.renderTasks();
-        */
+    },
+    completeTask: function(id) {
+        // Find the task in the user.tasks object.
+        let task = user.tasks.find(task => task.id === id);
+
+        // Check if the task exists.
+        if (task) {
+            // Toggle the completed status.
+            task.completed = !task.completed;
+        };
+
+        // Save the updated user object and reload tasks.
+        user.save();
+        tasks.renderTasks();
+    },
+    editTasks: function(id) {
+        // TODO: Edit tasks in user object and reload tasks.
+        // TODO: Open a text editor to edit tasks.
+        let task = user.tasks.find(task => task.id === id);
+
+        // Check if the task exists.
+        if (task) {
+            // TODO: Open a text editor to edit tasks.
+            let taskInput = document.getElementById(`task-${id}`);
+            taskInput.innerHTML = `<form id="edit-task-${id}" action="">
+            <label for="editing-task-${id}" class="sr-only">Edit task:</label>
+            <input id="editing-task-${id}" type="text" value="${task.title}" required>
+            <button id="update-task-${id}" type="button">Update task</button>
+            </form>`;
+        };
     },
     reorderTasks: function() {
         // TODO: Reorder tasks in user object and reload tasks.
-    },
-    completeTask: function(index) {
-        // TODO: Complete task in user object and reload tasks.
-    },
-    uncompleteTask: function(index) {
-        // TODO: Uncomplete task in user object and reload tasks.
     }
 };
 
