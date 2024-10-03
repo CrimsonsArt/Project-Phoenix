@@ -63,7 +63,6 @@
             <section id="todo" class="container">
                 <h2>Todo list</h2>
                 <form id="todo-controller" action="">
-                    <!-- TODO: Add task form. -->
                     <label for="todo-task">New task: </label>
                     <input type="text" id="todo-task" placeholder="New task" required>
                     <button id="add-task" type="button" onclick="tasks.addTask()">Add task</button>
@@ -84,8 +83,14 @@
                     </li>
                 </ul>
             </section>
+            <section id="helper">
+                <h2 class="sr-only">Helper</h2>
+                <div id="phoenix"></div>
+            </section>
             <section id="settings" class="container">
-                <!-- TODO: Have this be part of a dropdown menu? -->
+                <h2>Settings</h2>
+                <!-- TODO: Have this be part of a dropdown menu in the header? -->
+                <!-- TODO: Add way to delete all user data. -->
                 <input type="file" name="import-data" id="import-data" accept=".json">
                 <button id="import" onclick="user.import()">Import</button>
                 <button id="export" onclick="user.export()">Export</button>
@@ -93,6 +98,8 @@
         </main>
 
         <footer>
+            <p>Made by <a href="https://github.com/CrimsonsArt">CrimsonsArt</a></p>
+            <div>Version: <span id="version">0.3</span></div>
             <!-- TODO: Add contact info. -->
         </footer>
 
