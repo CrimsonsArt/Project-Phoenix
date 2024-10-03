@@ -53,6 +53,7 @@ const user = {
         // Create a temporary link element.
         const tempLink = document.createElement("a");
         tempLink.href = url;
+        // TODO: Improve file name.
         tempLink.download = "user-data.json";
 
         // Click the link to download the file, and remove it from the DOM.
@@ -99,7 +100,7 @@ const user = {
     showEvents: function() {
         console.log("User's events:")
         this.events.forEach((event, index) => {
-            console.log(`[${index + 1}]: ${event.title}, Date: ${event.date}`);
+            console.log(`[${index + 1}]: ${event.title}, Date: ${event.date}, Time: ${event.time}, Description: ${event.description}`);
             // TODO: Count events and return number of events.
         });
     },
@@ -142,7 +143,7 @@ const toast = {
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 500);
-        }, 60000);
+        }, 6000);
 
         // Log the toast message to the console.
         console.log(`[Toast - ${type}] ${message}`);
@@ -171,8 +172,10 @@ const calendar = {
     thisYear: new Date().getFullYear(),
 
     addEvent: function() {
+        // TODO: Allow users to submit the event using the enter key.
         let eventTitle = document.getElementById("event-title").value;
         let eventDate = document.getElementById("event-date").value;
+        let eventTime = document.getElementById("event-time").value;
         let eventDescription = document.getElementById("event-description").value;
 
         // Add event to the calendar.
@@ -181,13 +184,8 @@ const calendar = {
             const event = {
                 title: eventTitle,
                 date: eventDate,
-                time: "",
-                description: ""
-            };
-
-            // Add event description if provided.
-            if (eventDescription) {
-                event.description = eventDescription;
+                time: eventTime,
+                description: eventDescription
             };
 
             // Add the event to the user object.
@@ -198,6 +196,11 @@ const calendar = {
 
             // Re-render the calendar.
             calendar.renderCalendar(calendar.thisMonth, calendar.thisYear);
+
+            // Clear the input fields.
+            document.getElementById("event-title").value = "";
+            document.getElementById("event-date").value = "";
+            document.getElementById("event-description").value = "";
 
             // Toast success message.
             toast.show("Calendar event added successfully.", "success");
@@ -232,6 +235,7 @@ const calendar = {
             for (let j = 0; j < 7; j++) {
                 let day = document.createElement("td");
                 let dayNum = document.createTextNode("");
+                let dayEvent = "";
 
                 // Add empty cells for previous month's days.
                 if (i === 0 && j < firstDay) {
@@ -241,13 +245,13 @@ const calendar = {
 
                 // Break the loop when all days are added.
                 } else if (date > (32 - new Date(year, month, 32).getDate())) {
+                    // TODO: If more days in the week add next month's days, and have them look faded out.
                     break;
 
                 // Add days to the table.
                 } else {
                     // Highlight today's date.
                     if (date === this.today.getDate() && month === this.today.getMonth() && year === this.today.getFullYear()) {
-                        // TODO: Ensure that the date is visible.
                         day.classList.add('today');
                     };
 
@@ -258,16 +262,27 @@ const calendar = {
                     if (this.isEventDay(fullDate)) {
                         // Add a class to the day if it has an event.
                         day.classList.add('event-day');
-                        // TODO: Ensure that the event is visible.
-                        // TODO: Show event title and description in cell.
+
+                        // Find the event in the user.events object.
+                        let event = user.events.find(event => event.date === fullDate);
+
+                        dayEvent = `<div class="cal-event">
+                            <span class="event-title">${event.title}</span>
+                            <time class="event-time" datetime="${event.time}">${event.time}</time>
+                            <span class="event-description">${event.description}</span>
+                        </div>`;
                     };
 
                     // Add the date to the day, and add the day to the week.
-                    // TODO: Turn date into a date object.
-                    // TODO: Turn date into a title.
-                    // TODO: Show event title below date.
-                    dayNum = document.createTextNode(`${date}`);
-                    day.appendChild(dayNum);
+                    // TODO: Turn date into a title?
+                    // TODO: Improve date formatting. (.th, .st, etc.)
+                    // TODO: Add event listener for each day.
+                    // TODO: Allow editing and removing events.
+                    day.innerHTML = `<time class="cal-date" datetime="${fullDate}">
+                        ${date}
+                        <span class="sr-only">${this.months[month]}</span>
+                    </time>
+                    ${dayEvent}`;
                     week.appendChild(day);
                     date++;
                 };
@@ -276,6 +291,14 @@ const calendar = {
             // Add week to the table.
             table.appendChild(week);
         };
+    },
+    openDay: function() {
+        // TODO: Add event listener for each day.
+        // TODO: When clicked, focus on the day.
+    },
+    openEvent: function() {
+        // TODO: Add event listener for each event.
+        // TODO: When clicked, focus on the event and display edit and remove buttons.
     },
     next: function() {
         // If at the end of the year, go back to the first month.
@@ -314,6 +337,7 @@ const tasks = {
      * @returns {object} - The functions for the to-do list.
      */
     addTask: function() {
+        // TODO: Allow users to submit the task using the enter key.
         // Create a new task object
         let task = {
             id: 0,
@@ -343,6 +367,9 @@ const tasks = {
             user.save();
             tasks.renderTasks();
 
+            // Clear input field.
+            document.getElementById("todo-task").value = "";
+
             // Toast success message.
             toast.show("Task added successfully.", "success");
         } else {
@@ -350,31 +377,46 @@ const tasks = {
             toast.show("Please enter a task title.", "error");
         };
     },
-    renderTasks: function() {
+    renderTasks: function(target = 0) {
         let taskList = document.getElementById("todo-list");
 
-        // Clear list.
-        taskList.innerHTML = "";
-
-        // Add tasks to list.
-        user.tasks.forEach((task) => {
-            let taskItem = document.createElement("li");
-
-            //taskItem.IdName = `task-${task.id}`;
-            taskItem.id = `task-${task.id}`;
-
-            // Generate the task item and add data to it.
-            taskItem.innerHTML = `<p class="todo-task">${task.title}</p>
-            <label for="task-${task.id}-check" class="sr-only">${task.complete ? "Mark task as incomplete" : "Mark task as completed"}:</label>
+        let generateTask = (task) => {
+            return `<p class="todo-task">${task.title}</p>
+            <label for="task-${task.id}-check" class="sr-only">${task.completed ? "Mark task as incomplete" : "Mark task as completed"}:</label>
             <input class="todo-check" type="checkbox" name="task-${task.id}-check" onclick="tasks.completeTask(${task.id})" ${task.completed ? "checked" : ""}>
             <div class="todo-actions">
                 <button class="todo-edit" type="button" onclick="tasks.editTasks(${task.id})">Edit</button>
                 <button class="todo-delete" type="button" onclick="tasks.deleteTask(${task.id})">Delete</button>
             </div>`;
+        };
 
-            // Add task to list.
-            taskList.appendChild(taskItem);
-        });
+        // If target is specified, render specified list item.
+        if (target !== 0) {
+            let taskItem = document.getElementById(`task-${target}`);
+
+            // Clear specified list item.
+            taskItem.innerHTML = "";
+
+            // Find the task in the user.tasks object.
+            let tasks = user.tasks.find(task => task.id === target);
+
+            // Reload specified list item.
+            taskItem.innerHTML = generateTask(tasks);
+        } else {
+            taskList.innerHTML = "";
+
+            // Add each task to the list.
+            user.tasks.forEach(task => {
+                let taskItem = document.createElement("li");
+
+                // Get the task ID.
+                taskItem.id = `task-${task.id}`;
+
+                // Generate the task HTML and add the task to the list.
+                taskItem.innerHTML = generateTask(task);
+                taskList.appendChild(taskItem);
+            });
+        };
     },
     deleteTask: function(id) {
         // Remove the array item in the user.tasks object..
@@ -383,6 +425,9 @@ const tasks = {
         // Save the updated user object, and reload tasks.
         user.save();
         tasks.renderTasks();
+
+        // Toast success message.
+        toast.show("Task deleted successfully.", "success");
     },
     completeTask: function(id) {
         // Find the task in the user.tasks object.
@@ -397,26 +442,85 @@ const tasks = {
         // Save the updated user object and reload tasks.
         user.save();
         tasks.renderTasks();
+
+        // Toast success message.
+        // TODO: Change the message to indicate whether the task was completed or not.
     },
     editTasks: function(id) {
-        // TODO: Edit tasks in user object and reload tasks.
-        // TODO: Open a text editor to edit tasks.
+        // BUG: When editing a task, and deleting another task the wrong task is deleted.
+        // BUG: When multiple tasks are edited, and one is submitted all are closed.
         let task = user.tasks.find(task => task.id === id);
 
         // Check if the task exists.
         if (task) {
-            // TODO: Open a text editor to edit tasks.
             let taskInput = document.getElementById(`task-${id}`);
             taskInput.innerHTML = `<form id="edit-task-${id}" action="">
             <label for="editing-task-${id}" class="sr-only">Edit task:</label>
             <input id="editing-task-${id}" type="text" value="${task.title}" required>
-            <button id="update-task-${id}" type="button">Update task</button>
+            <button id="update-task-${id}" type="button">Update</button>
+            <button id="update-task-cancel-${id}" type="button">Cancel</button>
             </form>`;
+
+            // Add event listener for the update button.
+            document.getElementById(`update-task-${id}`).addEventListener("click", function() {
+                // TODO: Allow users to update the task using the enter key.
+                let updatedTitle = document.getElementById(`editing-task-${id}`).value;
+
+                if (updatedTitle === "") {
+                    // Toast error message.
+                    toast.show("Task title cannot be empty.", "error");
+                    return;
+                } else if (updatedTitle === task.title) {
+                    tasks.renderTasks(id);
+                    return;
+                } else {
+                    // Update the task title.
+                    task.title = updatedTitle;
+
+                    // Save the updated user object and reload tasks.
+                    user.save();
+                    tasks.renderTasks();
+
+                    // Toast success message.
+                    toast.show("Task updated successfully.", "success");
+                }
+            });
+
+            // Add event listener for the cancel button.
+            document.getElementById(`update-task-cancel-${id}`).addEventListener("click", function() {
+                // TODO: Allow users to cancel the task edit using the esc key.
+                // Cancel the edit and reload that list item.
+                tasks.renderTasks(id);
+            });
         };
+    },
+    submitEdit: function(id) {
+        // TODO: Allow users to submit the edit using the enter key.
+        // TODO: Move this function from the editTasks function.
+    },
+    cancelEdit: function(id) {
+        // TODO: Allow users to cancel the edit using the esc key.
+        // TODO: Move this function from the editTasks function.
     },
     reorderTasks: function() {
         // TODO: Reorder tasks in user object and reload tasks.
     }
+};
+
+const pomodoro = {
+    /**
+     * Adds functions for the pomodoro timer.
+     */
+};
+
+const helper = {
+    /**
+     * Adds functions for the emotional support creature.
+     */
+    // TODO: Figure out where to start.
+    // TODO: Have helper give reminders.
+    // TODO: Have helper give advice.
+    // TODO: Have helper tell the user to take breaks.
 };
 
 // Load user data from local storage.

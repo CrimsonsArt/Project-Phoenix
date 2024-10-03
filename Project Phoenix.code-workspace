@@ -114,6 +114,10 @@
 		],
 		"todo-tree.regex.regex": "((//|#|;|\\*)[ ]*($TAGS)[^\\n]*)|(/\\*(\\*?\\s*)*($TAGS)(.|\\n|\\r)*?\\*/)|(<!--\\s*($TAGS)(.|\\n|\\r)*?-->)",
 		"todo-tree.general.showActivityBarBadge": true,
-		"todo-tree.tree.showCountsInTree": true
+		"todo-tree.tree.showCountsInTree": true,
+		"cSpell.words": [
+			"datetime",
+			"pomodoro"
+		]
 	}
 }
