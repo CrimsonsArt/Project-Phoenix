@@ -53,8 +53,7 @@ const user = {
         // Create a temporary link element.
         const tempLink = document.createElement("a");
         tempLink.href = url;
-        // TODO: Improve file name.
-        tempLink.download = "user-data.json";
+        tempLink.download = `Project-Phoenix-${calendar.timestamp()}.json`;
 
         // Click the link to download the file, and remove it from the DOM.
         tempLink.click();
@@ -101,7 +100,6 @@ const user = {
         console.log("User's events:")
         this.events.forEach((event, index) => {
             console.log(`[${index + 1}]: ${event.title}, Date: ${event.date}, Time: ${event.time}, Description: ${event.description}`);
-            // TODO: Count events and return number of events.
         });
     },
 
@@ -109,8 +107,7 @@ const user = {
     showTasks: function() {
         console.log("User's tasks:")
         this.tasks.forEach((task) => {
-            console.log(`[${task.id}]: ${task.title} - ${task.completed ? "Complete" : "Incomplete"}`);	
-            // TODO: Count tasks and return number of tasks.
+            console.log(`[${task.id}]: ${task.title} - ${task.completed ? "Complete" : "Incomplete"}`);
         });
     }
 };
@@ -120,10 +117,7 @@ const toast = {
     /**
      * Show toast messages.
      * 
-     * TODO: Add animation for timeout.
-     * TODO: Add close button.
-     * TODO: Add a progress bar for timeout.
-     * TODO: Add a toast-log for the user.
+     * CONSIDER: Toast-log for the user.
      */
     show: function(message, type = 'info'){
         // Create toast container.
@@ -132,21 +126,61 @@ const toast = {
 
         // Add info to toast.
         toast.classList.add('toast', type, 'show');
-        toast.innerHTML = `<h2>${type.charAt(0).toUpperCase() + type.slice(1)}:</h2><p>${message}</p>`;
+        toast.innerHTML = `<h2>${type.charAt(0).toUpperCase() + type.slice(1)}:</h2>
+        <p>${message}</p>
+        <button id="toast-close" aria-label="Close toast">
+            <span class="bi bi-x-square" aria-hidden="true"></span>
+        </button>`;
 
-        // Add toast to container.
+        // Add toast to container and log to console.
         toastContainer.appendChild(toast);
-
-        // TODO: Pause the removal timer on hover.
-
-        // Remove toast after 5 seconds.
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 500);
-        }, 6000);
-
-        // Log the toast message to the console.
         console.log(`[Toast - ${type}] ${message}`);
+
+        // Initial removal timer (e.g., 5 seconds = 5000 milliseconds).
+        const totalTimeout = 5000;
+        let startTime = Date.now();
+        let remainingTime = totalTimeout;
+        let toastClose = document.getElementById("toast-close");
+
+        // Function to remove the toast.
+        const removeToast = (fadeout = 500) => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), fadeout);
+            console.log("[Toast - remove] Removing toast!");
+        };
+
+        // Start the removal timer.
+        let removalTimer = setTimeout(removeToast, remainingTime);
+        console.log(`[Toast - start timer] Starting removal timer for ${totalTimeout}ms.`);
+
+        // Pause and resume the removal timer.
+        const toggleTimer = (pause) => {
+            if (pause) {
+                clearTimeout(removalTimer);
+                remainingTime -= (Date.now() - startTime);
+                console.log(`[Toast - pause timer] Pausing removal timer.`);
+            } else if (!document.activeElement.closest(".toast")) {
+                startTime = Date.now();
+                removalTimer = setTimeout(removeToast, remainingTime);
+                console.log("[Toast - resume timer] Resuming removal timer.");
+            };
+        };
+
+        // Event listeners for pause and resume.
+        toast.addEventListener("mouseenter", () => toggleTimer(true));
+        toast.addEventListener("mouseleave", () => toggleTimer(false));
+        toastClose.addEventListener("focus", () => toggleTimer(true));
+        toastClose.addEventListener("focusout", () => toggleTimer(false));
+        /*
+        ["mouseenter", "focus"].forEach(event => toast.addEventListener(event, () => toggleTimer(true)));
+        ["mouseleave", "focusout"].forEach(event => toast.addEventListener(event, () => toggleTimer(false)));
+        */
+
+        // Close the toast on click.
+        toastClose.addEventListener('click', () => {
+            clearTimeout(removalTimer);
+            removeToast(0);
+        });
     }
 };
 
@@ -170,6 +204,13 @@ const calendar = {
     months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     thisMonth: new Date().getMonth(),
     thisYear: new Date().getFullYear(),
+
+    timestamp: function() {
+        const date = new Date();
+
+        // Format the date as YYYY-MM-DD or any other preferred format
+        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    },
 
     addEvent: function() {
         // TODO: Allow users to submit the event using the enter key.
@@ -276,8 +317,6 @@ const calendar = {
                     // Add the date to the day, and add the day to the week.
                     // TODO: Turn date into a title?
                     // TODO: Improve date formatting. (.th, .st, etc.)
-                    // TODO: Add event listener for each day.
-                    // TODO: Allow editing and removing events.
                     day.innerHTML = `<time class="cal-date" datetime="${fullDate}">
                         ${date}
                         <span class="sr-only">${this.months[month]}</span>
@@ -295,6 +334,7 @@ const calendar = {
     openDay: function() {
         // TODO: Add event listener for each day.
         // TODO: When clicked, focus on the day.
+        // TODO: Display edit and remove buttons.
     },
     openEvent: function() {
         // TODO: Add event listener for each event.
@@ -335,6 +375,9 @@ const tasks = {
      * @function renderTasks - Render the to-do list.
      * 
      * @returns {object} - The functions for the to-do list.
+     * 
+     * TODO: Add way to sort tasks.
+     * TODO: Add a way to add an estimate of the amount of pomodoros required to complete a task.
      */
     addTask: function() {
         // TODO: Allow users to submit the task using the enter key.
@@ -385,8 +428,8 @@ const tasks = {
             <label for="task-${task.id}-check" class="sr-only">${task.completed ? "Mark task as incomplete" : "Mark task as completed"}:</label>
             <input class="todo-check" type="checkbox" name="task-${task.id}-check" onclick="tasks.completeTask(${task.id})" ${task.completed ? "checked" : ""}>
             <div class="todo-actions">
-                <button class="todo-edit" type="button" onclick="tasks.editTasks(${task.id})">Edit</button>
-                <button class="todo-delete" type="button" onclick="tasks.deleteTask(${task.id})">Delete</button>
+                <button class="todo-edit" type="button" onclick="tasks.editTasks(${task.id})" title="Edit task" aria-label="Edit task">${generateIcon("pencil-square")}</button>
+                <button class="todo-delete" type="button" onclick="tasks.deleteTask(${task.id})" title="Delete task" aria-label="Delete task">${generateIcon("trash")}</button>
             </div>`;
         };
 
@@ -444,7 +487,7 @@ const tasks = {
         tasks.renderTasks();
 
         // Toast success message.
-        // TODO: Change the message to indicate whether the task was completed or not.
+        // CONSIDER: Have the creature praise the user for completing a task.
     },
     editTasks: function(id) {
         // BUG: When editing a task, and deleting another task the wrong task is deleted.
@@ -510,7 +553,33 @@ const tasks = {
 const pomodoro = {
     /**
      * Adds functions for the pomodoro timer.
+     * 
+     * When started, the timer should count down from 25 minutes, and then a 5 minute break.
+     * Every 4 pomodoros, a 15-30 minute break should occur.
+     * 
+     * TODO: Create the HTML for the pomodoro timer.
+     * TODO: Add event listeners for the pomodoro timer buttons.
+     * TODO: Find out how to set a task to focus on.
+     * CONSIDER: Reward the user for completing a task through the pomodoro timer.
      */
+    start: function() {
+        // Track the number of pomodoros completed.
+        let pomCompleted = 0;
+
+        // TODO: Loop 4 times.
+
+            // TODO: Count down from 25 minutes.
+
+            // TODO: Take a 5 minute break.
+
+            // CONSIDER: Reward user for completing a loop.
+
+        // TODO: After 4 pomodoros, take a 15-30 minute break.
+
+        // CONSIDER: If the user completes 4 pomodoros in a row, and returns from their break, give bigger reward.
+    },
+    pause: function() {},
+    stop: function() {}
 };
 
 const helper = {
@@ -524,6 +593,11 @@ const helper = {
     summon: function() {
         let phoenix = document.getElementById("phoenix");
     }
+};
+
+// Generate an icon HTML string.
+function generateIcon(iconName) {
+    return `<span class="bi bi-${iconName}" aria-hidden="true"></span>`;
 };
 
 // Load user data from local storage.

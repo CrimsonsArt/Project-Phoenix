@@ -24,9 +24,8 @@
                 <h2>Calendar</h2>
                 <!-- TODO: Add jump to add-event link for screen readers. -->
                 <div id="cal-controller">
-                    <!-- TODO: Add navigation icons. -->
-                    <button id="cal-prev" type="button" onclick="calendar.previous()" aria-label="Previous month">Previous</button>
-                    <button id="cal-next" type="button" onclick="calendar.next()" aria-label="Next month">Next</button>
+                    <button id="cal-prev" type="button" onclick="calendar.previous()" title=" Previous month" aria-label="Previous month"><span class="bi bi-chevron-left" aria-hidden="true"></span></button>
+                    <button id="cal-next" type="button" onclick="calendar.next()" title="Next month" aria-label="Next month"><span class="bi bi-chevron-right" aria-hidden="true"></span></button>
                 </div>
 
                 <table id="cal-table">
@@ -47,6 +46,7 @@
                 </table>
 
                 <form id="cal-events" action="">
+                    <h3>Add a new event</h3>
                     <label for="event-title">Event title:</label>
                     <input type="text" id="event-title" required>
                     <label for="event-date">Event date:</label>
@@ -56,32 +56,37 @@
                     <input type="time" name="event-time" id="event-time">
                     <label for="event-description">Event description:</label>
                     <textarea name="event-description" id="event-description"></textarea>
-                    <button id="add-event" type="button" onclick="calendar.addEvent()">Add event</button>
+                    <button id="add-event" type="button" onclick="calendar.addEvent()" title="Add event" aria-label="Add event"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
                 </form>
             </section>
 
-            <section id="todo" class="container">
-                <h2>Todo list</h2>
-                <form id="todo-controller" action="">
-                    <label for="todo-task">New task: </label>
-                    <input type="text" id="todo-task" placeholder="New task" required>
-                    <button id="add-task" type="button" onclick="tasks.addTask()">Add task</button>
-                </form>
-                <!-- TODO: Add way to sort tasks. -->
-                <!-- TODO: Add way to filter tasks. -->
-                <!-- TODO: Add way to add tags to tasks. -->
-                <ul id="todo-list">
-                    <!-- List will show up here, following this pattern: -->
-                    <li>
-                        <p>Task</p>
-                        <label for="task-check">Mark as done:</label>
-                        <input type="checkbox" name="task-check">
-                        <div class="todo-actions">
-                            <button id="todo-edit" type="button" onclick="">Edit</button>
-                            <button id="todo-delete" type="button" onclick="">Delete</button>
-                        </div>
-                    </li>
-                </ul>
+            <section id="tasks">
+                <h2>Tasks</h2>
+                <section id="todo" class="container">
+                    <h3>Todo list</h3>
+                    <form id="todo-controller" action="">
+                        <label for="todo-task">New task: </label>
+                        <input type="text" id="todo-task" placeholder="New task" required>
+                        <button id="add-task" type="button" onclick="tasks.addTask()" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
+                    </form>
+                    <!-- TODO: Add way to sort tasks. -->
+                    <!-- TODO: Add way to filter tasks. -->
+                    <!-- TODO: Add way to add tags to tasks. -->
+                    <ul id="todo-list">
+                        <!-- List will show up here -->
+                    </ul>
+                </section>
+                <section id="pomodoro" class="container">
+                    <h3>Pomodoro timer</h3>
+                    <div id="pomodoro-timer">
+                        <h4>25:00</h4>
+                    </div>
+                    <div id="pomodoro-controller">
+                        <button id="pomodoro-start" type="button" onclick="pomodoro.start()" title="Start timer" aria-label="Start timer"><span class="bi bi-play-fill" aria-hidden="true"></span></button>
+                        <button id="pomodoro-pause" type="button" onclick="pomodoro.pause()" title="Pause timer" aria-label="Pause timer"><span class="bi bi-pause-fill" aria-hidden="true"></button>
+                        <button id="pomodoro-stop" type="button" onclick="pomodoro.stop()" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
+                    </div>
+                </section>
             </section>
             <section id="helper">
                 <h2 class="sr-only">Helper</h2>
@@ -89,11 +94,13 @@
             </section>
             <section id="settings" class="container">
                 <h2>Settings</h2>
-                <!-- TODO: Have this be part of a dropdown menu in the header? -->
-                <!-- TODO: Add way to delete all user data. -->
-                <input type="file" name="import-data" id="import-data" accept=".json">
-                <button id="import" onclick="user.import()">Import</button>
-                <button id="export" onclick="user.export()">Export</button>
+                <!-- CONSIDER: Have this be part of a dropdown menu in the header? -->
+                <!-- TODO: Add way to delete all user data, with a confirmation dialog. -->
+                <section id="import-export">
+                    <input type="file" name="import-data" id="import-data" accept=".json">
+                    <button id="import" onclick="user.import()" title="Import save from file" aria-label="Import"><span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
+                    <button id="export" onclick="user.export()" title="Export save as file" aria-label="Export"><span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
+                </section>
             </section>
         </main>
 
