@@ -117,6 +117,7 @@ const toast = {
     /**
      * Show toast messages.
      * 
+     * TODO: Ensure that toast messages don't overlap.
      * CONSIDER: Toast-log for the user.
      */
     show: function(message, type = 'info'){
@@ -550,38 +551,6 @@ const tasks = {
     }
 };
 
-const pomodoro = {
-    /**
-     * Adds functions for the pomodoro timer.
-     * 
-     * When started, the timer should count down from 25 minutes, and then a 5 minute break.
-     * Every 4 pomodoros, a 15-30 minute break should occur.
-     * 
-     * TODO: Create the HTML for the pomodoro timer.
-     * TODO: Add event listeners for the pomodoro timer buttons.
-     * TODO: Find out how to set a task to focus on.
-     * CONSIDER: Reward the user for completing a task through the pomodoro timer.
-     */
-    start: function() {
-        // Track the number of pomodoros completed.
-        let pomCompleted = 0;
-
-        // TODO: Loop 4 times.
-
-            // TODO: Count down from 25 minutes.
-
-            // TODO: Take a 5 minute break.
-
-            // CONSIDER: Reward user for completing a loop.
-
-        // TODO: After 4 pomodoros, take a 15-30 minute break.
-
-        // CONSIDER: If the user completes 4 pomodoros in a row, and returns from their break, give bigger reward.
-    },
-    pause: function() {},
-    stop: function() {}
-};
-
 const helper = {
     /**
      * Adds functions for the emotional support creature.
@@ -592,6 +561,95 @@ const helper = {
     // TODO: Have helper tell the user to take breaks.
     summon: function() {
         let phoenix = document.getElementById("phoenix");
+    }
+};
+
+/* FUNCTIONS */
+// Pomodoro
+
+const pomodoro = {
+    /**
+     * TODO: Let user select pomodoro length.
+     * TODO: Reward user for participation.
+     * TODO: Loop 4 times.
+     * TODO: Count down from 25 minutes.
+     * TODO: Take a 5 minute break.
+     * TODO: After 4 pomodoros, take a 15-30 minute break.
+     * TODO: Don't react if pomodoro is not active.
+     * CONSIDER: Reward user for completing a loop.
+     * CONSIDER: If the user completes 4 pomodoros in a row, and returns from their break, give bigger reward.
+     */
+    timer: null,
+    minutes: 15,
+    seconds: 0,
+    isActive: false,
+    isPaused: false,
+    updateButton: function(state = "play") {
+        let button = document.getElementById("pomodoro-start");
+        let buttonIcon = document.getElementById("pomodoro-activity-icon");
+
+        // Toggle the button text and icon.
+        button.title = `${state === "play" ? "Start" : `${state}`} timer`;
+        button.ariaLabel = `${state === "play" ? "Start" : `${state}`} timer`;
+        buttonIcon.className = "bi";
+        buttonIcon.classList.add(`bi-${state === "resume" ? "play" : state}-fill`);
+    },
+    start: function() {
+        if (!pomodoro.isActive) {
+            // If not active, start.
+            // BUG: Timer starts slowly.
+            this.timer = setInterval(() => this.update(), 1000);
+            pomodoro.isActive = true;
+            this.updateButton("pause");
+            toast.show("Pomodoro timer has been started.", "info");
+        } else {
+            // Else, act as pause.
+            if (!pomodoro.isPaused) {
+                pomodoro.isPaused = true;
+                this.updateButton("resume");
+                toast.show("Pomodoro timer has been paused.", "info");
+            } else {
+                pomodoro.isPaused = false;
+                this.updateButton("pause");
+                toast.show("Pomodoro timer has been resumed.", "info");
+            };
+        };
+    },
+    update: function() {
+        const timerElement = document.getElementById("pomodoro-countdown");
+
+        // Format the time for display.
+        // TODO: Combine the function into the call.
+        function formatTime(minutes, seconds) {
+            return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        };
+
+        // Update the timer display.
+        timerElement.textContent = formatTime(this.minutes, this.seconds);
+
+        if (this.minutes === 0 && this.seconds === 0) {
+            clearInterval(this.timer);
+            toast.show("Time's up!", "success");
+        } else if (!this.isPaused) {
+            if (this.seconds > 0) {
+                this.seconds--;
+            } else {
+                this.seconds = 59;
+                this.minutes--;
+            };
+        };
+    },
+    reset: function() {
+        if (!pomodoro.isActive) {
+            toast.show("No pomodoro timer is currently active.", "error");
+        } else {
+            // BUG: Timer display does not reset.
+            clearInterval(this.timer);
+            pomodoro.isActive = false;
+            pomodoro.isPaused = false;
+            this.updateButton();
+            toast.show("Pomodoro timer has been reset.", "info");
+        };
     }
 };
 

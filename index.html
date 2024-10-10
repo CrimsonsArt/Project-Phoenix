@@ -79,12 +79,13 @@
                 <section id="pomodoro" class="container">
                     <h3>Pomodoro timer</h3>
                     <div id="pomodoro-timer">
-                        <h4>25:00</h4>
+                        <p id="pomodoro-countdown">15:00</p>
                     </div>
                     <div id="pomodoro-controller">
-                        <button id="pomodoro-start" type="button" onclick="pomodoro.start()" title="Start timer" aria-label="Start timer"><span class="bi bi-play-fill" aria-hidden="true"></span></button>
-                        <button id="pomodoro-pause" type="button" onclick="pomodoro.pause()" title="Pause timer" aria-label="Pause timer"><span class="bi bi-pause-fill" aria-hidden="true"></button>
-                        <button id="pomodoro-stop" type="button" onclick="pomodoro.stop()" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
+                        <!-- TODO: Make it so that the start button turns into a pause button when the timer is running. -->
+                        <button id="pomodoro-start" type="button" onclick="pomodoro.start()" title="Start timer" aria-label="Start timer"><span id="pomodoro-activity-icon" class="bi bi-play-fill" aria-hidden="true"></span></button>
+                        <!--<button id="pomodoro-pause" type="button" onclick="pomodoro.pause()" title="Pause timer" aria-label="Pause timer"><span class="bi bi-pause-fill" aria-hidden="true"></span></button>-->
+                        <button id="pomodoro-stop" type="button" onclick="pomodoro.reset()" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
                     </div>
                 </section>
             </section>
