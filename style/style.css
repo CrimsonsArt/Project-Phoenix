@@ -83,6 +83,7 @@ TODO: Add animation for timeout.
 TODO: Add a progress bar for timeout.
 TODO: Increase toast area size.
 TODO: Move close button to the top right corner, and increase its size.
+BUG: The event date picker overlaps the toast.
 */
 .toast {
     background-color: var(--secondary-bg-color);

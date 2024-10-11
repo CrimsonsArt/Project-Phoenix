@@ -45,6 +45,7 @@
                     </tbody>
                 </table>
 
+                <!-- TODO: Turn this into a dropdown menu. -->
                 <form id="cal-events" action="">
                     <h3>Add a new event</h3>
                     <label for="event-title">Event title:</label>
@@ -69,9 +70,6 @@
                         <input type="text" id="todo-task" placeholder="New task" required>
                         <button id="add-task" type="button" onclick="tasks.addTask()" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
                     </form>
-                    <!-- TODO: Add way to sort tasks. -->
-                    <!-- TODO: Add way to filter tasks. -->
-                    <!-- TODO: Add way to add tags to tasks. -->
                     <ul id="todo-list">
                         <!-- List will show up here -->
                     </ul>
@@ -82,7 +80,6 @@
                         <p id="pomodoro-countdown">15:00</p>
                     </div>
                     <div id="pomodoro-controller">
-                        <!-- TODO: Make it so that the start button turns into a pause button when the timer is running. -->
                         <button id="pomodoro-start" type="button" onclick="pomodoro.start()" title="Start timer" aria-label="Start timer"><span id="pomodoro-activity-icon" class="bi bi-play-fill" aria-hidden="true"></span></button>
                         <!--<button id="pomodoro-pause" type="button" onclick="pomodoro.pause()" title="Pause timer" aria-label="Pause timer"><span class="bi bi-pause-fill" aria-hidden="true"></span></button>-->
                         <button id="pomodoro-stop" type="button" onclick="pomodoro.reset()" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
@@ -106,8 +103,12 @@
         </main>
 
         <footer>
-            <p>Made by <a href="https://github.com/CrimsonsArt">CrimsonsArt</a></p>
-            <div>Version: <span id="version">0.3</span></div>
+            <section>
+                <p>Made by <a href="https://github.com/CrimsonsArt">CrimsonsArt</a></p>
+            </section>
+            <section>
+                <p>Version: <span id="version">0.0.7</span></p>
+            </section>
             <!-- TODO: Add contact info. -->
         </footer>
 
