@@ -19,7 +19,9 @@ const user = {
      */
     name: "",
     events: [],
+    nextEventId: 1,
     tasks: [],
+    nextTaskId: 1,
     pomodoros: [],
 
     save: function() {
@@ -104,6 +106,30 @@ const user = {
             // Read the file as text.
             reader.readAsText(file);
         };
+    },
+    format: function() {
+        /**
+         * Delete user data from local storage.
+         */
+        // Clear the user arrays.
+        this.name = "";
+        this.events = [];
+        this.tasks = [];
+        this.pomodoros = [];
+
+        // Reset ID's.
+        this.nextEventId = 1;
+        this.nextTaskId = 1;
+
+        // Clear the local storage.
+        localStorage.removeItem("user");
+
+        // Reload the page.
+        window.location.reload();
+
+        // Toast success message and log the message.
+        ui.toast("User data deleted successfully.", "success");
+        ui.log("User - format", "User data successfully deleted.");
     },
     showEvents: function() {
         /**
@@ -314,12 +340,15 @@ const calendar = {
      * @function previous - Move to the previous month.
      * 
      * @returns {object} calendar - The calendar object.
+     * 
+     * TODO: Add secondary display, as a journal-style calendar.
      */
     today: new Date(),
     months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     thisMonth: new Date().getMonth(),
     thisYear: new Date().getFullYear(),
     activeDay: null,
+    activeEvent: null,
 
     timestamp: function() {
         /**
@@ -378,20 +407,25 @@ const calendar = {
                     // Create a full date string.
                     let fullDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
 
+                    // Initialize an empty string to hold event data.
+                    let dayEvents = "";
+
                     // Check if this day has an event.
                     if (this.isEventDay(fullDate)) {
                         // Add a class to the day if it has an event.
                         day.classList.add("event-day");
 
-                        // Find the event in the user.events object.
-                        let event = user.events.find(event => event.date === fullDate);
+                        // Find all events dor this day using filter().
+                        let eventsForDay = user.events.filter(event => event.date === fullDate);
 
-                        // Add the event data to the day.
-                        dayEvent = `<div class="cal-event">
-                            <span class="event-title">${event.title}</span>
-                            <time class="event-time" datetime="${event.time}">${event.time}</time>
-                            <span class="event-description">${event.description}</span>
-                        </div>`;
+                        // Loop through the events and add each to the day.
+                        eventsForDay.forEach(event => {
+                            dayEvents += `<div class="cal-event" data-event-id="${event.id}">
+                                <span class="event-title">${event.title}</span>
+                                <time class="event-time" datetime="${event.time}">${event.time}</time>
+                                <span class="event-description">${event.description}</span>
+                            </div>`;
+                        });
                     };
 
                     // Add the date as an attribute to the day cell.
@@ -399,13 +433,12 @@ const calendar = {
                     day.classList.add("cal-day");
 
                     // Add the date to the day, and add the day to the week.
-                    // TODO: Turn date into a title?
-                    // TODO: Improve date formatting. (.th, .st, etc.)
+                    // TODO: Turn date into a title and improve date formatting. (.th, .st, etc.)
                     day.innerHTML = `<time class="cal-date" datetime="${fullDate}">
                         ${date}
                         <span class="sr-only">${this.months[month]}</span>
                     </time>
-                    ${dayEvent}`;
+                    ${dayEvents}`;
                     week.appendChild(day);
                     date++;
                 };
@@ -415,58 +448,94 @@ const calendar = {
             table.appendChild(week);
         };
 
-        // Add event listener to activate a day.
+        // Add event listeners for days and events.
         document.getElementById("cal-body").addEventListener("click", (event) => {
-            // Use closest() to find the nearest day element.
+            // Use closest() to find the nearest clicked element.
+            const clickedEvent = event.target.closest(".cal-event");
             const clickedDay = event.target.closest(".cal-day");
-            // BUG: clickedDay is null if having used the previous or next functions.
 
-            // Check if the clicked element is a day.
-            if (clickedDay.classList.contains("cal-day")) {
-                // Get the date of the clicked day.
-                const selectedDay = clickedDay.getAttribute("data-date");
+            // If the user clicked on an event, open the event.
+            if (clickedEvent && this.activeEvent !== clickedEvent) {
+                // If an event is already open, close it.
+                if (this.activeEvent) {
+                    this.activeEvent.classList.remove("active-event");
+                    if (this.activeEvent.querySelector(".control-panel")) {
+                        this.activeEvent.removeChild(this.activeEvent.querySelector(".control-panel"));
+                    };
+                };
 
-                // Focus on the selected day.
-                this.openDay(selectedDay);
+                // If a day is already open, close it.
+                if (this.activeDay) {
+                    if (this.activeDay.querySelector(".control-panel")) {
+                        this.activeDay.removeChild(this.activeDay.querySelector(".control-panel"));
+                    };
+                    this.activeDay.classList.remove("active-day");
+                };
+
+                // Mark the event as active.
+                const eventId = clickedEvent.getAttribute("data-event-id");
+                this.activeEvent = clickedEvent;
+                clickedEvent.classList.add("active-event");
+
+                // Mark the day as active too.
+                const eventDay = clickedEvent.closest(".cal-day");
+                this.activeDay = eventDay;
+                eventDay.classList.add("active-day");
+
+                // Render the control panel for the selected event.
+                let controlPanel = ui.controls(
+                    ["edit", "delete"],
+                    "event",
+                    {
+                        // TODO: FIX!
+                        edit: function (id) {
+                            // Find the event with the given id.
+                            let eventId = user.events.findIndex(event => event.id === id);
+                        },
+                        delete: this.deleteEvent(eventId)
+                    }
+                );
+                this.activeEvent.appendChild(controlPanel);
+
+            // If the user didn't click on an event, focus on the active day.
+            } else if (clickedDay && this.activeDay !== clickedDay) {
+                // If an event is already open, close it.
+                if (this.activeEvent) {
+                    if (this.activeEvent.querySelector(".control-panel")) {
+                        this.activeEvent.removeChild(this.activeEvent.querySelector(".control-panel"));
+                    }
+                    this.activeEvent.classList.remove("active-event");
+                    this.activeEvent = null;
+                };
+
+                // If a day is already open, close it.
+                if (this.activeDay) {
+                    if (this.activeDay.querySelector(".control-panel")) {
+                        this.activeDay.removeChild(this.activeDay.querySelector(".control-panel"));
+                    };
+                    this.activeDay.classList.remove("active-day");
+                };
+
+                // If the user didn't click on an event, focus on the active day.
+                const selectedDate = clickedDay.getAttribute("data-date");
+                this.activeDay = clickedDay;
+                clickedDay.classList.add("active-day");
+
+                // Render the control panel for the selected day.
+                let controlPanel = ui.controls(
+                    ["add"],
+                    "event",
+                    {
+                        add: function () {
+                            let eventDate = clickedDay.getAttribute("data-date");
+                            let dateInput = document.getElementById("event-date");
+                            dateInput.value = eventDate;
+                        }
+                    }
+                );
+                clickedDay.appendChild(controlPanel);
             };
         });
-    },
-    openDay: function(day) {
-        /**
-         * Focus on the selected day.
-         * 
-         * @param {string} day - The date string to focus on.
-         * 
-         * TODO: Only open edit and delete buttons on days that have events.
-         * TODO: Add the ability to edit and remove events.
-         * TODO: Ensure that if a day is already open, keep it open.
-         */
-
-        // If a day is already active, clear the old active day.
-        if (this.activeDay) {
-            // Remove the active class.
-            this.activeDay.classList.remove("active");
-
-            // Remove the control panel.
-            this.activeDay.removeChild(this.activeDay.querySelector(".control-panel"));
-        };
-
-        // Find the correct day cell to focus on.
-        const selectedDay = document.querySelector(`[data-date="${day}"]`);
-
-        // If a day is found, open it.
-        if (selectedDay) {
-            // Update the active day reference to the new active day.
-            this.activeDay = selectedDay;
-
-            // Add the active class to the selected day, and log to console.
-            selectedDay.classList.add("active");
-            ui.log("Calendar - select", `Opened day: ${day}`);
-
-            // Render the control panel for the selected day.
-            const controlPanel = ui.controls(["edit", "delete"], "event", {edit: this.editEvent, delete: this.deleteEvent});
-            selectedDay.appendChild(controlPanel);
-        };
     },
     isEventDay: function(dateString) {
         /**
@@ -494,13 +563,19 @@ const calendar = {
 
         // Add event to the calendar.
         if (eventTitle && eventDate) {
+            // Get the id of the next event.
+            let eventId = user.nextEventId;
+
             // Create an event object.
             const event = {
                 title: eventTitle,
                 date: eventDate,
                 time: eventTime,
-                description: eventDescription
+                description: eventDescription,
+                id: eventId
             };
+
+            user.nextEventId++;
 
             // Add the event to the user object.
             user.events.push(event);
@@ -525,21 +600,33 @@ const calendar = {
             ui.log("Calendar - add event", "Error: Missing event title and/or date.");
         };
     },
-    editEvent: function() {
+    editEvent: function(id) {
         /**
          * Edit an event in the calendar.
          * 
          * TODO: Implement edit event functionality.
          */
-        ui.log("Calendar - edit event", "Editing an event in the calendar...");
+        //ui.log(`Calendar - edit event", "Editing event ${id} in the calendar...`);
+        // TODO: Grab the date from active day.
     },
-    deleteEvent: function() {
+    deleteEvent: function(id) {
         /**
          * Delete an event from the calendar.
          * 
          * TODO: Implement delete event functionality.
          */
-        ui.log("Calendar - delete event", "Deleting an event from the calendar...");
+        // Find the event with the given id.
+        let eventId = user.events.findIndex(event => event.id);
+
+        // If the event exists, remove it from the array.
+        if (eventId !== -1 && eventId !== 0) {
+            user.events.splice(eventId, 1);
+            this.renderCalendar();
+            user.save();
+            ui.log(`Calendar - event`, `Event ${eventId} has been deleted from the calendar.`);
+        } else {
+            ui.log(`Calendar - event`, `Event ${eventId} does not exist in the calendar.`);
+        };
     },
     next: function() {
         /**
@@ -649,30 +736,20 @@ const tasks = {
          * 
          * TODO: Allow users to submit a task using the enter key.
          */
+
+        // Add a new task ID.
+        let taskId = user.nextTaskId;
+
         // Create a new task object
         let task = {
-            id: 0,
+            id: taskId,
             title: document.getElementById("todo-task").value,
             completed: false
         };
-
-        // Check if the ID counter exists in localStorage, if not, initialize it to 1
-        if (!localStorage.getItem("taskIdCounter")) {
-            localStorage.setItem("taskIdCounter", "1"); // Initialize counter to 1
-        };
+        user.nextTaskId++;
 
         // Fallback check if task title is empty.
         if (task.title !== "") {
-            // Get the current task ID from localStorage.
-            let currentId = parseInt(localStorage.getItem("taskIdCounter"));
-
-            // Update the task object with new data.
-            task.id = currentId;
-
-            // Increment the ID and save it back to localStorage.
-            currentId++;
-            localStorage.setItem("taskIdCounter", currentId.toString());
-
             // Save to user object, and re-render tasks.
             user.tasks.push(task);
             user.save();

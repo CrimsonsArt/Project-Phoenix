@@ -95,9 +95,14 @@
                 <!-- CONSIDER: Have this be part of a dropdown menu in the header? -->
                 <!-- TODO: Add way to delete all user data, with a confirmation dialog. -->
                 <section id="import-export">
+                    <h3 class="sr-only">Import/Export user data</h3>
                     <input type="file" name="import-data" id="import-data" accept=".json">
-                    <button id="import" onclick="user.import()" title="Import save from file" aria-label="Import"><span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
-                    <button id="export" onclick="user.export()" title="Export save as file" aria-label="Export"><span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
+                    <button id="import" type="button" onclick="user.import()" title="Import save from file" aria-label="Import"><span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
+                    <button id="export" type="button" onclick="user.export()" title="Export save as file" aria-label="Export"><span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
+                </section>
+                <section>
+                    <h3 class="sr-only">Delete user date</h3>
+                    <button id="delete-data" type="button" onclick="user.format()" title="Delete user data" aria-label="Delete user data">Delete user data</button>
                 </section>
             </section>
         </main>

@@ -129,6 +129,7 @@ BUG: The event date picker overlaps the toast.
     font-weight: bold;
 }
 .cal-event {
+    border: var(--borders);
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
