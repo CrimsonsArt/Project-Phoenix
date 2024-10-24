@@ -119,6 +119,7 @@
 			"datetime",
 			"pomodoro",
 			"pomodoros"
-		]
+		],
+		"todo-tree.tree.scanMode": "workspace"
 	}
 }

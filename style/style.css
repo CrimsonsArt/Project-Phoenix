@@ -4,10 +4,14 @@
 
 /* VARIABLES */
 :root {
+    --primary-color: #0d1b2a;
+    --secondary-color: #415a77;
+
     --main-bg-color: #0d1b2a;
     --main-font-color: #e0e1dd;
     --secondary-bg-color: #778da9;
     --secondary-font-color: #1b263b;
+    --tertiary-bg-color: #1b263b;
 
     --borders: 1px solid #415a77;
 }
@@ -29,14 +33,13 @@
 
 /* GENERAL */
 html {
-    background-color: var(--main-bg-color);
+    background-color: var(--primary-color);
     color: var(--main-font-color);
     font-family: 'Open Sans', sans-serif;
 }
 a:visited {
     color: var(--main-font-color); /* TODO: Change color. */
 }
-
 h2 {
     text-align: center;
 }
@@ -49,14 +52,17 @@ body {
     width: 100%;
 }
 header {
+    background-color: var(--tertiary-bg-color);
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
     height: 50px;
     left: 0;
+    padding: 0 1%;
     position: fixed;
     top: 0;
     width: 100%;
+    z-index: 999;
 }
 nav ul {
     list-style: none;
@@ -74,7 +80,15 @@ section {
     width: 75%;
 }
 footer {
+    background-color: var(--tertiary-bg-color);
     display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    margin: 2% 0 0 0;
+    padding: 0 1%;
+}
+footer section:last-of-type {
+    text-align: right;
 }
 
 /* Toast styling */
@@ -92,7 +106,7 @@ BUG: The event date picker overlaps the toast.
     position: fixed;
     right: 1%;
     top: 1%;
-    z-index: 999; /* Ensure that toast is always on top. */
+    z-index: 998; /* Ensure that toast is always on top. */
 }
 
 /* Calendar styling */
@@ -147,6 +161,47 @@ BUG: The event date picker overlaps the toast.
 }
 .todo-check {
     order: -1;
+}
+
+/* Pomodoro timer styling */
+#pomodoro {
+    align-items: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+}
+#pom-display {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#pom-feedback {
+    align-items: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    min-height: 200px;
+    min-width: 200px;
+    position: absolute;
+}
+#pom-time {
+    font-size: 2em;
+}
+#pom-svg {
+    height: 200px;
+    width: 200px;
+}
+#pom-circle {
+    fill: none;
+    stroke: var(--secondary-color);
+    stroke-dasharray: 565.48;
+    stroke-dashoffset: 0;
+    stroke-width: 8px;
+    transform: rotate(-90deg);
+    transform-origin: 100px 100px;
 }
 
 /* Settings styling */

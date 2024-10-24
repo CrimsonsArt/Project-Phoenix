@@ -20,9 +20,9 @@
         </header>
 
         <main>
+            <!--
             <section id="calendar" class="container">
                 <h2>Calendar</h2>
-                <!-- TODO: Add jump to add-event link for screen readers. -->
                 <div id="cal-controller">
                     <button id="cal-prev" type="button" onclick="calendar.previous()" title=" Previous month" aria-label="Previous month"><span class="bi bi-chevron-left" aria-hidden="true"></span></button>
                     <button id="cal-next" type="button" onclick="calendar.next()" title="Next month" aria-label="Next month"><span class="bi bi-chevron-right" aria-hidden="true"></span></button>
@@ -45,14 +45,12 @@
                     </tbody>
                 </table>
 
-                <!-- TODO: Turn this into a dropdown menu. -->
-                <form id="cal-events" action="">
+                <form id="cal-events" action="" class="accordion">
                     <h3>Add a new event</h3>
                     <label for="event-title">Event title:</label>
                     <input type="text" id="event-title" required>
                     <label for="event-date">Event date:</label>
                     <input type="date" name="event-date" id="event-date" required>
-                    <!-- TODO: Add intuitive time picker. -->
                     <label for="event-time">Event time:</label>
                     <input type="time" name="event-time" id="event-time">
                     <label for="event-description">Event description:</label>
@@ -71,29 +69,34 @@
                         <button id="add-task" type="button" onclick="tasks.addTask()" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
                     </form>
                     <ul id="todo-list">
-                        <!-- List will show up here -->
                     </ul>
                 </section>
+            -->
                 <section id="pomodoro" class="container">
                     <h3>Pomodoro timer</h3>
-                    <div id="pomodoro-timer">
-                        <p id="pomodoro-countdown">15:00</p>
+                    <div id="pom-display">
+                        <svg id="pom-svg">
+                            <circle id="pom-circle" cx="100" cy="100" r="90"></circle>
+                        </svg>
+                        <p id="pom-feedback">
+                            <span id="pom-time">15:00</span>
+                            <span id="pom-message"></span>
+                        </p>
                     </div>
                     <div id="pomodoro-controller">
-                        <button id="pomodoro-start" type="button" onclick="pomodoro.start()" title="Start timer" aria-label="Start timer"><span id="pomodoro-activity-icon" class="bi bi-play-fill" aria-hidden="true"></span></button>
-                        <!--<button id="pomodoro-pause" type="button" onclick="pomodoro.pause()" title="Pause timer" aria-label="Pause timer"><span class="bi bi-pause-fill" aria-hidden="true"></span></button>-->
-                        <button id="pomodoro-stop" type="button" onclick="pomodoro.reset()" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
+                        <button id="pom-start" type="button" title="Start timer" aria-label="Start timer"><span id="pomodoro-activity-icon" class="bi bi-play-fill" aria-hidden="true"></span></button>
+                        <button id="pom-stop" type="button" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
                     </div>
                 </section>
+            <!--
             </section>
+            
             <section id="helper">
                 <h2 class="sr-only">Helper</h2>
                 <div id="phoenix"></div>
             </section>
             <section id="settings" class="container">
                 <h2>Settings</h2>
-                <!-- CONSIDER: Have this be part of a dropdown menu in the header? -->
-                <!-- TODO: Add way to delete all user data, with a confirmation dialog. -->
                 <section id="import-export">
                     <h3 class="sr-only">Import/Export user data</h3>
                     <input type="file" name="import-data" id="import-data" accept=".json">
@@ -105,6 +108,7 @@
                     <button id="delete-data" type="button" onclick="user.format()" title="Delete user data" aria-label="Delete user data">Delete user data</button>
                 </section>
             </section>
+            -->
         </main>
 
         <footer>
@@ -114,9 +118,8 @@
             <section>
                 <p>Version: <span id="version">0.0.7</span></p>
             </section>
-            <!-- TODO: Add contact info. -->
         </footer>
 
-        <script src="scripts/main.js"></script>
+        <script type="module" src="scripts/main.js"></script>
     </body>
 </html>
