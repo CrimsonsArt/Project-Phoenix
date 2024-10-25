@@ -1,24 +1,44 @@
+/*---------------------------------- IMPORT ----------------------------------*/
 import { user } from "./user.js";
 import { ui } from "./ui.js";
 // import { calendar } from "./calendar.js";
-// import { tasks } from "./tasks.js";
+import { tasks } from "./tasks.js";
 import { pomodoro } from "./pomodoro.js";
+
 
 /*---------------------------------- ONLOAD ----------------------------------*/
 window.onload = function() {
     /**
      * Onload function that runs when the page is loaded.
      */
+    /*---------------------------- INITIALIZATION ----------------------------*/
+    // Load testing cheats.
+    window.pomodoro = pomodoro;
+    window.user = user;
     // Load user data from local storage.
     user.load();
 
-    /*// Add event listeners for the start and stop pomodoro buttons.
-    document.getElementById('pom-start').addEventListener('click', () => {
-        pomodoro.start();
-    });
-    document.getElementById('pom-stop').addEventListener('click', () => {
-        pomodoro.reset();
-    });*/
+    /*------------------------------- CALENDAR -------------------------------*/
+    /*
+    // Render the calendar, and initialize its events.
+    calendar.renderCalendar(calendar.thisMonth, calendar.thisYear);
+    let calPrev = document.getElementById("cal-prev");
+    let calNext = document.getElementById("cal-next");
+    calPrev.addEventListener("click", calendar.previous);
+    calNext.addEventListener("click", calendar.next);
+    */
+
+
+    /*-------------------------------- TASKS ---------------------------------*/
+    /*// Add event listeners for the add task button.
+    const addTaskButton = document.getElementById("add-task");
+    addTaskButton.addEventListener("click", tasks.addTask);
+
+    // Render the tasks.
+    tasks.renderTasks();*/
+
+
+    /*------------------------------- POMODORO -------------------------------*/
     // Add event listeners for the start and stop pomodoro buttons.
     const pomActions = {
         "pom-start": pomodoro.start,
@@ -31,19 +51,21 @@ window.onload = function() {
         }
     });
 
-    /*
-    // Render the calendar, and initialize its events.
-    calendar.renderCalendar(calendar.thisMonth, calendar.thisYear);
-    let calPrev = document.getElementById("cal-prev");
-    let calNext = document.getElementById("cal-next");
-    calPrev.addEventListener("click", calendar.previous);
-    calNext.addEventListener("click", calendar.next);
 
-    // Render the tasks.
-    tasks.renderTasks();
+    /*------------------------------- SETTINGS -------------------------------*/
+    // Add event listeners for the settings buttons.
+    const settingsActions = {
+        "data-import": user.import,
+        "data-export": user.export,
+        "data-delete": user.format
+    };
+    Object.keys(settingsActions).forEach(buttonId => {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.addEventListener("click", settingsActions[buttonId]);
+        }
+    });
 
-    */
-
-    // Testing area
+    // Testing area.
     ui.toast("Welcome back!");
 };

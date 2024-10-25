@@ -10,7 +10,7 @@ export const ui = {
      * 
      * @returns {object} ui - The user interface object. 
      */
-    log: function(origin, message) {
+    log(origin, message) {
         /**
          * Logs messages to the console.
          * 
@@ -19,13 +19,13 @@ export const ui = {
          * */
         console.log(`[${origin}]: ${message}`);
     },
-    icon: function(iconName) {
+    icon(iconName) {
         /**
          * Generates an icon HTML string.
          */
         return `<span class="bi bi-${iconName}" aria-hidden="true"></span>`;
     },
-    controls: function(buttons = [], labelContext = "", events = {}) {
+    controls(buttons = [], labelContext = "", events = {}) {
         /**
          * Generate control buttons.
          * 
@@ -100,10 +100,12 @@ export const ui = {
 
         return panel;
     },
-    toast: function(message, title = "info") {
+    toast(message, title = "info") {
         /**
          * Show toast messages.
          * 
+         * TODO: Redo.
+         * TODO: Add icons to toast.
          * TODO: Ensure that toast messages don't overlap.
          * CONSIDER: Toast-log for the user.
          */
@@ -138,18 +140,18 @@ export const ui = {
 
         // Start the removal timer.
         let removalTimer = setTimeout(removeToast, remainingTime);
-        ui.log(`Toast - start timer`, `Removing in ${totalTimeout}ms.`);
+        ui.log(`Toast - timer`, `Removing in ${totalTimeout}ms.`);
 
         // Pause and resume the removal timer.
         const toggleTimer = (pause) => {
             if (pause) {
                 clearTimeout(removalTimer);
                 remainingTime -= (Date.now() - startTime);
-                ui.log(`Toast - pause timer`, `Pausing removal timer.`);
+                ui.log(`Toast - timer`, `Pausing removal timer.`);
             } else if (!document.activeElement.closest(".toast")) {
                 startTime = Date.now();
                 removalTimer = setTimeout(removeToast, remainingTime);
-                ui.log(`Toast - resume timer`, `Resuming removal timer.`);
+                ui.log(`Toast - timer`, `Resuming removal timer.`);
             };
         };
 

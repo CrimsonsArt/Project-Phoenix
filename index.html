@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="author" content="CrimsonsArt">
-        <meta name="description" content="A daily planner to notice and manage ADHD burnout and other related issues.">
+        <meta name="description" content="A daily planner to help notice and manage ADHD burnout.">
         <title>Project Phoenix</title>
         <link rel="stylesheet" href="style/style.css">
     </head>
@@ -15,6 +15,7 @@
             <nav>
                 <ul>
                     <li><h1><a href="index.html">Project Phoenix</a></h1></li>
+                    <li><button id="toast-toggle" type="button" title="Open toast log" aria-label="Open toast log"><span class="bi bi-list" aria-hidden="true"></span></button></li>
                 </ul>
             </nav>
         </header>
@@ -66,12 +67,12 @@
                     <form id="todo-controller" action="">
                         <label for="todo-task">New task: </label>
                         <input type="text" id="todo-task" placeholder="New task" required>
-                        <button id="add-task" type="button" onclick="tasks.addTask()" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
+                        <button id="add-task" type="button" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
                     </form>
                     <ul id="todo-list">
                     </ul>
-                </section>
-            -->
+                </section>-->
+
                 <section id="pomodoro" class="container">
                     <h3>Pomodoro timer</h3>
                     <div id="pom-display">
@@ -79,7 +80,7 @@
                             <circle id="pom-circle" cx="100" cy="100" r="90"></circle>
                         </svg>
                         <p id="pom-feedback">
-                            <span id="pom-time">15:00</span>
+                            <span id="pom-time">25:00</span>
                             <span id="pom-message"></span>
                         </p>
                     </div>
@@ -94,21 +95,22 @@
             <section id="helper">
                 <h2 class="sr-only">Helper</h2>
                 <div id="phoenix"></div>
-            </section>
+            </section>-->
             <section id="settings" class="container">
                 <h2>Settings</h2>
                 <section id="import-export">
                     <h3 class="sr-only">Import/Export user data</h3>
-                    <input type="file" name="import-data" id="import-data" accept=".json">
-                    <button id="import" type="button" onclick="user.import()" title="Import save from file" aria-label="Import"><span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
-                    <button id="export" type="button" onclick="user.export()" title="Export save as file" aria-label="Export"><span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
+                    <input type="file" name="data-import" id="data-import" accept=".json">
+                    <!-- TODO: Add label. -->
+                    <button id="data-import" type="button" title="Import save from file" aria-label="Import user data"><span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
+                    <button id="data-export" type="button" title="Export save as file" aria-label="Export user data"><span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
                 </section>
                 <section>
                     <h3 class="sr-only">Delete user date</h3>
-                    <button id="delete-data" type="button" onclick="user.format()" title="Delete user data" aria-label="Delete user data">Delete user data</button>
+                    <button id="data-delete" type="button" title="Delete user data" aria-label="Delete user data">Delete user data</button>
                 </section>
             </section>
-            -->
+            
         </main>
 
         <footer>

@@ -1,4 +1,5 @@
 import { ui } from "./ui.js";
+import { calendar } from "./calendar.js";
 
 /*-------------------------- USER DATA & FUNCTIONS ---------------------------*/
 export const user = {
@@ -55,7 +56,7 @@ export const user = {
          * Export user data to a JSON file.
          */
         // Convert user object to a JSON string.
-        const jsonString = JSON.stringify(this, null, 2)
+        const jsonString = JSON.stringify(user, null, 2)
         
         // Create a blob with the JSON data.
         const blob = new Blob([jsonString], {type: "application/json"});
@@ -78,8 +79,10 @@ export const user = {
     import: function() {
         /**
          * Import user data from a JSON file.
+         * 
+         * BUG: Import is not working.
          */
-        const file = document.getElementById("import-data").files[0];
+        const file = document.getElementById("data-import").files[0];
 
         if (file) {
             const reader = new FileReader();
