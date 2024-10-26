@@ -15,7 +15,7 @@
             <nav>
                 <ul>
                     <li><h1><a href="index.html">Project Phoenix</a></h1></li>
-                    <li><button id="toast-toggle" type="button" title="Open toast log" aria-label="Open toast log"><span class="bi bi-list" aria-hidden="true"></span></button></li>
+                    <li><button id="log-toggle" type="button" title="Open toast log" aria-label="Open toast log"><span class="bi bi-list" aria-hidden="true"></span></button></li>
                 </ul>
             </nav>
         </header>
@@ -106,16 +106,22 @@
                     <button id="data-export" type="button" title="Export save as file" aria-label="Export user data"><span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
                 </section>
                 <section>
-                    <h3 class="sr-only">Delete user date</h3>
+                    <h3 class="sr-only">Delete user data</h3>
                     <button id="data-delete" type="button" title="Delete user data" aria-label="Delete user data">Delete user data</button>
                 </section>
             </section>
-            
+
+            <section id="log" class="container">
+                <h2 id="log-title" class="sr-only">Toast log</h2>
+                <ul id="log-list" class="log-closed">
+                    <!-- Toasts are displayed here. -->
+                </ul>
+            </section>
         </main>
 
         <footer>
             <section>
-                <p>Made by <a href="https://github.com/CrimsonsArt">CrimsonsArt</a></p>
+                <p>Made by <a href="https://github.com/CrimsonsArt" target="_blank">CrimsonsArt</a></p>
             </section>
             <section>
                 <p>Version: <span id="version">0.0.7</span></p>

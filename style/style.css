@@ -4,14 +4,13 @@
 
 /* VARIABLES */
 :root {
+    --base-color: #1b263b;
     --primary-color: #0d1b2a;
     --secondary-color: #415a77;
+    --tertiary-color: #778da9;
 
-    --main-bg-color: #0d1b2a;
     --main-font-color: #e0e1dd;
-    --secondary-bg-color: #778da9;
     --secondary-font-color: #1b263b;
-    --tertiary-bg-color: #1b263b;
 
     --borders: 1px solid #415a77;
 }
@@ -52,7 +51,7 @@ body {
     width: 100%;
 }
 header {
-    background-color: var(--tertiary-bg-color);
+    background-color: var(--base-color);
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
@@ -82,11 +81,14 @@ main, section {
     margin: auto;
     width: 100%;
 }
+main {
+    position: relative;
+}
 section {
     width: 75%;
 }
 footer {
-    background-color: var(--tertiary-bg-color);
+    background-color: var(--base-color);
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
@@ -105,14 +107,52 @@ TODO: Increase toast area size.
 TODO: Move close button to the top right corner, and increase its size.
 BUG: The event date picker overlaps the toast.
 */
-.toast {
-    background-color: var(--secondary-bg-color);
+#log {
+    background-color: var(--base-color);
+    max-height: 100%;
+    max-width: 25%;
+    position: fixed;
+    right: 0;
+    top: 50px;
+}
+#log-list {
+    list-style: none;
+    margin: 0;
+    overflow: scroll;
+    padding: 0;
+}
+#log-toggle {
+    border: none;
+    font-size: 1.5em;
+    height: 40px;
+    width: 40px;
+}
+.log-closed li:not(:first-child) {
+    display: none;
+}
+/*.toast {
+    background-color: var(--tertiary-color);
     color: var(--secondary-font-color);
     padding: 0 2%;;
     position: fixed;
     right: 1%;
     top: 1%;
-    z-index: 998; /* Ensure that toast is always on top. */
+}*/
+.toast {
+    margin: 0;
+    padding: 0 5%;
+}
+.info {
+    border: 1px solid var(--secondary-color);
+}
+.success {
+    border: 1px solid green;
+}
+.warning {
+    border: 1px solid yellow;
+}
+.error {
+    border: 1px solid red;
 }
 
 /* Calendar styling */

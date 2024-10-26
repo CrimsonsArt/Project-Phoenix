@@ -15,8 +15,22 @@ window.onload = function() {
     // Load testing cheats.
     window.pomodoro = pomodoro;
     window.user = user;
+
     // Load user data from local storage.
     user.load();
+
+
+    /* --------------------------------- UI ----------------------------------*/
+    // Add event listener for the toast menu toggle button.
+    const toastToggle = document.getElementById("log-toggle");
+    toastToggle.addEventListener("click", ui.toggleToastLog);
+
+    // Testing area.
+    ui.toast("Welcome back!");
+    ui.toast("This is a test warning message.", "warning");
+    ui.toast("This is a test error message.", "error");
+    ui.toast("This is a test success message.", "success");
+
 
     /*------------------------------- CALENDAR -------------------------------*/
     /*
@@ -65,7 +79,4 @@ window.onload = function() {
             button.addEventListener("click", settingsActions[buttonId]);
         }
     });
-
-    // Testing area.
-    ui.toast("Welcome back!");
 };

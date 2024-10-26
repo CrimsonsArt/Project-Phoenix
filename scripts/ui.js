@@ -10,6 +10,7 @@ export const ui = {
      * 
      * @returns {object} ui - The user interface object. 
      */
+    toastLogOpen: false,
     log(origin, message) {
         /**
          * Logs messages to the console.
@@ -104,13 +105,46 @@ export const ui = {
         /**
          * Show toast messages.
          * 
+         * @param {string} message - The message to display.
+         * @param {string} title - The title of the toast.
+         * @param {string} title - "info" - "success" - "warning" - "error"
+         * 
          * TODO: Redo.
          * TODO: Add icons to toast.
          * TODO: Ensure that toast messages don't overlap.
+         * TODO: Open toast-log if user clicks on toast.
          * CONSIDER: Toast-log for the user.
          */
-        // Create toast container.
-        let toastContainer = document.getElementsByTagName("header")[0];
+        let toastList = document.getElementById("log-list");
+        let toast = document.createElement("li");
+        let toastTitle = document.createElement("h3");
+        let toastMessage = document.createElement("p");
+
+        // Add info to toast.
+        toastTitle.innerHTML = title.charAt(0).toUpperCase() + title.slice(1);
+        toastMessage.innerHTML = message;
+
+        // Add classes to toast.
+        toast.classList.add("toast", title);
+
+        // Build the toast, and add to list.
+        toast.appendChild(toastTitle);
+        toast.appendChild(toastMessage);
+        toastList.appendChild(toast);
+
+        // Log to console.
+        ui.log(`Toast - ${title}`, message);
+
+        // TODO: If toast log is closed, start a removal timer.
+        // TODO: If toast log is closed, add close button.
+        /*if (!ui.toastLogOpen) {
+            setTimeout(() => {
+                
+            }, 5000);
+        };*/
+
+        /*// Create toast container.
+        let toastContainer = document.getElementById("toast-log-list");
         let toast = document.createElement("div");
 
         // Add info to toast.
@@ -165,6 +199,30 @@ export const ui = {
         toastClose.addEventListener("click", () => {
             clearTimeout(removalTimer);
             removeToast(0);
-        });
+        });*/
+    },
+    toggleToastLog() {
+        /**
+         * Open the toast log list.
+         * 
+         * TODO: Add "sr-only" class to the header when toast log is closed.
+         * TODO: If there are 25 toasts, delete the oldest toast.
+         * TODO: Add another tab for the companion log.
+         */
+        let logTitle = document.getElementById("log-title");
+        let logList = document.getElementById("log-list");
+        if (!ui.toastLogOpen) {
+            // Open toast log.
+            ui.log("UI", "Opening toast log.");
+            ui.toastLogOpen = true;
+            logTitle.classList.remove("sr-only");
+            logList.classList.remove("log-closed");
+        } else {
+            // Close toast log.
+            ui.log("UI", "Closing toast log.");
+            ui.toastLogOpen = false;
+            logTitle.classList.add("sr-only");
+            logList.classList.add("log-closed");
+        };
     }
 };
