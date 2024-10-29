@@ -127,8 +127,11 @@ BUG: The event date picker overlaps the toast.
     height: 40px;
     width: 40px;
 }
-.log-closed li:not(:first-child) {
+#log-list.log-closed .toast {
     display: none;
+}
+#log-list.log-closed .toast.show-temp {
+    display: block;
 }
 /*.toast {
     background-color: var(--tertiary-color);
@@ -140,7 +143,13 @@ BUG: The event date picker overlaps the toast.
 }*/
 .toast {
     margin: 0;
-    padding: 0 5%;
+    padding: 2% 5%;
+}
+.toast-title {
+    font-size: 1.2em;
+}
+.toast-message {
+    margin: 0;
 }
 .info {
     border: 1px solid var(--secondary-color);

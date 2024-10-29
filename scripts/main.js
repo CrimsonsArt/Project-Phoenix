@@ -1,6 +1,7 @@
 /*---------------------------------- IMPORT ----------------------------------*/
+import { utils } from "./utils.js";
 import { user } from "./user.js";
-import { ui } from "./ui.js";
+import { toast } from "./toast.js";
 // import { calendar } from "./calendar.js";
 import { tasks } from "./tasks.js";
 import { pomodoro } from "./pomodoro.js";
@@ -15,21 +16,28 @@ window.onload = function() {
     // Load testing cheats.
     window.pomodoro = pomodoro;
     window.user = user;
+    window.toast = toast;
 
     // Load user data from local storage.
     user.load();
 
 
-    /* --------------------------------- UI ----------------------------------*/
+    /* --------------------------- USER INTERFACE ----------------------------*/
+    // Load toast messages from local storage.
+    toast.load();
+
     // Add event listener for the toast menu toggle button.
-    const toastToggle = document.getElementById("log-toggle");
-    toastToggle.addEventListener("click", ui.toggleToastLog);
+    const logToggle = document.getElementById("log-toggle");
+    logToggle.addEventListener("click", toast.toggleLog);
+
+    // Update the toast timestamps once every minute.
+    setInterval(toast.updateTimestamps, 60000);
 
     // Testing area.
-    ui.toast("Welcome back!");
-    ui.toast("This is a test warning message.", "warning");
-    ui.toast("This is a test error message.", "error");
-    ui.toast("This is a test success message.", "success");
+    /*utils.toast("This is a test warning message.", "warning");
+    utils.toast("This is a test error message.", "error");
+    utils.toast("This is a test success message.", "success");
+    utils.toast("Welcome back!"); */
 
 
     /*------------------------------- CALENDAR -------------------------------*/
@@ -44,12 +52,14 @@ window.onload = function() {
 
 
     /*-------------------------------- TASKS ---------------------------------*/
-    /*// Add event listeners for the add task button.
-    const addTaskButton = document.getElementById("add-task");
-    addTaskButton.addEventListener("click", tasks.addTask);
+    // Load the tasks from local storage.
+    tasks.load();
 
-    // Render the tasks.
-    tasks.renderTasks();*/
+    // Add event listeners for the add task button.
+    const taskButton = document.getElementById("add-task");
+    if (taskButton) {
+        taskButton.addEventListener("click", tasks.add);
+    };
 
 
     /*------------------------------- POMODORO -------------------------------*/

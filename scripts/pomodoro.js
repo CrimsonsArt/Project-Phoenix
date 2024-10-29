@@ -1,4 +1,4 @@
-import { ui } from "./ui.js";
+import { utils } from "./utils.js";
 import { user } from "./user.js";
 
 /*---------------------------- POMODORO FUNCTIONS ----------------------------*/
@@ -43,19 +43,19 @@ export const pomodoro = {
             pomodoro.isBreak = false;
             pomodoro.timer = setInterval(() => pomodoro.update(), 1000);
             updateButton("pause");
-            ui.log("Pomodoro", "Starting timer.");
+            utils.log("Pomodoro", "Starting timer.");
 
         // Else, act as resume.
         } else if (pomodoro.isPaused) {
             pomodoro.isPaused = false;
             updateButton("pause");
-            ui.log("Pomodoro", "Resuming timer.");
+            utils.log("Pomodoro", "Resuming timer.");
 
         // Else, act as pause.
         } else {
             pomodoro.isPaused = true;
             updateButton("resume");
-            ui.log("Pomodoro", "Pausing timer.");
+            utils.log("Pomodoro", "Pausing timer.");
         };
     },
     startBreak(duration = 5) {
@@ -75,7 +75,7 @@ export const pomodoro = {
             if (pomMessage) {
                 pomMessage.textContent = `${duration} minute break`;
             };
-            ui.log("Pomodoro", "Starting break.");
+            utils.log("Pomodoro", "Starting break.");
         };
     },
     advance() {
@@ -100,10 +100,10 @@ export const pomodoro = {
             pomodoro.minutes = pomodoro.defaultPomLength;
             pomodoro.seconds = 0;
             pomodoro.timerLength = pomodoro.defaultPomLength;
-            ui.log("Pomodoro", `Starting round ${pomodoro.rounds + 1}`);
+            utils.log("Pomodoro", `Starting round ${pomodoro.rounds + 1}`);
             pomodoro.start();
         } else {
-            ui.log("Pomodoro", "Finishing up.");
+            utils.log("Pomodoro", "Finishing up.");
             pomodoro.endSession();
         };
     },
@@ -127,7 +127,7 @@ export const pomodoro = {
 
         // If the requester is the user, ask if they completed their task.
         if (caller === "user") {
-            ui.log("Pomodoro", `${caller} is ending the pomodoro session.`);
+            utils.log("Pomodoro", `${caller} is ending the pomodoro session.`);
             // TODO: Use HTML for this.
             const isTaskComplete = confirm("Did you complete your task?");
 
@@ -145,18 +145,18 @@ export const pomodoro = {
         };
 
         // Save the pomodoro stats to the user.
-        user.pomLog.push(pomLog);
+        user.pomodoros.push(pomLog);
         user.nextPomId++;
         user.save();
 
         if (caller === "system") {
             // End session normally.
-            ui.log("Pomodoro", `${caller} is ending the pomodoro session.`);
+            utils.log("Pomodoro", `${caller} is ending the pomodoro session.`);
             pomodoro.reset("system");
         };
 
         // Reset the pomodoro timer.
-        ui.log("Pomodoro", `Ending ${pomLog.totalTime} minute pomodoro session.`);
+        utils.log("Pomodoro", `Ending ${pomLog.totalTime} minute pomodoro session.`);
     },
     reset (caller = "user") {
         /**
@@ -167,7 +167,7 @@ export const pomodoro = {
             caller = "user";
         };
         if (!pomodoro.isActive) {
-            ui.log("Pomodoro", "No timer is currently active.");
+            utils.log("Pomodoro", "No timer is currently active.");
         } else {
             // If the requester is the user, confirm that they want to reset.
             if (caller === "user") {
@@ -175,16 +175,16 @@ export const pomodoro = {
                 const confirmReset = confirm("Are you sure you want to reset the pomodoro timer?");
                 if (confirmReset) {
                     // If so, end the session early.
-                    ui.log("Pomodoro", `${caller} confirmed reset.`);
+                    utils.log("Pomodoro", `${caller} confirmed reset.`);
                     pomodoro.endSession("user");
                 } else {
                     // If not, cancel the reset.
-                    ui.log("Pomodoro", "User canceled reset.");
+                    utils.log("Pomodoro", "User canceled reset.");
                     return;
                 };
             };
             // Reset the pomodoro timer.
-            ui.log("Pomodoro", "Resetting timer.");
+            utils.log("Pomodoro", "Resetting timer.");
             clearInterval(pomodoro.timer);
             pomodoro.timer = null;
             pomodoro.minutes = pomodoro.defaultPomLength;
@@ -206,7 +206,7 @@ export const pomodoro = {
         if (!pomodoro.isPaused) {
             if (pomodoro.seconds === 0 && pomodoro.minutes === 0) {
                 clearInterval(pomodoro.timer);
-                ui.log("Pomodoro", "Timer has ended.");
+                utils.log("Pomodoro", "Timer has ended.");
                 if (!pomodoro.isBreak) {
                     // Log the time spent on the pomodoro.
                     pomodoro.timeSpent.focusTime += pomodoro.timerLength;
@@ -272,12 +272,12 @@ export const pomodoro = {
             // Advance the pomodoro timer.
             pomodoro.minutes = 0;
             pomodoro.seconds = 1;
-            ui.log("Pomodoro - Cheat", "Skipping to the end of the timer.");
+            utils.log("Pomodoro - Cheat", "Skipping to the end of the timer.");
 
             // Update the UI to reflect the change immediately.
             pomodoro.updateUI();
         } else {
-            ui.log("Pomodoro - Cheat", "No timer is currently active.");
+            utils.log("Pomodoro - Cheat", "No timer is currently active.");
         };
     }
 };

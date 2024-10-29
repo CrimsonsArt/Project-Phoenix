@@ -1,3 +1,4 @@
+import { utils } from "./utils.js";
 import { user } from "./user.js";
 
 /*---------------------------- CALENDAR FUNCTIONS ----------------------------*/
@@ -270,14 +271,14 @@ export const calendar = {
             document.getElementById("event-description").value = "";
 
             // Toast success message.
-            ui.toast("Calendar event added successfully.", "success");
+            utils.toast("Calendar event added successfully.", "success");
 
             // Log the success to the console.
-            ui.log("Calendar - add event", `${event.title} added on ${event.date} at ${event.time}.`);
+            utils.log("Calendar - add event", `${event.title} added on ${event.date} at ${event.time}.`);
         } else {
             // Show error toast and log the error.
-            ui.toast("Please enter an event title and date.", "error");
-            ui.log("Calendar - add event", "Error: Missing event title and/or date.");
+            utils.toast("Please enter an event title and date.", "error");
+            utils.log("Calendar - add event", "Error: Missing event title and/or date.");
         };
     },
     editEvent: function(id) {
@@ -286,7 +287,7 @@ export const calendar = {
          * 
          * TODO: Implement edit event functionality.
          */
-        //ui.log(`Calendar - edit event", "Editing event ${id} in the calendar...`);
+        //utils.log(`Calendar - edit event", "Editing event ${id} in the calendar...`);
         // TODO: Grab the date from active day.
     },
     deleteEvent: function(id) {
@@ -303,9 +304,9 @@ export const calendar = {
             user.events.splice(eventId, 1);
             this.renderCalendar();
             user.save();
-            ui.log(`Calendar - event`, `Event ${eventId} has been deleted from the calendar.`);
+            utils.log(`Calendar - event`, `Event ${eventId} has been deleted from the calendar.`);
         } else {
-            ui.log(`Calendar - event`, `Event ${eventId} does not exist in the calendar.`);
+            utils.log(`Calendar - event`, `Event ${eventId} does not exist in the calendar.`);
         };
     },
     next: function() {

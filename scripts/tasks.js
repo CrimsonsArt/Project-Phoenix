@@ -1,151 +1,130 @@
+import { utils } from "./utils.js";
 import { user } from "./user.js";
-import { ui } from "./ui.js";
+import { toast } from "./toast.js";
 
 /*--------------------------- TO-DO LIST FUNCTIONS ---------------------------*/
 export const tasks = {
     /**
      * To-do list data and functions.
      * 
-     * @function renderTasks - Render the to-do list.
-     * @function addTask - Add a new task to the to-do list.
-     * @function deleteTask - Delete a task from the to-do list.
-     * @function completeTask - Mark a task as completed in the to-do list.
-     * @function editTask - Edit a task in the to-do list.
-     * @function reorderTasks - Reorder tasks in the to-do list.
+     * @function add - Add a new task to the task object.
+     * @function load - Load the task list items, and render them.
+     * @function render - Render the to-do list.
+     * @function delete - Delete a task from the to-do list.
+     * @function edit - Edit a task.
+     * @function complete - Mark a task as completed.
      * 
      * @returns {object} - The functions for the to-do list.
      * 
      * TODO: Allow users to sort tasks.
      * TODO: Allow users to tag tasks.
      * TODO: Allow users to estimate the amount of pomodoros required to complete a task.
-     * TODO: Add a way to filter tasks by completed status.
      * TODO: Add a way to filter tasks by date.
      * TODO: Add a way to filter tasks by tags.
      * TODO: Add a way to filter tasks by estimated pomodoros.
+     * TODO: Let user pin tasks to the top of the list.
      * TODO: Generate whole buttons instead of only icons.
+     * TODO: Allow archiving completed tasks.
+     * TODO: Allow users to set due dates for tasks.
+     * TODO: Allow users to create task hierarchies.
      */
-    renderTasks: function(target = 0) {
+    add() {
         /**
-         * Render the to-do list.
-         * 
-         * @param {number} target - The ID of the list item to render.
+         * Add a new task to the to-do list.
          */
-        let taskList = document.getElementById("todo-list");
+        const taskInput = document.getElementById("todo-task");
+        if (taskInput.value != "") { // Check if task input is not empty.
+            const task = { // Create task object.
+                id: user.nextTaskId,
+                text: taskInput.value,
+                completed: false,
+                date: Date.now()
+            };
+            toast.add("Added task successfully.", "success"); // Success toast.
+            user.tasks.push(task); // Add task to user.tasks array.
+            user.nextTaskId++; // Increment ID.
+            user.save(); // Save changes to user object.
+            taskInput.value = ""; // Clear the task input.
 
-        let generateTask = (task) => {
-            // TODO: Make use of ui.controls() to generate the controls.
-            return `<p class="todo-task">${task.title}</p>
-            <label for="task-${task.id}-check" class="sr-only">${task.completed ? "Mark task as incomplete" : "Mark task as completed"}:</label>
-            <input class="todo-check" type="checkbox" name="task-${task.id}-check" onclick="tasks.completeTask(${task.id})" ${task.completed ? "checked" : ""}>
-            <div class="todo-actions">
-                <button class="todo-edit" type="button" onclick="tasks.editTasks(${task.id})" title="Edit task" aria-label="Edit task">${ui.icon("pencil-square")}</button>
-                <button class="todo-delete" type="button" onclick="tasks.deleteTask(${task.id})" title="Delete task" aria-label="Delete task">${ui.icon("trash")}</button>
-            </div>`;
+            tasks.render(task);
+        } else { // If task input is empty.
+            toast.add("Task title cannot be empty.", "error"); // Error toast.
         };
-
-        // If target is specified, render specified list item.
-        if (target !== 0) {
-            let taskItem = document.getElementById(`task-${target}`);
-
-            // Clear specified list item.
-            taskItem.innerHTML = "";
-
-            // Find the task in the user.tasks object.
-            let tasks = user.tasks.find(task => task.id === target);
-
-            // Reload specified list item.
-            taskItem.innerHTML = generateTask(tasks);
-        } else {
-            taskList.innerHTML = "";
-
-            // Add each task to the list.
+    },
+    load() {
+        /**
+         * Loads the task list items, and renders them.
+         */
+        // Check if user has any tasks.
+        if (user.tasks && user.tasks.length > 0) {
             user.tasks.forEach(task => {
-                let taskItem = document.createElement("li");
-
-                // Get the task ID.
-                taskItem.id = `task-${task.id}`;
-
-                // Generate the task HTML and add the task to the list.
-                taskItem.innerHTML = generateTask(task);
-                taskList.appendChild(taskItem);
+                this.render(task);
             });
         };
     },
-    addTask: function() {
+    render(data) {
         /**
-         * Add a new task to the to-do list.
-         * 
-         * TODO: Allow users to submit a task using the enter key.
+         * Render the to-do list.
          */
+        // Create list item.
+        const wrapper = document.createElement("li");
+        wrapper.id = `task-${data.id}`;
+        wrapper.classList.add("task", data.completed ? "complete" : "incomplete");
 
-        // Add a new task ID.
-        let taskId = user.nextTaskId;
+        // Add text to the list item.
+        const text = document.createElement("p");
+        text.innerHTML = data.text.charAt(0).toUpperCase() + data.text.slice(1);
+        wrapper.appendChild(text);
 
-        // Create a new task object
-        let task = {
-            id: taskId,
-            title: document.getElementById("todo-task").value,
-            completed: false
-        };
-        user.nextTaskId++;
+        // Add label for checkbox.
+        const label = document.createElement("label");
+        label.classList.add("sr-only");
+        label.htmlFor = `task-${data.id}-check`;
+        label.innerHTML = data.completed ? "Mark task as incomplete" : "Mark task as completed";
+        wrapper.appendChild(label);
 
-        // Fallback check if task title is empty.
-        if (task.title !== "") {
-            // Save to user object, and re-render tasks.
-            user.tasks.push(task);
-            user.save();
-            tasks.renderTasks();
+        // Add checkbox.
+        const checkbox = document.createElement("input");
+        checkbox.classList.add("todo-check");
+        checkbox.type = "checkbox";
+        checkbox.id = `task-${data.id}-check`;
+        checkbox.name = `task-${data.id}-check`;
+        checkbox.checked = data.completed;
+        wrapper.appendChild(checkbox); // TODO: Add checkbox click event listener.
 
-            // Clear input field.
-            document.getElementById("todo-task").value = "";
+        // TODO: Add timestamp.
 
-            // Toast success message.
-            ui.toast("Task added successfully.", "success");
-        } else {
-            // Toast error message.
-            ui.toast("Please enter a task title.", "error");
-        };
+        // Add delete button.
+        wrapper.appendChild(utils.button("delete", "task", data.id)).addEventListener("click", () => this.delete(data.id));
+
+        // Add edit button.
+        wrapper.appendChild(utils.button("edit", "task", data.id));
+        // TODO: Add edit event listener.
+        // TODO: Click on task to edit.
+
+        // Add task to the top of the list.
+        document.querySelector("#todo-list").prepend(wrapper);
     },
-    deleteTask: function(id) {
+    delete(id) {
         /**
          * Delete a task from the to-do list.
          * 
          * @param {number} id - The ID of the task to delete.
          */
-        // Remove the array item in the user.tasks object..
-        user.tasks.splice(id, 1);
+        // Remove task from array.
+        user.tasks = user.tasks.filter(task => task.id !== id);
 
-        // Save the updated user object, and reload tasks.
-        user.save();
-        tasks.renderTasks();
-
-        // Toast success message.
-        ui.toast("Task deleted successfully.", "success");
-    },
-    completeTask: function(id) {
-        /**
-         * Mark a task as completed in the to-do list.
-         * 
-         * @param {number} id - The ID of the task to mark as completed.
-         * 
-         * TODO: Only toast the user when the task is completed.
-         * CONSIDER: Praise users for completing a task.
-         */
-        // Find the task in the user.tasks object.
-        let task = user.tasks.find(task => task.id === id);
-
-        // Check if the task exists.
+        // Remove toast from DOM.
+        const task = document.getElementById(`task-${id}`);
         if (task) {
-            // Toggle the completed status.
-            task.completed = !task.completed;
+            task.remove();
         };
 
-        // Save the updated user object, reload tasks and toast.
+        // Log to console, and save changes.
+        utils.log("Task", `Deleting task with ID: ${id}`);
         user.save();
-        tasks.renderTasks();
-        ui.toast("Task done, good job!", "success");
     },
-    editTasks: function(id) {
+    edit(id) {
         /**
          * Edit a task in the to-do list.
          * 
@@ -156,7 +135,7 @@ export const tasks = {
          * BUG: When editing a task, and deleting another task the wrong task is deleted.
          * BUG: When multiple tasks are edited, and one is submitted all are closed.
          */
-        let task = user.tasks.find(task => task.id === id);
+        /*let task = user.tasks.find(task => task.id === id);
 
         // Check if the task exists.
         if (task) {
@@ -174,7 +153,7 @@ export const tasks = {
 
                 if (updatedTitle === "") {
                     // Toast error message.
-                    ui.toast("Task title cannot be empty.", "error");
+                    utils.toast("Task title cannot be empty.", "error");
                     return;
                 } else if (updatedTitle === task.title) {
                     tasks.renderTasks(id);
@@ -188,7 +167,7 @@ export const tasks = {
                     tasks.renderTasks();
 
                     // Toast success message.
-                    ui.toast("Task updated successfully.", "success");
+                    utils.toast("Task updated successfully.", "success");
                 }
             });
 
@@ -197,13 +176,28 @@ export const tasks = {
                 // Cancel the edit and reload that list item.
                 tasks.renderTasks(id);
             });
-        };
+        };*/
     },
-    reorderTasks: function() {
+    complete(id) {
         /**
-         * Reorder tasks in the to-do list.
+         * Mark a task as completed in the to-do list.
          * 
-         * TODO: Allow users to reorder tasks.
+         * @param {number} id - The ID of the task to mark as completed.
+         * 
+         * TODO: Only toast the user when the task is completed.
          */
+        // Find the task in the user.tasks object.
+        let task = user.tasks.find(task => task.id === id);
+
+        // Check if the task exists.
+        if (task) {
+            // Toggle the completed status.
+            task.completed = !task.completed;
+        };
+
+        // Save the updated user object, reload tasks and toast.
+        user.save();
+        tasks.renderTasks();
+        utils.toast("Task done, good job!", "success");
     }
 };
