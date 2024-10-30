@@ -5,6 +5,7 @@ import { toast } from "./toast.js";
 // import { calendar } from "./calendar.js";
 import { tasks } from "./tasks.js";
 import { pomodoro } from "./pomodoro.js";
+import { calendar } from "./calendar.js";
 
 
 /*---------------------------------- ONLOAD ----------------------------------*/
@@ -49,17 +50,28 @@ window.onload = function() {
     calPrev.addEventListener("click", calendar.previous);
     calNext.addEventListener("click", calendar.next);
     */
+    const today = new Date();
+    calendar.render.fullCalendar(today.getFullYear(), today.getMonth());
 
 
     /*-------------------------------- TASKS ---------------------------------*/
     // Load the tasks from local storage.
     tasks.load();
 
-    // Add event listeners for the add task button.
+    // Add event listener for the add task button.
     const taskButton = document.getElementById("add-task");
     if (taskButton) {
         taskButton.addEventListener("click", tasks.add);
     };
+
+    // Add event listener for pressing enter in the task input, to add the task.
+    const taskInput = document.getElementById("todo-task");
+    taskInput.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Prevent form from submitting.
+            tasks.add(); // Add the task.
+        };
+    });
 
 
     /*------------------------------- POMODORO -------------------------------*/

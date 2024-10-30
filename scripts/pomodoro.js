@@ -14,9 +14,11 @@ export const pomodoro = {
      * @function update     - Updates the pomodoro timer display.
      * @function updateUI   - Updates the pomodoro timer UI.
      * 
-     * TODO: Let user select pomodoro length (15 or 25).
+     * TODO: Let user select pomodoro length (15 or 25), by clicking the time display and selecting the time from a dropdown.
+     * TODO: Keep timer running until the user clicks to advance.
      * TODO: Let user select task to focus on.
      * CONSIDER: Darken the rest of the screen when timer is active.
+     * CONSIDER: Button for displaying pomodoro history.
      */
     timer: null,
     minutes: 25,

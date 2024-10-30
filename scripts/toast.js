@@ -63,6 +63,7 @@ export const toast = {
          * Renders the toast list items in the toast log.
          * 
          * TODO: Add hover over timestamp to display exact time.
+         * TODO: Allow hovering over toast to pause the removal of the toast.
          * TODO: Ensure that alike toasts are grouped together, if they happen after each other.
          * CONSIDER: Add source or something in the toast title (e.g. "Import - Success")?
          */

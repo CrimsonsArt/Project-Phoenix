@@ -51,9 +51,16 @@ export const utils = {
         // If older than a week, return full date.
         return `${then.getDate()}-${then.getMonth() + 1}-${then.getFullYear()}, ${hours}:${minutes}`;
     },
-    button(type, source, id) {
+    button(type, source, id = null, context = null) {
         /**
          * Generates a button HTML string.
+         * 
+         * Will throw an error if the button type is invalid. This was a great
+         * opportunity to let me learn how to throw errors in JS.
+         * 
+         * @param {string} type - The type of button, valid options in defaults.
+         * @param {string} source - The source of the button, for accessibility.
+         * @param {string} id - The ID of the newly created button.
          * 
          * TODO: Update icons.
          */
@@ -74,17 +81,55 @@ export const utils = {
                 label: "edit",
                 icon: "pencil-square"
             },
-            update: {
-                label: "update",
-                icon: "arrow-repeat"
+            cancel: {
+                label: "cancel",
+                icon: "x-square"
+            },
+            save: {
+                label: "save",
+                icon: "floppy"
+            },
+            archive: {
+                label: "archive",
+                icon: "archive"
+            },
+            next: {
+                label: "next",
+                icon: "chevron-right"
+            },
+            previous: {
+                label: "previous",
+                icon: "chevron-left"
             }
         };
+
+        // Check if the button type is valid.
+        if (!defaults[type]) { 
+            // If not, throw an error.
+            throw new Error(`Invalid button type: "${type}"`);
+        };
+
+        let buttonId = "";
+        if (!id) {
+            buttonId = `${type}-${source}`;
+        } else {
+            buttonId = `${type}-${source}-${id}`;
+        }
+
+        let buttonLabel = "";
+        if (context) {
+            buttonLabel = `${context} ${defaults[type].label} ${source}`;
+        } else {
+            buttonLabel = `${defaults[type].label} ${source}`;
+        };
+
+        // Create the button, and add classes and attributes.
         const button = document.createElement("button");
         button.type = "button";
-        button.id = `${type}-${source}-${id}`;
+        button.id = buttonId;
         button.classList.add(`btn-${type}`);
-        button.title = `${defaults[type].label} ${source}`;
-        button.ariaLabel = `${defaults[type].label} ${source}`;
+        button.title = buttonLabel;
+        button.ariaLabel = buttonLabel;
 
         const icon = document.createElement("span");
         icon.setAttribute("aria-hidden", "true");

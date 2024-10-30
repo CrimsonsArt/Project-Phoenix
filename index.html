@@ -21,17 +21,16 @@
         </header>
 
         <main>
-            <!--
             <section id="calendar" class="container">
                 <h2>Calendar</h2>
-                <div id="cal-controller">
-                    <button id="cal-prev" type="button" onclick="calendar.previous()" title=" Previous month" aria-label="Previous month"><span class="bi bi-chevron-left" aria-hidden="true"></span></button>
-                    <button id="cal-next" type="button" onclick="calendar.next()" title="Next month" aria-label="Next month"><span class="bi bi-chevron-right" aria-hidden="true"></span></button>
-                </div>
+                <!--<div id="cal-controller">
+                    <button id="cal-prev-btn" type="button" title=" Previous month" aria-label="Previous month"><span class="bi bi-chevron-left" aria-hidden="true"></span></button>
+                    <button id="cal-next-btn" type="button" title="Next month" aria-label="Next month"><span class="bi bi-chevron-right" aria-hidden="true"></span></button>
+                </div>-->
 
                 <table id="cal-table">
-                    <caption id="cal-title"></caption>
-                    <thead>
+                    <caption id="cal-title"><span id="cal-title-month"></span> <span id="cal-title-year"></span></caption>
+                    <thead id="cal-head">
                         <tr id="weekdays">
                             <th>Monday</th>
                             <th>Tuesday</th>
@@ -46,7 +45,7 @@
                     </tbody>
                 </table>
 
-                <form id="cal-events" action="" class="accordion">
+                <!--<form id="cal-events" action="" class="accordion">
                     <h3>Add a new event</h3>
                     <label for="event-title">Event title:</label>
                     <input type="text" id="event-title" required>
@@ -57,8 +56,8 @@
                     <label for="event-description">Event description:</label>
                     <textarea name="event-description" id="event-description"></textarea>
                     <button id="add-event" type="button" onclick="calendar.addEvent()" title="Add event" aria-label="Add event"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
-                </form>
-            </section>-->
+                </form>-->
+            </section>
 
             <section id="tasks">
                 <h2>Tasks</h2>
@@ -66,10 +65,11 @@
                     <h3>Todo list</h3>
                     <form id="todo-controller" action="">
                         <label for="todo-task">New task: </label>
-                        <input type="text" id="todo-task" placeholder="New task" required>
+                        <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
                         <button id="add-task" type="button" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
                     </form>
-                    <ul id="todo-list">
+                    <ul id="todo-list" class="task-list">
+                        <!-- Tasks are displayed here. -->
                     </ul>
                 </section>
 

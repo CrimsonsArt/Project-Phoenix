@@ -20,6 +20,8 @@ export const user = {
      * @function showTasks - See all of the user's tasks in the console.
      * 
      * @returns {object} user - The user's data.
+     * 
+     * TODO: Add settings for the user.
      */
     name: "",
     events: [],
@@ -161,7 +163,7 @@ export const user = {
          */
         utils.log("Console - showTasks", "Showing all of the user's tasks in the console...");
         this.tasks.forEach((task) => {
-            utils.log(`Console - task ${task.id}`, `${task.title} - ${task.completed ? "Complete" : "Incomplete"}`);
+            utils.log(`Console - task ${task.id}`, `${task.text} - ${task.completed ? "Complete" : "Incomplete"} - ${task.archived ? "Archived" : "Not archived"}`);
         });
     }
 };
