@@ -285,7 +285,7 @@ export const pomodoro = {
 };
 
 
-/*---------------------------- POMODORO UTILITIES ----------------------------*/
+/*------------------------ POMODORO UTILITY FUNCTIONS ------------------------*/
 function updateButton(state = "play") {
     /**
      * Toggles the text and icon for the pomodoro timer button.

@@ -11,6 +11,7 @@
 
     --main-font-color: #e0e1dd;
     --secondary-font-color: #1b263b;
+    --faded-font-color: #aaa;
 
     --borders: 1px solid #415a77;
 }
@@ -193,6 +194,10 @@ BUG: The event date picker overlaps the toast.
 #cal-body tr td.today.event-day {
     border: 4px solid yellow;
 }
+#cal-body tr td.faded-day {
+    color: var(--faded-font-color);
+    opacity: 0.5;
+}
 .cal-date {
     font-size: 1.2em;
     font-weight: bold;
@@ -202,6 +207,22 @@ BUG: The event date picker overlaps the toast.
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
+}
+.compact-event {
+    /* TODO: Update colors. */
+    background-color: var(--tertiary-color);
+    border: var(--borders);
+    border-radius: 5%;
+    color: black;
+}
+.dropdown-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+}
+.dropdown-closed {
+    display: none;
 }
 
 /* Task styling */

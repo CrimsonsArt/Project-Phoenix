@@ -23,13 +23,30 @@
         <main>
             <section id="calendar" class="container">
                 <h2>Calendar</h2>
-                <!--<div id="cal-controller">
-                    <button id="cal-prev-btn" type="button" title=" Previous month" aria-label="Previous month"><span class="bi bi-chevron-left" aria-hidden="true"></span></button>
-                    <button id="cal-next-btn" type="button" title="Next month" aria-label="Next month"><span class="bi bi-chevron-right" aria-hidden="true"></span></button>
-                </div>-->
-
                 <table id="cal-table">
-                    <caption id="cal-title"><span id="cal-title-month"></span> <span id="cal-title-year"></span></caption>
+                    <caption id="cal-title">
+                        <span id="cal-title-month" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"></span>
+                        <span id="cal-title-year" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"></span>
+                        <!-- Dropdowns are displayed here. -->
+                        <ul id="month-dropdown" class="dropdown-menu dropdown-closed">
+                            <!-- Months are displayed here. -->
+                            <li data-month="0">January</li>
+                            <li data-month="1">February</li>
+                            <li data-month="2">March</li>
+                            <li data-month="3">April</li>
+                            <li data-month="4">May</li>
+                            <li data-month="5">June</li>
+                            <li data-month="6">July</li>
+                            <li data-month="7">August</li>
+                            <li data-month="8">September</li>
+                            <li data-month="9">October</li>
+                            <li data-month="10">November</li>
+                            <li data-month="11">December</li>
+                        </ul>
+                        <ul id="year-dropdown" class="dropdown-menu dropdown-closed">
+                            <!-- Years are displayed here. -->
+                        </ul>
+                    </caption>
                     <thead id="cal-head">
                         <tr id="weekdays">
                             <th>Monday</th>
@@ -44,29 +61,20 @@
                     <tbody id="cal-body">
                     </tbody>
                 </table>
+            </section>
 
-                <!--<form id="cal-events" action="" class="accordion">
-                    <h3>Add a new event</h3>
-                    <label for="event-title">Event title:</label>
-                    <input type="text" id="event-title" required>
-                    <label for="event-date">Event date:</label>
-                    <input type="date" name="event-date" id="event-date" required>
-                    <label for="event-time">Event time:</label>
-                    <input type="time" name="event-time" id="event-time">
-                    <label for="event-description">Event description:</label>
-                    <textarea name="event-description" id="event-description"></textarea>
-                    <button id="add-event" type="button" onclick="calendar.addEvent()" title="Add event" aria-label="Add event"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
-                </form>-->
+            <section id="journal">
+                <h2>Journal</h2>
             </section>
 
             <section id="tasks">
                 <h2>Tasks</h2>
                 <section id="todo" class="container">
                     <h3>Todo list</h3>
-                    <form id="todo-controller" action="">
+                    <form id="task-form" action="">
                         <label for="todo-task">New task: </label>
                         <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
-                        <button id="add-task" type="button" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
+                        <button id="add-task" type="submit" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
                     </form>
                     <ul id="todo-list" class="task-list">
                         <!-- Tasks are displayed here. -->
@@ -91,11 +99,12 @@
                 </section>
             <!--
             </section>
-            
+
             <section id="helper">
                 <h2 class="sr-only">Helper</h2>
                 <div id="phoenix"></div>
             </section>-->
+
             <section id="settings" class="container">
                 <h2>Settings</h2>
                 <section id="import-export">

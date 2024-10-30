@@ -138,5 +138,65 @@ export const utils = {
 
         // Return the button.
         return button;
+    },
+    meetsRequirements(formId) {
+        /**
+         * Checks if the requirements are met.
+         * 
+         * @param {string} formId - The ID of the form to check.
+         * 
+         * @returns {boolean} - True if the requirements are met, false if not.
+         */
+        const form = document.getElementById(formId);
+        const requiredInputs = form.querySelectorAll("[required]");
+        for (let input of requiredInputs) {
+            if (!input.value.trim()) {
+                return false;
+            };
+        };
+    },
+    makeInput(id, labelText, type, placeholder = null, required = false) {
+        /**
+         * Creates an input element with a label, wrapped in a div.
+         * 
+         * @param {string} id - The ID of the input element.
+         * @param {string} label - The label text.
+         * @param {string} type - The type of the input element.
+         * @param {string} placeholder - The placeholder text.
+         * @param {boolean} required - Whether the input is required.
+         * 
+         * @returns {object} - The input element.
+         */
+        // Create the elements.
+        const wrapper = document.createElement("div");
+        const label = document.createElement("label");
+        let input = document.createElement("input");
+    
+        // Set the label properties.
+        label.htmlFor = id;
+        label.textContent = `${labelText.charAt(0).toUpperCase()}${labelText.slice(1)}:`;
+    
+        // Set the input properties.
+        if (type === "textarea") {
+            input = document.createElement("textarea");
+        } else {
+            input.type = type;
+        };
+        input.required = required;
+        input.name = labelText;
+        input.id = id;
+    
+        // Set the placeholder if provided.
+        if (placeholder) {
+            input.placeholder = placeholder;
+        };
+    
+        // Add the elements to the wrapper.
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+    
+        // Set the wrapper properties, and return it.
+        wrapper.classList.add("input-wrapper");
+        return wrapper;
     }
 };

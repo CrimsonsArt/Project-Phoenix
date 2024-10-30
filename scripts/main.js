@@ -2,10 +2,10 @@
 import { utils } from "./utils.js";
 import { user } from "./user.js";
 import { toast } from "./toast.js";
-// import { calendar } from "./calendar.js";
+import { calendar } from "./calendar.js";
+import { journal } from "./journal.js";
 import { tasks } from "./tasks.js";
 import { pomodoro } from "./pomodoro.js";
-import { calendar } from "./calendar.js";
 
 
 /*---------------------------------- ONLOAD ----------------------------------*/

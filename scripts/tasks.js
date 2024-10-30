@@ -1,3 +1,4 @@
+/*---------------------------------- IMPORT ----------------------------------*/
 import { utils } from "./utils.js";
 import { user } from "./user.js";
 import { toast } from "./toast.js";
@@ -229,11 +230,16 @@ export const tasks = {
         // Append the label and input elements to the edit form.
         editForm.appendChild(editLabel);
         editForm.appendChild(editInput).addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                event.preventDefault(); // Prevent the form from submitting.
-                this.save(id);
-            } else if (event.key === "Escape") {
-                this.cancel(id);
+            // BUG: Fix, still saves on button and enter press.
+            if (utils.meetsRequirements("task-form")) { // Check if the form is valid.
+                if (event.key === "Enter") {
+                    event.preventDefault(); // Prevent the form from submitting.
+                    this.save(id);
+                } else if (event.key === "Escape") {
+                    this.cancel(id);
+                };
+            } else {
+                utils.log("Task", "Form requirements not met.");
             };
         });
         wrapper.prepend(editForm); // Add the edit form to the task wrapper.

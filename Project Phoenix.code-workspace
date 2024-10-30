@@ -117,9 +117,10 @@
 		"todo-tree.tree.showCountsInTree": true,
 		"cSpell.words": [
 			"datetime",
+			"fieldsets",
 			"pomodoro",
 			"pomodoros"
 		],
-		"todo-tree.tree.scanMode": "workspace"
+		"todo-tree.tree.scanMode": "workspace only"
 	}
 }
