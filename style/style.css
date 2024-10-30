@@ -4,10 +4,14 @@
 
 /* VARIABLES */
 :root {
-    --main-bg-color: #0d1b2a;
+    --base-color: #1b263b;
+    --primary-color: #0d1b2a;
+    --secondary-color: #415a77;
+    --tertiary-color: #778da9;
+
     --main-font-color: #e0e1dd;
-    --secondary-bg-color: #778da9;
     --secondary-font-color: #1b263b;
+    --faded-font-color: #aaa;
 
     --borders: 1px solid #415a77;
 }
@@ -29,14 +33,13 @@
 
 /* GENERAL */
 html {
-    background-color: var(--main-bg-color);
+    background-color: var(--primary-color);
     color: var(--main-font-color);
     font-family: 'Open Sans', sans-serif;
 }
 a:visited {
     color: var(--main-font-color); /* TODO: Change color. */
 }
-
 h2 {
     text-align: center;
 }
@@ -49,6 +52,7 @@ body {
     width: 100%;
 }
 header {
+    background-color: var(--base-color);
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
@@ -57,11 +61,19 @@ header {
     position: fixed;
     top: 0;
     width: 100%;
+    z-index: 999;
 }
 nav ul {
+    align-items: center;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 0 1%;
+}
+nav ul li {
+    display: inline;
 }
 main, section {
     display: flex;
@@ -70,11 +82,22 @@ main, section {
     margin: auto;
     width: 100%;
 }
+main {
+    position: relative;
+}
 section {
     width: 75%;
 }
 footer {
+    background-color: var(--base-color);
     display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    margin: 2% 0 0 0;
+    padding: 0 1%;
+}
+footer section:last-of-type {
+    text-align: right;
 }
 
 /* Toast styling */
@@ -85,14 +108,61 @@ TODO: Increase toast area size.
 TODO: Move close button to the top right corner, and increase its size.
 BUG: The event date picker overlaps the toast.
 */
-.toast {
-    background-color: var(--secondary-bg-color);
+#log {
+    background-color: var(--base-color);
+    max-height: 100%;
+    max-width: 25%;
+    position: fixed;
+    right: 0;
+    top: 50px;
+}
+#log-list {
+    list-style: none;
+    margin: 0;
+    overflow: scroll;
+    padding: 0;
+}
+#log-toggle {
+    border: none;
+    font-size: 1.5em;
+    height: 40px;
+    width: 40px;
+}
+#log-list.log-closed .toast {
+    display: none;
+}
+#log-list.log-closed .toast.show-temp {
+    display: block;
+}
+/*.toast {
+    background-color: var(--tertiary-color);
     color: var(--secondary-font-color);
     padding: 0 2%;;
     position: fixed;
     right: 1%;
     top: 1%;
-    z-index: 999; /* Ensure that toast is always on top. */
+}*/
+.toast {
+    margin: 0;
+    padding: 2% 5%;
+}
+.toast-title {
+    font-size: 1.2em;
+}
+.toast-message {
+    margin: 0;
+}
+.info {
+    border: 1px solid var(--secondary-color);
+}
+.success {
+    border: 1px solid green;
+}
+.warning {
+    border: 1px solid yellow;
+}
+.error {
+    border: 1px solid red;
 }
 
 /* Calendar styling */
@@ -124,6 +194,10 @@ BUG: The event date picker overlaps the toast.
 #cal-body tr td.today.event-day {
     border: 4px solid yellow;
 }
+#cal-body tr td.faded-day {
+    color: var(--faded-font-color);
+    opacity: 0.5;
+}
 .cal-date {
     font-size: 1.2em;
     font-weight: bold;
@@ -134,19 +208,77 @@ BUG: The event date picker overlaps the toast.
     flex-flow: column nowrap;
     justify-content: center;
 }
+.compact-event {
+    /* TODO: Update colors. */
+    background-color: var(--tertiary-color);
+    border: var(--borders);
+    border-radius: 5%;
+    color: black;
+}
+.dropdown-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+}
+.dropdown-closed {
+    display: none;
+}
 
-/* Todo list styling */
-#todo-list {
+/* Task styling */
+.task-list {
     list-style: none;
     margin: 0;
     padding: 0;
 }
-#todo-list li {
+.task-list li {
+    align-items: center;
     display: flex;
     flex-flow: row nowrap;
 }
 .todo-check {
     order: -1;
+}
+
+/* Pomodoro styling */
+#pomodoro {
+    align-items: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+}
+#pom-display {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#pom-feedback {
+    align-items: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    min-height: 200px;
+    min-width: 200px;
+    position: absolute;
+}
+#pom-time {
+    font-size: 2em;
+}
+#pom-svg {
+    height: 200px;
+    width: 200px;
+}
+#pom-circle {
+    fill: none;
+    stroke: var(--secondary-color);
+    stroke-dasharray: 565.48;
+    stroke-dashoffset: 0;
+    stroke-width: 8px;
+    transform: rotate(-90deg);
+    transform-origin: 100px 100px;
 }
 
 /* Settings styling */

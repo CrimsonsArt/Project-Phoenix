@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="author" content="CrimsonsArt">
-        <meta name="description" content="A daily planner to notice and manage ADHD burnout and other related issues.">
+        <meta name="description" content="A daily planner to help notice and manage ADHD burnout.">
         <title>Project Phoenix</title>
         <link rel="stylesheet" href="style/style.css">
     </head>
@@ -15,6 +15,7 @@
             <nav>
                 <ul>
                     <li><h1><a href="index.html">Project Phoenix</a></h1></li>
+                    <li><button id="log-toggle" type="button" title="Open toast log" aria-label="Open toast log"><span class="bi bi-list" aria-hidden="true"></span></button></li>
                 </ul>
             </nav>
         </header>
@@ -22,15 +23,31 @@
         <main>
             <section id="calendar" class="container">
                 <h2>Calendar</h2>
-                <!-- TODO: Add jump to add-event link for screen readers. -->
-                <div id="cal-controller">
-                    <button id="cal-prev" type="button" onclick="calendar.previous()" title=" Previous month" aria-label="Previous month"><span class="bi bi-chevron-left" aria-hidden="true"></span></button>
-                    <button id="cal-next" type="button" onclick="calendar.next()" title="Next month" aria-label="Next month"><span class="bi bi-chevron-right" aria-hidden="true"></span></button>
-                </div>
-
                 <table id="cal-table">
-                    <caption id="cal-title"></caption>
-                    <thead>
+                    <caption id="cal-title">
+                        <span id="cal-title-month" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"></span>
+                        <span id="cal-title-year" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"></span>
+                        <!-- Dropdowns are displayed here. -->
+                        <ul id="month-dropdown" class="dropdown-menu dropdown-closed">
+                            <!-- Months are displayed here. -->
+                            <li data-month="0">January</li>
+                            <li data-month="1">February</li>
+                            <li data-month="2">March</li>
+                            <li data-month="3">April</li>
+                            <li data-month="4">May</li>
+                            <li data-month="5">June</li>
+                            <li data-month="6">July</li>
+                            <li data-month="7">August</li>
+                            <li data-month="8">September</li>
+                            <li data-month="9">October</li>
+                            <li data-month="10">November</li>
+                            <li data-month="11">December</li>
+                        </ul>
+                        <ul id="year-dropdown" class="dropdown-menu dropdown-closed">
+                            <!-- Years are displayed here. -->
+                        </ul>
+                    </caption>
+                    <thead id="cal-head">
                         <tr id="weekdays">
                             <th>Monday</th>
                             <th>Tuesday</th>
@@ -44,79 +61,82 @@
                     <tbody id="cal-body">
                     </tbody>
                 </table>
+            </section>
 
-                <!-- TODO: Turn this into a dropdown menu. -->
-                <form id="cal-events" action="">
-                    <h3>Add a new event</h3>
-                    <label for="event-title">Event title:</label>
-                    <input type="text" id="event-title" required>
-                    <label for="event-date">Event date:</label>
-                    <input type="date" name="event-date" id="event-date" required>
-                    <!-- TODO: Add intuitive time picker. -->
-                    <label for="event-time">Event time:</label>
-                    <input type="time" name="event-time" id="event-time">
-                    <label for="event-description">Event description:</label>
-                    <textarea name="event-description" id="event-description"></textarea>
-                    <button id="add-event" type="button" onclick="calendar.addEvent()" title="Add event" aria-label="Add event"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
-                </form>
+            <section id="journal">
+                <h2>Journal</h2>
             </section>
 
             <section id="tasks">
                 <h2>Tasks</h2>
                 <section id="todo" class="container">
                     <h3>Todo list</h3>
-                    <form id="todo-controller" action="">
+                    <form id="task-form" action="">
                         <label for="todo-task">New task: </label>
-                        <input type="text" id="todo-task" placeholder="New task" required>
-                        <button id="add-task" type="button" onclick="tasks.addTask()" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
+                        <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
+                        <button id="add-task" type="submit" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
                     </form>
-                    <ul id="todo-list">
-                        <!-- List will show up here -->
+                    <ul id="todo-list" class="task-list">
+                        <!-- Tasks are displayed here. -->
                     </ul>
                 </section>
+
                 <section id="pomodoro" class="container">
                     <h3>Pomodoro timer</h3>
-                    <div id="pomodoro-timer">
-                        <p id="pomodoro-countdown">15:00</p>
+                    <div id="pom-display">
+                        <svg id="pom-svg">
+                            <circle id="pom-circle" cx="100" cy="100" r="90"></circle>
+                        </svg>
+                        <p id="pom-feedback">
+                            <span id="pom-time">25:00</span>
+                            <span id="pom-message"></span>
+                        </p>
                     </div>
                     <div id="pomodoro-controller">
-                        <button id="pomodoro-start" type="button" onclick="pomodoro.start()" title="Start timer" aria-label="Start timer"><span id="pomodoro-activity-icon" class="bi bi-play-fill" aria-hidden="true"></span></button>
-                        <!--<button id="pomodoro-pause" type="button" onclick="pomodoro.pause()" title="Pause timer" aria-label="Pause timer"><span class="bi bi-pause-fill" aria-hidden="true"></span></button>-->
-                        <button id="pomodoro-stop" type="button" onclick="pomodoro.reset()" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
+                        <button id="pom-start" type="button" title="Start timer" aria-label="Start timer"><span id="pomodoro-activity-icon" class="bi bi-play-fill" aria-hidden="true"></span></button>
+                        <button id="pom-stop" type="button" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
                     </div>
                 </section>
+            <!--
             </section>
+
             <section id="helper">
                 <h2 class="sr-only">Helper</h2>
                 <div id="phoenix"></div>
-            </section>
+            </section>-->
+
             <section id="settings" class="container">
                 <h2>Settings</h2>
-                <!-- CONSIDER: Have this be part of a dropdown menu in the header? -->
-                <!-- TODO: Add way to delete all user data, with a confirmation dialog. -->
                 <section id="import-export">
                     <h3 class="sr-only">Import/Export user data</h3>
-                    <input type="file" name="import-data" id="import-data" accept=".json">
-                    <button id="import" type="button" onclick="user.import()" title="Import save from file" aria-label="Import"><span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
-                    <button id="export" type="button" onclick="user.export()" title="Export save as file" aria-label="Export"><span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
+                    <input type="file" name="data-import" id="data-import" accept=".json">
+                    <!-- TODO: Add label. -->
+                    <button id="data-import" type="button" title="Import save from file" aria-label="Import user data"><span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
+                    <button id="data-export" type="button" title="Export save as file" aria-label="Export user data"><span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
                 </section>
                 <section>
-                    <h3 class="sr-only">Delete user date</h3>
-                    <button id="delete-data" type="button" onclick="user.format()" title="Delete user data" aria-label="Delete user data">Delete user data</button>
+                    <h3 class="sr-only">Delete user data</h3>
+                    <button id="data-delete" type="button" title="Delete user data" aria-label="Delete user data">Delete user data</button>
                 </section>
+            </section>
+
+            <section id="log" class="container">
+                <h2 id="log-title" class="sr-only">Toast log</h2>
+                <ul id="log-list" class="log-closed">
+                    <!-- Toasts are displayed here. -->
+                </ul>
             </section>
         </main>
 
         <footer>
             <section>
-                <p>Made by <a href="https://github.com/CrimsonsArt">CrimsonsArt</a></p>
+                <p>Made by <a href="https://github.com/CrimsonsArt" target="_blank">CrimsonsArt</a></p>
             </section>
             <section>
                 <p>Version: <span id="version">0.0.7</span></p>
             </section>
-            <!-- TODO: Add contact info. -->
         </footer>
 
-        <script src="scripts/main.js"></script>
+        <script type="module" src="scripts/main.js"></script>
     </body>
 </html>
