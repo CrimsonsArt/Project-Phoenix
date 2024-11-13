@@ -62,12 +62,16 @@ export const events = {
              * @param {Object} data - The event data object.
              */
         },
-        form() {
+        form(date = null) {
             /**
              * Renders the event picker form that lets users create new events.
              * 
              * CONSIDER: Add helper function for creating labels.
              */
+            if (document.getElementById("event-form")) {
+                document.getElementById("event-form").remove();
+            }
+
             // Create the form, and set its properties.
             const form = document.createElement("form");
             form.id = "event-form";
@@ -75,12 +79,23 @@ export const events = {
             // Create the header, set its properties, and add it to the form.
             const header = document.createElement("h3");
             header.textContent = "Add a new event";
+            // TODO: Add close button.
             form.appendChild(header);
 
             // Add the form to the calendar.
             document.getElementById("calendar").appendChild(form);
 
-            // Create fieldsets for each section.
+            // Date - start date - end date
+            // Time - start time - end time - all day
+            // Info - event title - event description - event location - event type
+            // TODO: Set "all day" as a default option.
+
+            const dateFieldset = document.createElement("fieldset");
+            const timeFieldset = document.createElement("fieldset");
+            const infoFieldset = document.createElement("fieldset");
+            const buttonsFieldset = document.createElement("fieldset");
+
+            /*// Create fieldsets for each section.
             const sections = ["details", "time", "info"];
             sections.forEach((section) => {
                 const fieldset = document.createElement("fieldset");
@@ -98,9 +113,9 @@ export const events = {
             // Get the new fieldsets.
             const eventDetailsField = document.getElementById("event-details");
             const eventTimeField = document.getElementById("event-time");
-            const additionalInfoField = document.getElementById("event-info");
+            const additionalInfoField = document.getElementById("event-info");*/
 
-            /*----------------------- Details fieldset -----------------------*/
+            /*----------------------- Details fieldset -----------------------
             // Create event title input, and add it to the event details field.
             const eventTitle = utils.makeInput("event-title", "event title", "text", "Event title", true);
             eventDetailsField.appendChild(eventTitle);
@@ -108,39 +123,46 @@ export const events = {
             // Create start date input, and add it to the event details field.
             const dateStart = utils.makeInput("event-date-start", "start date", "date", null, true);
             eventDetailsField.appendChild(dateStart);
+            if (date != null) {
+                const dateStartInput = document.getElementById("event-date-start");
+                dateStartInput.value = date;
+            };
 
             // Create end date input, and add it to the event details field.
             const dateEnd = utils.makeInput("event-date-end", "end date", "date", null);
-            eventDetailsField.appendChild(dateEnd);
-            // TODO: Add a "different end date?" option that spawns this.
+            eventDetailsField.appendChild(dateEnd);*/
 
-            /*------------------------ Time fieldset -------------------------*/
-            // TODO: Find out how to set the time picker to military time.
-            // TODO: Ask if event is all-day, if not ask for start and end time.
+            /*------------------------ Time fieldset -------------------------
+            // Create all day checkbox, and add it to the event time field.
+            const allDay = utils.makeInput("event-all-day", "all day", "checkbox", "All day");
+            eventTimeField.appendChild(allDay);
+
+            // TODO: Remove start and end time inputs if all day is checked.
+
             // Create start time input, and add it to the event time field.
             const timeStart = utils.makeInput("event-time-start", "start time", "time");
             eventTimeField.appendChild(timeStart);
 
             // Create end time input, and add it to the event time field.
             const timeEnd = utils.makeInput("event-time-end", "end time", "time");
-            eventTimeField.appendChild(timeEnd);
+            eventTimeField.appendChild(timeEnd);*/
 
-            /*------------------- Additional info fieldset -------------------*/
+            /*------------------- Additional info fieldset -------------------
             // Create description input, and add it to the additional info field.
             const description = utils.makeInput("event-description", "description", "textarea", "Description");
             additionalInfoField.appendChild(description);
 
             // Create location input, and add it to the additional info field.
-            // TODO: Use geolocation API.
+            // CONSIDER: Use geolocation API.
             const location = utils.makeInput("event-location", "event location", "text", "Event location");
             additionalInfoField.appendChild(location);
 
             // TODO: Ask if event should be recurring.
 
             // TODO: Let user select event category.
-            // TODO: Let user create new categories from the category dropdown.
+            // TODO: Let user create new categories from the category dropdown.*/
 
-            /*------------------------ Submit button -------------------------*/
+            /*------------------------ Submit button -------------------------
             // Create the submit button, set properties, and add it to the form.
             const submitButton = document.createElement("button");
             submitButton.type = "submit";
@@ -149,7 +171,7 @@ export const events = {
                 // TODO: Check that all required fields are filled.
                 event.preventDefault();
                 events.add();
-            });
+            });*/
         }
     },
     new() {
@@ -215,7 +237,7 @@ export const events = {
         utils.log("Calendar", `Added event: ${event.title}, on ${event.date.start}.`);
 
         // Rerender the calendar.
-        calendar.render();
+        calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
     },
     search(lookupDate) {
         /**

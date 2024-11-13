@@ -13,7 +13,6 @@ export const calendar = {
      * 
      * @object render - Functions for rendering the calendar.
      * @object controls - Functions for controlling the calendar.
-     * @object event - Functions for calendar events.
      * 
      * @returns {object} calendar - The calendar object.
      * 
@@ -23,6 +22,7 @@ export const calendar = {
     today: new Date(),
     displayMonth: new Date().getMonth(), // 0-11 (Jan-Dec).
     displayYear: new Date().getFullYear(),
+    lastClickedCell: null,
     render: {
         /**
          * Render the calendar elements.
@@ -36,15 +36,22 @@ export const calendar = {
         fullCalendar(year, month) {
             /**
              * Renders the full calendar.
+             * 
+             * CONSIDER: Display faded out events for last and next month.
              */
-            // Get the first day of the month.
-            const firstDayOfMonth = (((new Date(year, month)).getDay() - 1) + 7) % 7;
-            const daysInMonth = new Date(year, month + 1, 0).getDate(); // Total days in the month.
-            const calendarBody = document.getElementById("cal-body"); // Grab the calendar body.
+            const calendarTable = document.getElementById("cal-table");
+            const calendarBody = document.getElementById("cal-body");
             const date = {
                 year: year,
                 month: month
             };
+
+            // Get the first day of the month.
+            const firstDayOfMonth = (((new Date(year, month)).getDay() - 1) + 7) % 7;
+
+            // Total days in the month.
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
             calendarBody.innerHTML = ""; // Clear the table.
             
             // Update the table title to display the correct month and year.
@@ -52,10 +59,6 @@ export const calendar = {
 
             // Render the days.
             calendar.render.days(daysInMonth, firstDayOfMonth, date);
-
-            // Render the event picker.
-            // TODO: Add a button that opens the event picker form.
-            events.render.form();
 
             // Make the previous and next month buttons.
             const backButton = utils.button("previous", "month", null, "Go to the");
@@ -65,10 +68,21 @@ export const calendar = {
             if (!document.getElementById("cal-controller")) {
                 const controlWrapper = document.createElement("div");
                 controlWrapper.id = "cal-controller";
+                controlWrapper.classList.add("controller");
                 controlWrapper.appendChild(backButton).addEventListener("click", calendar.controls.previous);
                 controlWrapper.appendChild(forwardButton).addEventListener("click", calendar.controls.next);
-                document.getElementById("calendar").insertBefore(controlWrapper, document.getElementById("cal-table"));
+                document.getElementById("calendar").insertBefore(controlWrapper, calendarTable);
             };
+
+            // Update the selected month and year in the select and input elements.
+            calendar.render.setSelectedDate();
+
+            // Add event listener to the table.
+            calendarTable.addEventListener("click", (event) => {
+                if (event.target.tagName === "TD") {
+                    calendar.render.controls(event.target);
+                }
+            });
         },
         days(daysInMonth, startDay, date) {
             /**
@@ -77,8 +91,6 @@ export const calendar = {
              * @param {number} daysInMonth - The total number of days in the month.
              * @param {number} startDay - The first day of the month.
              * @param {object} date - The date to display.
-             * 
-             * TODO: Add week numbers.
              */
             const calendarBody = document.getElementById("cal-body");
             let day = 1;
@@ -96,11 +108,9 @@ export const calendar = {
                         const prevMonthDay = daysInPrevMonth - (startDay - days - 1);
                         const prevMonthDate = `${prevYear}-${prevMonth + 1}-${prevMonthDay}`;
 
-                        // TODO: Check for events in the previous month.
-
                         // Add data to the cell.
                         dayCell.dataset.date = prevMonthDate;
-                        dayCell.classList.add("faded-day");
+                        dayCell.classList.add("day", "faded");
                         dayCell.textContent = prevMonthDay;
                         weekRow.appendChild(dayCell);
 
@@ -111,11 +121,9 @@ export const calendar = {
                         const nextMonthDay = day - daysInMonth;
                         const nextMonthDate = `${nextYear}-${nextMonth + 1}-${nextMonthDay}`;
 
-                        // TODO: Check for events in the next month.
-
                         // Add data to the cell.
                         dayCell.dataset.date = nextMonthDate;
-                        dayCell.classList.add("faded-day");
+                        dayCell.classList.add("day","faded");
                         dayCell.textContent = nextMonthDay;
                         weekRow.appendChild(dayCell);
                         day++;
@@ -123,7 +131,7 @@ export const calendar = {
                     // Add days for the current month.
                     } else {
                         // Add the day number, and other data to the cell.
-                        dayCell.classList.add("calendar-day");
+                        dayCell.classList.add("day");
                         dayCell.textContent = day;
 
                         // Store the date in the cell, for later use.
@@ -138,20 +146,14 @@ export const calendar = {
                         // Check if there is an event on this day.
                         const eventsForDate = events.search(dateData);
                         if (eventsForDate) {
-                            // TODO: Add a [more] bit if there is more than a certain number of events.
+                            // TODO: Add a [more] bit if there is too many to display.
                             // Add the event data to the cell.
-                            dayCell.classList.add("event-day");
+                            dayCell.classList.add("event");
                             eventsForDate.forEach(event => {
                                 // Add event related data to the cell.
                                 dayCell.appendChild(events.render.compact(event));
-                                // TODO: Add event listener to the compact event.
-                            })
-                            utils.log("Calendar", `There is at least one event on ${dateData}`);
+                            });
                         };
-
-                        // TODO: Add event listener to the cell.
-                        // TODO: Button to add event from the cell.
-                        // TODO: Button to open journal from the cell.
 
                         // Add the cell to the week row and increment the day.
                         weekRow.appendChild(dayCell);
@@ -168,34 +170,99 @@ export const calendar = {
              * 
              * @param {number} year - The current year.
              * @param {number} month - The current month.
-             * 
-             * TODO: Add a reasonable year-range.
-             * TODO: Allow users to change the month and year using the spans.
-             * TODO: Style the spans to make it obvious that the user can change the month and year.
              */
             const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const monthDisplay = document.getElementById("cal-title-month");
-            const monthDropdown = document.getElementById("month-dropdown");
             const yearDisplay = document.getElementById("cal-title-year");
-            const yearDropdown = document.getElementById("year-dropdown");
 
-            // Set text content.
-            monthDisplay.textContent = months[month];
-            yearDisplay.textContent = year;
+            // Create month selector.
+            if (!document.getElementById("cal-nav-month")) {
+                const monthNav = document.createElement("select");
+                const monthNavLabel = document.createElement("label");
 
-            // TODO: Complete this.
-            /*
-            // Toggle dropdown menu for the month.
-            monthDisplay.addEventListener("click", () => {
-                monthDropdown.classList.toggle("dropdown-closed");
-                utils.log("Calendar", "Toggled month dropdown menu.");
+                monthNavLabel.htmlFor = "cal-nav-month";
+                monthNavLabel.textContent = "Month:";
+                monthNavLabel.classList.add("sr-only");
+
+                monthNav.classList.add("cal-nav");
+                monthNav.id = "cal-nav-month";
+                months.forEach((month, index) => {
+                    const option = document.createElement("option");
+                    option.id = `cal-nav-month-${index}`;
+                    option.value = index;
+                    option.textContent = month;
+                    monthNav.appendChild(option);
+                });
+                monthNav.addEventListener("change", (event) => {
+                    calendar.displayMonth = parseInt(event.target.value);
+                    calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
+                })
+                monthDisplay.appendChild(monthNav);
+            };
+
+            // Let user change year by writing.
+            if (!document.getElementById("cal-nav-year")) {
+                const yearNav = document.createElement("input");
+                const yearNavLabel = document.createElement("label");
+
+                yearNavLabel.htmlFor = "cal-nav-year";
+                yearNavLabel.textContent = "Year:";
+                yearNavLabel.classList.add("sr-only");
+
+                yearNav.type = "number";
+                yearNav.id = "cal-nav-year";
+                yearNav.value = year;
+
+                yearNav.addEventListener("change", (event) => {
+                    calendar.displayYear = parseInt(event.target.value);
+                    calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
+                });
+                yearDisplay.appendChild(yearNavLabel);
+                yearDisplay.appendChild(yearNav);
+            };
+        },
+        setSelectedDate() {
+            /**
+             * Sets the currently selected month in the select element.
+             */
+            // Set the month selector.
+            const option = document.getElementById(`cal-nav-month-${calendar.displayMonth}`);
+            if (option) {
+                option.selected = "true";
+            };
+
+            // Set the year input.
+            const yearNav = document.getElementById("cal-nav-year");
+            if (yearNav) {
+                yearNav.value = calendar.displayYear;
+            };
+        },
+        controls(target) {
+            /**
+             * Renders the controls for a day.
+             */
+            if (calendar.lastClickedCell) {
+                const previous = document.getElementById("day-control");
+                if (previous) {
+                    previous.remove();
+                };
+            };
+            calendar.lastClickedCell = target;
+
+            const wrapper = document.createElement("div");
+            wrapper.id = "day-control";
+
+            const addButton = document.createElement("button");
+            wrapper.appendChild(addButton);
+            const addIcon = utils.icon("plus-lg");
+            addButton.appendChild(addIcon);
+
+            wrapper.addEventListener("click", (event) => {
+                events.render.form(target.dataset.date);
+                // BUG: Does not set date on faded days at the end of the month.
             });
 
-            // Toggle dropdown menu for the year.
-            yearDisplay.addEventListener("click", () => {
-                yearDropdown.classList.toggle("dropdown-closed");
-                utils.log("Calendar", "Toggled year dropdown menu.");
-            });*/
+            target.appendChild(wrapper);
         }
     },
     controls: {
@@ -226,11 +293,6 @@ export const calendar = {
                 calendar.displayYear--;
             };
             calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
-        },
-        open() {
-            /**
-             * Open a day or event.
-             */
         }
     }
 };

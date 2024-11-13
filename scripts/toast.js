@@ -98,7 +98,7 @@ export const toast = {
         };
 
         // Add toast to list.
-        document.querySelector("#log-list").prepend(wrapper);
+        document.querySelector("#toast-list").prepend(wrapper);
 
         // Add event listener to delete button.
         document.getElementById(`delete-toast-${data.id}`).addEventListener("click", () => this.delete(data.id));

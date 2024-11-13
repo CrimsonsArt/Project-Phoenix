@@ -23,6 +23,7 @@ export const user = {
      * @returns {object} user - The user's data.
      * 
      * TODO: Add settings for the user.
+     * TODO: Add github-like activity display.
      */
     name: "",
     events: [],

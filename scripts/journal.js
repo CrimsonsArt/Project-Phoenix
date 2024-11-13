@@ -9,6 +9,9 @@ export const journal = {
      * @object render - Functions for rendering journal elements.
      * 
      * @returns {object} journal - The journal object.
+     * 
+     * TODO: Add a way to edit journal entries.
+     * TODO: Let user customize journal entries through BBCode.
      */
     render: {
         /**

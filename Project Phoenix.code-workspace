@@ -116,10 +116,13 @@
 		"todo-tree.general.showActivityBarBadge": true,
 		"todo-tree.tree.showCountsInTree": true,
 		"cSpell.words": [
+			"Autoethnography",
 			"datetime",
 			"fieldsets",
+			"minigame",
 			"pomodoro",
-			"pomodoros"
+			"pomodoros",
+			"Unlockables"
 		],
 		"todo-tree.tree.scanMode": "workspace only"
 	}

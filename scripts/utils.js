@@ -19,11 +19,12 @@ export const utils = {
          * */
         console.log(`[${origin}]: ${message}`);
     },
-    formatRelativeTime(timestamp) {
+    formatRelativeTime(timestamp, continuous = false) {
         /**
          * Formats a timestamp as a relative time.
          * 
          * @param {object} timestamp - The Date.now() timestamp to format.
+         * @param {boolean} continuous - Whether to continue relative formatting.
          * 
          * @returns {string} - The formatted timestamp.
          */
@@ -45,11 +46,37 @@ export const utils = {
 
         // If less than a week, return days ago.
         const diffInDays = Math.floor(diffInHours / 24);
-        if (diffInDays === 1) return `Yesterday at ${hours}:${minutes}`;
+        if (diffInDays === 1) return "Yesterday";
         if (diffInDays < 7) return `${diffInDays} days ago`;
 
-        // If older than a week, return full date.
-        return `${then.getDate()}-${then.getMonth() + 1}-${then.getFullYear()}, ${hours}:${minutes}`;
+        if (!continuous) {
+            // If older than a week, return full date.
+            return `${then.getDate()}-${then.getMonth() + 1}-${then.getFullYear()}, ${hours}:${minutes}`;
+        } else {
+            // Calculate the number of weeks.
+            const diffInWeeks = Math.floor(diffInDays / 7);
+            if (diffInWeeks === 1) return "A week ago";
+            if (diffInWeeks < 4) return `${diffInWeeks} weeks ago`;
+
+            // Calculate the number of months.
+            const diffInMonths = Math.floor(diffInWeeks / 4);
+            if (diffInMonths === 1) return "A month ago";
+            if (diffInMonths < 12) return `${diffInMonths} months ago`;
+
+            // Calculate the number of years.
+            const diffInYears = Math.floor(diffInMonths / 12);
+            if (diffInYears === 1) return "A year ago";
+            return `${diffInYears} years ago`;
+        };
+    },
+    icon(i) {
+        /**
+         * Generates a formatted icon.
+         */
+        const wrapper = document.createElement("span");
+        wrapper.classList.add("bi", `bi-${i}`);
+        wrapper.setAttribute("aria-hidden", "true");
+        return wrapper;
     },
     button(type, source, id = null, context = null) {
         /**
@@ -85,6 +112,10 @@ export const utils = {
                 label: "cancel",
                 icon: "x-square"
             },
+            close: {
+                label: "close",
+                icon: "x-square"
+            },
             save: {
                 label: "save",
                 icon: "floppy"
@@ -100,6 +131,14 @@ export const utils = {
             previous: {
                 label: "previous",
                 icon: "chevron-left"
+            },
+            down: {
+                label: "open",
+                icon: "chevron-down"
+            },
+            hierarchy: {
+                label: "hierarchy",
+                icon: "diagram-2"
             }
         };
 
@@ -127,7 +166,7 @@ export const utils = {
         const button = document.createElement("button");
         button.type = "button";
         button.id = buttonId;
-        button.classList.add(`btn-${type}`);
+        button.classList.add("button", `button-${type}`);
         button.title = buttonLabel;
         button.ariaLabel = buttonLabel;
 
@@ -198,5 +237,39 @@ export const utils = {
         // Set the wrapper properties, and return it.
         wrapper.classList.add("input-wrapper");
         return wrapper;
+    },
+    modal(title, content) {
+        /**
+         * Creates a modal element.
+         * 
+         * @param {string} title - The title of the modal.
+         * @param {string} content - The content of the modal.
+         * 
+         * @returns {object} - The modal element.
+         */
+        const modal = document.createElement("aside");
+
+        // Set the modal properties.
+        modal.classList.add("modal");
+
+        // Add header.
+        const header = document.createElement("header");
+        const titleElement = document.createElement("h2");
+        const closeButton = utils.button("cancel", "modal");
+        titleElement.textContent = title;
+
+        header.appendChild(titleElement);
+        modal.appendChild(header);
+
+        // Add content.
+        const contentElement = document.createElement("p");
+        contentElement.textContent = content;
+        modal.appendChild(contentElement);
+
+        // Add footer.
+        const footer = document.createElement("footer");
+
+        // Return the modal.
+        return modal;
     }
 };
