@@ -61,7 +61,7 @@
                         </tbody>
                     </table>
                 </section>
-                <!--<section id="journal">
+                <section id="journal">
                     <h3>Journal</h3>
                     <article class="journal-entry">
                         <header class="journal-header">
@@ -98,10 +98,10 @@
                         </fieldset>
                         <button type="submit" id="journal-submit">Save</button>
                     </form>
-                </section>-->
+                </section>
             </section>
 
-            <!--<section id="tasks" class="container">
+            <section id="tasks" class="container">
                 <h2>Tasks</h2>
                 <section id="pomodoro">
                     <h3>Focus timer</h3>
@@ -122,14 +122,23 @@
                 <section id="todo">
                     <h3>Todo list</h3>
                     <form id="task-form">
-                        <label for="todo-task">New task: </label>
-                        <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
-                        <button id="add-task" type="submit" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
+                        <fieldset>
+                            <legend>New task</legend>
+                            <div class="form-field">
+                                <label for="todo-task">New task:</label>
+                                <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="todo-due">Due date:</label>
+                                <input type="date" id="todo-due">
+                            </div>
+                            <button id="add-task" type="submit" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
+                        </fieldset>
                     </form>
                     <ul id="todo-list" class="task-list">
                     </ul>
                 </section>
-            </section>-->
+            </section>
 
             <!--<section id="companion">
                 <h2 class="sr-only">Helper</h2>
@@ -139,10 +148,11 @@
                 <div id="friend"><p>:]</p></div>
             </section>-->
 
-            <!--<section id="user" class="container">
+            <section id="user" class="container">
                 <h2>User</h2>
                 <section id="profile">
                     <h3>Profile</h3>
+                    <!--TODO: Update this.-->
                     <p>Name: <span id="user-name">CrimsonsArt</span></p>
                     <p>Birthday: <span id="user-birthdate">February 10th</span></p>
                     <img src="" alt="User profile image">
@@ -192,7 +202,7 @@
                         </fieldset>
                     </form>
                 </section>
-            </section>-->
+            </section>
         </main>
 
         <footer>

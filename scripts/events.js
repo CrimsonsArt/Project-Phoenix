@@ -45,8 +45,7 @@ export const events = {
             span.textContent = data.title;
 
             // Set the properties of the event time element.
-            // TODO: Check if event time has been set.
-            // TODO: Add event time if so.
+            // TODO: Check if event time has been set, and add event time.
 
             // Add the elements to the wrapper.
             wrapper.appendChild(span);
@@ -66,7 +65,7 @@ export const events = {
             /**
              * Renders the event picker form that lets users create new events.
              * 
-             * CONSIDER: Add helper function for creating labels.
+             * TODO: Turn into a floating modal.
              */
             if (document.getElementById("event-form")) {
                 document.getElementById("event-form").remove();
@@ -79,99 +78,190 @@ export const events = {
             // Create the header, set its properties, and add it to the form.
             const header = document.createElement("h3");
             header.textContent = "Add a new event";
-            // TODO: Add close button.
             form.appendChild(header);
 
             // Add the form to the calendar.
             document.getElementById("calendar").appendChild(form);
 
-            // Date - start date - end date
-            // Time - start time - end time - all day
-            // Info - event title - event description - event location - event type
-            // TODO: Set "all day" as a default option.
-
+            // Time and date
             const dateFieldset = document.createElement("fieldset");
-            const timeFieldset = document.createElement("fieldset");
+            form.appendChild(dateFieldset);
+
+            const dateLegend = document.createElement("legend");
+            dateLegend.textContent = "Date and time";
+            dateFieldset.appendChild(dateLegend);
+
+            /// Date
+            const dateStartWrapper = document.createElement("div");
+            dateStartWrapper.classList.add("form-field");
+            dateFieldset.appendChild(dateStartWrapper);
+
+            const dateStartLabel = document.createElement("label");
+            dateStartLabel.htmlFor = "event-date-start";
+            dateStartLabel.textContent = "Start date:";
+            dateStartWrapper.appendChild(dateStartLabel);
+
+            const dateStartInput = document.createElement("input");
+            dateStartInput.id = "event-date-start";
+            dateStartInput.type = "date";
+            dateStartInput.required = true;
+            dateStartWrapper.appendChild(dateStartInput);
+            if (date) dateStartInput.value = date;
+
+            const dateEndWrapper = document.createElement("div");
+            dateEndWrapper.classList.add("form-field");
+            dateFieldset.appendChild(dateEndWrapper);
+
+            const dateEndLabel = document.createElement("label");
+            dateEndLabel.htmlFor = "event-date-end";
+            dateEndLabel.textContent = "End date:";
+            dateEndWrapper.appendChild(dateEndLabel);
+
+            const dateEndInput = document.createElement("input");
+            dateEndInput.id = "event-date-end";
+            dateEndInput.type = "date";
+            dateEndWrapper.appendChild(dateEndInput);
+
+            const dateRepeatWrapper = document.createElement("div");
+            dateRepeatWrapper.classList.add("form-field");
+            dateFieldset.appendChild(dateRepeatWrapper);
+
+            const dateRepeatLabel = document.createElement("label");
+            dateRepeatLabel.htmlFor = "event-date-repeat";
+            dateRepeatLabel.textContent = "Repeat:";
+            dateRepeatWrapper.appendChild(dateRepeatLabel);
+
+            const dateRepeatInput = document.createElement("input");
+            dateRepeatInput.id = "event-date-repeat";
+            dateRepeatInput.type = "checkbox";
+            dateRepeatWrapper.appendChild(dateRepeatInput);
+            // TODO: If "repeat" is checked, show the repeat options.
+
+            /// Time
+            const allDayWrapper = document.createElement("div");
+            allDayWrapper.classList.add("form-field");
+            dateFieldset.appendChild(allDayWrapper);
+
+            const allDayLabel = document.createElement("label");
+            allDayLabel.htmlFor = "event-all-day";
+            allDayLabel.textContent = "All day:";
+            allDayWrapper.appendChild(allDayLabel);
+
+            const allDayInput = document.createElement("input");
+            allDayInput.id = "event-all-day";
+            allDayInput.type = "checkbox";
+            allDayInput.checked = true;
+            allDayWrapper.appendChild(allDayInput);
+
+            // TODO: Show time only when "all day" is unchecked.
+            const timeStartWrapper = document.createElement("div");
+            timeStartWrapper.classList.add("form-field");
+            dateFieldset.appendChild(timeStartWrapper);
+
+            const timeStartLabel = document.createElement("label");
+            timeStartLabel.htmlFor = "event-time-start";
+            timeStartLabel.textContent = "Start time:";
+            timeStartWrapper.appendChild(timeStartLabel);
+
+            const timeStartInput = document.createElement("input");
+            timeStartInput.id = "event-time-start";
+            timeStartInput.type = "time";
+            timeStartWrapper.appendChild(timeStartInput);
+
+            const timeEndWrapper = document.createElement("div");
+            timeEndWrapper.classList.add("form-field");
+            dateFieldset.appendChild(timeEndWrapper);
+
+            const timeEndLabel = document.createElement("label");
+            timeEndLabel.htmlFor = "event-time-end";
+            timeEndLabel.textContent = "End time:";
+            timeEndWrapper.appendChild(timeEndLabel);
+
+            const timeEndInput = document.createElement("input");
+            timeEndInput.id = "event-time-end";
+            timeEndInput.type = "time";
+            timeEndWrapper.appendChild(timeEndInput);
+
+            // Details
             const infoFieldset = document.createElement("fieldset");
+            form.appendChild(infoFieldset);
+
+            const infoLegend = document.createElement("legend");
+            infoLegend.textContent = "Details";
+            infoFieldset.appendChild(infoLegend);
+
+            const titleWrapper = document.createElement("div");
+            titleWrapper.classList.add("form-field");
+            infoFieldset.appendChild(titleWrapper);
+
+            const titleLabel = document.createElement("label");
+            titleLabel.htmlFor = "event-title";
+            titleLabel.textContent = "Title:";
+            titleWrapper.appendChild(titleLabel);
+
+            const titleInput = document.createElement("input");
+            titleInput.id = "event-title";
+            titleInput.type = "text";
+            titleInput.required = true;
+            titleWrapper.appendChild(titleInput);
+
+            const descriptionWrapper = document.createElement("div");
+            descriptionWrapper.classList.add("form-field");
+            infoFieldset.appendChild(descriptionWrapper);
+
+            const descriptionLabel = document.createElement("label");
+            descriptionLabel.htmlFor = "event-description";
+            descriptionLabel.textContent = "Description:";
+            descriptionWrapper.appendChild(descriptionLabel);
+
+            const descriptionInput = document.createElement("textarea");
+            descriptionInput.id = "event-description";
+            descriptionWrapper.appendChild(descriptionInput);
+
+            const locationWrapper = document.createElement("div");
+            locationWrapper.classList.add("form-field");
+            infoFieldset.appendChild(locationWrapper);
+
+            const locationLabel = document.createElement("label");
+            locationLabel.htmlFor = "event-location";
+            locationLabel.textContent = "Location:";
+            locationWrapper.appendChild(locationLabel);
+
+            const locationInput = document.createElement("input");
+            locationInput.id = "event-location";
+            locationInput.type = "text";
+            locationWrapper.appendChild(locationInput);
+
+            // Controls
             const buttonsFieldset = document.createElement("fieldset");
+            form.appendChild(buttonsFieldset);
 
-            /*// Create fieldsets for each section.
-            const sections = ["details", "time", "info"];
-            sections.forEach((section) => {
-                const fieldset = document.createElement("fieldset");
-                const legend = document.createElement("legend");
+            const cancelLabel = document.createElement("label");
+            cancelLabel.htmlFor = "event-cancel";
+            cancelLabel.textContent = "Cancel:";
+            cancelLabel.classList.add("sr-only");
+            buttonsFieldset.appendChild(cancelLabel);
 
-                // Set the fieldset and legend properties.
-                fieldset.id = `event-${section}`;
-                legend.textContent = section.replace("-", " ").charAt(0).toUpperCase() + section.replace("-", " ").slice(1);
+            const cancelButton = document.createElement("button");
+            cancelButton.id = "event-cancel";
+            cancelButton.type = "button";
+            cancelButton.textContent = "Cancel";
+            buttonsFieldset.appendChild(cancelButton);
+            // TODO: Add event cancel handler.
 
-                // Add the legend and fieldset to the form.
-                fieldset.appendChild(legend);
-                form.appendChild(fieldset);
-            });
+            const submitLabel = document.createElement("label");
+            submitLabel.htmlFor = "event-submit";
+            submitLabel.textContent = "Submit:";
+            submitLabel.classList.add("sr-only");
+            buttonsFieldset.appendChild(submitLabel);
 
-            // Get the new fieldsets.
-            const eventDetailsField = document.getElementById("event-details");
-            const eventTimeField = document.getElementById("event-time");
-            const additionalInfoField = document.getElementById("event-info");*/
-
-            /*----------------------- Details fieldset -----------------------
-            // Create event title input, and add it to the event details field.
-            const eventTitle = utils.makeInput("event-title", "event title", "text", "Event title", true);
-            eventDetailsField.appendChild(eventTitle);
-
-            // Create start date input, and add it to the event details field.
-            const dateStart = utils.makeInput("event-date-start", "start date", "date", null, true);
-            eventDetailsField.appendChild(dateStart);
-            if (date != null) {
-                const dateStartInput = document.getElementById("event-date-start");
-                dateStartInput.value = date;
-            };
-
-            // Create end date input, and add it to the event details field.
-            const dateEnd = utils.makeInput("event-date-end", "end date", "date", null);
-            eventDetailsField.appendChild(dateEnd);*/
-
-            /*------------------------ Time fieldset -------------------------
-            // Create all day checkbox, and add it to the event time field.
-            const allDay = utils.makeInput("event-all-day", "all day", "checkbox", "All day");
-            eventTimeField.appendChild(allDay);
-
-            // TODO: Remove start and end time inputs if all day is checked.
-
-            // Create start time input, and add it to the event time field.
-            const timeStart = utils.makeInput("event-time-start", "start time", "time");
-            eventTimeField.appendChild(timeStart);
-
-            // Create end time input, and add it to the event time field.
-            const timeEnd = utils.makeInput("event-time-end", "end time", "time");
-            eventTimeField.appendChild(timeEnd);*/
-
-            /*------------------- Additional info fieldset -------------------
-            // Create description input, and add it to the additional info field.
-            const description = utils.makeInput("event-description", "description", "textarea", "Description");
-            additionalInfoField.appendChild(description);
-
-            // Create location input, and add it to the additional info field.
-            // CONSIDER: Use geolocation API.
-            const location = utils.makeInput("event-location", "event location", "text", "Event location");
-            additionalInfoField.appendChild(location);
-
-            // TODO: Ask if event should be recurring.
-
-            // TODO: Let user select event category.
-            // TODO: Let user create new categories from the category dropdown.*/
-
-            /*------------------------ Submit button -------------------------
-            // Create the submit button, set properties, and add it to the form.
             const submitButton = document.createElement("button");
+            submitButton.id = "event-submit";
             submitButton.type = "submit";
-            submitButton.textContent = "Add event";
-            form.appendChild(submitButton).addEventListener("click", (event) => {
-                // TODO: Check that all required fields are filled.
-                event.preventDefault();
-                events.add();
-            });*/
+            submitButton.textContent = "Submit";
+            buttonsFieldset.appendChild(submitButton);
+            // TODO: Add event submit handler.
+            submitButton.addEventListener("click", () => {events.add();});
         }
     },
     new() {
@@ -179,8 +269,6 @@ export const events = {
          * Creates a new event object to modify.
          * 
          * @returns {object} event - The new event object.
-         * 
-         * TODO: Add details.
          */
         return {
             id: null, // Unique ID.
@@ -204,6 +292,9 @@ export const events = {
     add() {
         /**
          * Add a new event to the events array in the user object.
+         * 
+         * BUG: Does not work!
+         * TODO: Remove default submit handler.
          */
         const event = events.new();
 
@@ -220,10 +311,10 @@ export const events = {
             document.getElementById("event-time-start"),
             document.getElementById("event-time-end"),
             document.getElementById("event-description"),
-            document.getElementById("event-location"),
-            document.getElementById("event-category"),
-            document.getElementById("event-status"),
-            document.getElementById("event-recurring")
+            document.getElementById("event-location")//,
+            //document.getElementById("event-category"),
+            //document.getElementById("event-status"),
+            //document.getElementById("event-recurring")
         ];
 
         // Clear input fields.

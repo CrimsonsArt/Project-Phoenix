@@ -164,3 +164,44 @@ nav ul {
     overflow: hidden;
     text-wrap: nowrap;
 }
+
+/* Pomodoro styling */
+#pomodoro {
+    align-items: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+}
+#pom-display {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#pom-feedback {
+    align-items: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    min-height: 200px;
+    min-width: 200px;
+    position: absolute;
+}
+#pom-time {
+    font-size: 2em;
+}
+#pom-svg {
+    height: 200px;
+    width: 200px;
+}
+#pom-circle {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-dasharray: 565.48;
+    stroke-dashoffset: 0;
+    stroke-width: 8px;
+    transform: rotate(-90deg);
+    transform-origin: 100px 100px;
+}

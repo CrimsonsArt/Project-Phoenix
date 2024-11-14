@@ -15,9 +15,6 @@ export const calendar = {
      * @object controls - Functions for controlling the calendar.
      * 
      * @returns {object} calendar - The calendar object.
-     * 
-     * CONSIDER: Add secondary display, as a journal-style calendar.
-     * CONSIDER: Move event-related functions to their own file.
      */
     today: new Date(),
     displayMonth: new Date().getMonth(), // 0-11 (Jan-Dec).
@@ -36,8 +33,6 @@ export const calendar = {
         fullCalendar(year, month) {
             /**
              * Renders the full calendar.
-             * 
-             * CONSIDER: Display faded out events for last and next month.
              */
             const calendarTable = document.getElementById("cal-table");
             const calendarBody = document.getElementById("cal-body");
@@ -146,10 +141,15 @@ export const calendar = {
                         // Check if there is an event on this day.
                         const eventsForDate = events.search(dateData);
                         if (eventsForDate) {
-                            // TODO: Add a [more] bit if there is too many to display.
                             // Add the event data to the cell.
                             dayCell.classList.add("event");
-                            eventsForDate.forEach(event => {
+                            eventsForDate.forEach((event, index) => {
+                                if (index < 3) {
+                                    // Add event related data to the cell.
+                                    dayCell.appendChild(events.render.compact(event));
+                                } else {
+                                    // TODO: Add a [more] bit if there is too many to display.
+                                };
                                 // Add event related data to the cell.
                                 dayCell.appendChild(events.render.compact(event));
                             });

@@ -19,11 +19,6 @@ export const tasks = {
      * 
      * @returns {object} - The functions for the to-do list.
      * 
-     * TODO: Allow users to sort tasks.
-     * TODO: Allow users to tag tasks.
-     * TODO: Allow users to estimate the amount of pomodoros required to complete a task.
-     * TODO: Add a way to filter tasks by date, tags and estimated pomodoros.
-     * TODO: Let user pin tasks to the top of the list.
      * TODO: Allow users to set due dates for tasks.
      * TODO: Allow users to create task hierarchies.
      */
@@ -42,17 +37,15 @@ export const tasks = {
                 dependencies: [],
                 dependents: [],
                 completed: false,
-                completedDate: null,
-                archived: false,
-                archivedDate: null
+                completedDate: null
             };
             toast.add("Added task successfully.", "success"); // Success toast.
             user.tasks.push(task); // Add task to user.tasks array.
             user.nextTaskId++; // Increment ID.
             user.save(); // Save changes to user object.
             taskInput.value = ""; // Clear the task input.
+            document.getElementById("todo-list").prepend(tasks.render.task(task.id));
 
-            //tasks.render(task); // TODO: Fix.
         } else { // If task input is empty.
             toast.add("Task title can't be empty.", "error"); // Error toast.
         };
@@ -86,8 +79,6 @@ export const tasks = {
              * Renders a task in the to-do list.
              * 
              * @param {number} id - The ID of the task to render.
-             * 
-             * TODO: Check if task with that id is already there.
              */
             // Get the task data.
             const task = user.tasks.find(task => task.id === id);
@@ -133,6 +124,7 @@ export const tasks = {
             delBtn.id = `task-delete-${task.id}`;
             delBtn.textContent = "Remove";
             controls.appendChild(delBtn);
+            delBtn.addEventListener("click", () => tasks.delete(task.id));
 
             // Create the dropdown wrapper.
             const dropWrapper = document.createElement("div");
@@ -147,6 +139,7 @@ export const tasks = {
             menu.ariaLabel = "Open task menu.";
             menu.appendChild(utils.icon("chevron-down"));
             dropWrapper.appendChild(menu);
+            menu.addEventListener("click", () => tasks.openMenu(task.id));
 
             // Create the options wrapper.
             const options = document.createElement("div");
@@ -160,13 +153,15 @@ export const tasks = {
             edit.id = `task-edit-${task.id}`;
             edit.textContent = "Edit";
             options.appendChild(edit);
+            edit.addEventListener("click", () => tasks.edit(task.id));
 
             // Create the dependency button.
             const dependency = document.createElement("button");
             dependency.classList.add("task-dependency");
             dependency.id = `task-dependency-${task.id}`;
-            dependency.textContent = "Dependency";
+            dependency.textContent = "Add dependency";
             options.appendChild(dependency);
+            // TODO: Add event listener to dependency button.
 
             // Create the due date button.
             const due = document.createElement("button");
@@ -174,6 +169,7 @@ export const tasks = {
             due.id = `task-due-${task.id}`;
             due.textContent = "Due date";
             options.appendChild(due);
+            // TODO: Add event listener to due date button.
 
             // Return the HTML object.
             return wrapper;
@@ -197,6 +193,13 @@ export const tasks = {
         // Log to console, and save changes.
         utils.log("Task", `Deleting task with ID: ${id}`);
         user.save();
+    },
+    openMenu(id) {
+        /**
+         * Open the task menu.
+         */
+        const dropdown = document.getElementById(`task-dropdown-content-${id}`);
+        dropdown.classList.toggle("closed");
     },
     edit(id) {
         /**
@@ -226,8 +229,8 @@ export const tasks = {
 
         // Remove the original elements.
         wrapper.querySelector("p").remove();
-        document.getElementById(`edit-task-${id}`).remove();
-        document.getElementById(`delete-task-${id}`).remove();
+        //document.getElementById(`edit-task-${id}`).remove();
+        //document.getElementById(`delete-task-${id}`).remove();
 
         // Set the label attributes.
         editLabel.htmlFor = `editing-task-${id}`;
@@ -243,8 +246,8 @@ export const tasks = {
         editInput.type = "text";
 
         // Create the save and cancel buttons, and add event listeners.
-        wrapper.appendChild(utils.button("save", "task", id)).addEventListener("click", () => this.save(id));
-        wrapper.appendChild(utils.button("cancel", "task", id)).addEventListener("click", () => this.cancel(id));
+        wrapper.appendChild(utils.button("save", "task", id)).addEventListener("click", () => tasks.save(id));
+        wrapper.appendChild(utils.button("cancel", "task", id)).addEventListener("click", () => tasks.cancelEdit(id));
 
         // Append the label and input elements to the edit form.
         editForm.appendChild(editLabel);
@@ -265,7 +268,7 @@ export const tasks = {
         utils.log("Task", `Editing task with ID: ${id}`); // Log to console.
         editInput.focus(); // Focus on the input element.
     },
-    cancel(id) {
+    cancelEdit(id) {
         /**
          * Cancel an edit in the to-do list.
          * 
@@ -273,8 +276,9 @@ export const tasks = {
          */
         const wrapper = document.getElementById(`task-${id}`); // Grab the task wrapper.
         if (wrapper) { // Check if the task wrapper exists.
-            const original = this.render(user.tasks.find(task => task.id === id), "object"); // Grab the original task as an object.
-            wrapper.replaceWith(original);
+            const list = document.getElementById("todo-list");
+            list.innerHTML = ""; // Clear the list.
+            tasks.render.list();
         };
     },
     save(id) {
@@ -282,8 +286,6 @@ export const tasks = {
          * Update a task in the to-do list.
          * 
          * @param {number} id - The ID of the task to update.
-         * 
-         * CONSIDER: Success toast.
          */
         // Find the task in the user.tasks object.
         const newText = document.getElementById(`editing-task-${id}`);
@@ -301,9 +303,12 @@ export const tasks = {
         // Reload the task.
         const wrapper = document.getElementById(`task-${id}`);
         if (wrapper) {
-            const reloadedWrapper = this.render(user.tasks[taskIndex], "object");
+            /*const reloadedWrapper = this.render(user.tasks[taskIndex], "object");
             wrapper.replaceWith(reloadedWrapper);
-            utils.log("Task", `Updated task with ID: ${id}`);
+            utils.log("Task", `Updated task with ID: ${id}`);*/
+            const list = document.getElementById("todo-list");
+            list.innerHTML = ""; // Clear the list.
+            tasks.render.list();
         };
     },
     complete(id) {
@@ -333,39 +338,6 @@ export const tasks = {
             } else {
                 utils.log("Task", `Marked task incomplete with ID: ${id}`);
             };
-        };
-    },
-    archive(id) {
-        /**
-         * Archive a completed task.
-         * 
-         * Should only be called when a task is completed. It is also intended
-         * that once a task has been archived, it cannot be undone, only deleted
-         * from the archive by the user. This is to prevent the user from going
-         * back and fourth between archiving and un-archiving a task.
-         * 
-         * @param {number} id - The ID of the task to archive.
-         */
-        // Find the task in the user.tasks object.
-        const taskIndex = user.tasks.findIndex(task => task.id === id);
-        if (taskIndex === -1) {
-            utils.log("Task", `Could not find task with ID: ${id}`);
-            return; // Return if the task doesn't exist.
-        };
-
-        // Check if the task is completed.
-        if (user.tasks[taskIndex].completed) {
-            // Mark the task as archived, and save the changes.
-            user.tasks[taskIndex].archived = true;
-            user.save();
-
-            // Render the task in the archive, and remove it from the to-do list.
-            this.render(user.tasks[taskIndex]);
-            document.getElementById(`task-${id}`).remove();
-
-            // Log to console and toast.
-            utils.log("Task", `Archived task with ID: ${id}`);
-            toast.add("Task archived", "success");
         };
     },
     hierarchy: {

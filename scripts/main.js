@@ -52,7 +52,7 @@ window.onload = function() {
 
 
     /*-------------------------------- TASKS ---------------------------------*/
-    /*// Load the tasks from local storage.
+    // Load the tasks from local storage.
     //tasks.load();
     tasks.render.list();
 
@@ -69,12 +69,12 @@ window.onload = function() {
             event.preventDefault(); // Prevent form from submitting.
             tasks.add(); // Add the task.
         };
-    });*/
+    });
 
 
     /*------------------------------- POMODORO -------------------------------*/
     // Add event listeners for the start and stop pomodoro buttons.
-    /*const pomActions = {
+    const pomActions = {
         "pom-start": pomodoro.start,
         "pom-stop": pomodoro.reset
     };
@@ -83,7 +83,7 @@ window.onload = function() {
         if (button) {
             button.addEventListener("click", pomActions[buttonId]);
         }
-    });*/
+    });
 
 
     /*------------------------------- SETTINGS -------------------------------*/

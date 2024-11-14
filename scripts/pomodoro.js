@@ -112,8 +112,6 @@ export const pomodoro = {
     endSession(caller = "system") {
         /**
          * Finishes the pomodoro session.
-         * 
-         * TODO: If less than 5 minutes have passed, don't ask if they completed their task.
          */
         const pomLog = {
             id: user.nextPomId,
@@ -129,14 +127,14 @@ export const pomodoro = {
 
         // If the requester is the user, ask if they completed their task.
         if (caller === "user") {
-            utils.log("Pomodoro", `${caller} is ending the pomodoro session.`);
+            /*utils.log("Pomodoro", `${caller} is ending the pomodoro session.`);
             // TODO: Use HTML for this.
             const isTaskComplete = confirm("Did you complete your task?");
 
             // If task is not complete, mark as incomplete.
             if (!isTaskComplete) {
                 pomLog.complete = false;
-            };
+            };*/
 
             // Log seconds spent.
             if (pomodoro.isBreak) {
@@ -262,7 +260,6 @@ export const pomodoro = {
         if (timerCircle) {
             timerCircle.style.strokeDashoffset = circleOffset;
         };
-        // TODO: Change the color of the circle, depending on the timer state.
     },
     cheat() {
         /**
