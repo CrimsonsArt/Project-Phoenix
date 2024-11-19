@@ -119,11 +119,12 @@
 			"Autoethnography",
 			"datetime",
 			"fieldsets",
+			"gridcell",
 			"minigame",
 			"pomodoro",
 			"pomodoros",
 			"Unlockables"
 		],
-		"todo-tree.tree.scanMode": "workspace only"
+		"todo-tree.tree.scanMode": "open files"
 	}
 }

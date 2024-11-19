@@ -44,28 +44,34 @@ export const events = {
             span.classList.add("compact-event-title");
             span.textContent = data.title;
 
-            // Set the properties of the event time element.
-            // TODO: Check if event time has been set, and add event time.
-
             // Add the elements to the wrapper.
             wrapper.appendChild(span);
             // wrapper.appendChild(time);
+
+            // Add event listener.
+            wrapper.addEventListener("click", () => {
+                events.render.expanded(data);
+            });
 
             // Return the wrapper.
             return wrapper;
         },
         expanded(data) {
             /**
-             * Renders an expanded event display.
+             * Renders an expanded event display in a closed day view.
              * 
              * @param {Object} data - The event data object.
              */
+            // TODO: Add expanded event display.
+            console.log(`Clicked on event ${data.id}`);
         },
-        form(date = null) {
+        form(date = null, parent) {
             /**
              * Renders the event picker form that lets users create new events.
              * 
-             * TODO: Turn into a floating modal.
+             * @param {string} date - The date to render the form for.
+             * @param {object} parent - The parent element to append the form to.
+             * 
              */
             if (document.getElementById("event-form")) {
                 document.getElementById("event-form").remove();
@@ -81,7 +87,7 @@ export const events = {
             form.appendChild(header);
 
             // Add the form to the calendar.
-            document.getElementById("calendar").appendChild(form);
+            parent.appendChild(form);
 
             // Time and date
             const dateFieldset = document.createElement("fieldset");
@@ -104,7 +110,7 @@ export const events = {
             const dateStartInput = document.createElement("input");
             dateStartInput.id = "event-date-start";
             dateStartInput.type = "date";
-            dateStartInput.required = true;
+            //dateStartInput.required = true; // BUGGED
             dateStartWrapper.appendChild(dateStartInput);
             if (date) dateStartInput.value = date;
 
@@ -329,18 +335,77 @@ export const events = {
 
         // Rerender the calendar.
         calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
+        // BUG: New events do not show up!
     },
-    search(lookupDate) {
+    find(lookupDate, cell) {
         /**
-         * Checks if the given day has an event.
+         * Checks if the given day has an event, and adds it to the cell.
          * 
          * @param {string} lookupDate - The date to check.
          * @param {string} lookupDate - YYYY-MM-DD format.
+         * @param {object} cell - The cell to add the event data to.
          * 
          * @returns {object} - The event object if it exists, otherwise null.
          */
-        const eventsForDay = user.events.filter(event => event.date.start === lookupDate);
-        return eventsForDay.length > 0 ? eventsForDay : null;
+        const eventsForDate = user.events.filter(event => event.date.start === lookupDate);
+        if (eventsForDate) {
+            eventsForDate.forEach((event, index) => {
+                if (index < 3) {
+                    // Add event related data to the cell.
+                    cell.classList.add("event");
+                    cell.appendChild(events.render.compact(event));
+                } else {
+                    // TODO: Add a [more] bit if there is too many to display.
+                    console.log("Too many events to display.");
+                };
+            });
+        };
+    },
+    list (date, list) {
+        /**
+         * Renders a list of events for a given day.
+         * 
+         * @param {string} date - The date to check.
+         * @param {object} list - The list to add the listed events to.
+         * 
+         * TODO: Sort events by time.
+         */
+        const eventsForDate = user.events.filter(event => event.date.start === date);
+        if (eventsForDate) {
+            eventsForDate.forEach((event, index) => {
+                // Create list item.
+                const li = document.createElement("li");
+                li.classList.add("full-event");
+
+                // Add event title.
+                const title = document.createElement("h5");
+                title.textContent = event.title;
+                li.appendChild(title);
+
+                // TODO: Check if event is all day.
+                // TODO: Check if event is recurring.
+                // TODO: Add event start and end times, if any.
+
+                // Add event description, if any.
+                if (event.description) {
+                    const description = document.createElement("p");
+                    description.classList.add("full-event-description");
+                    description.textContent = event.description;
+                    li.appendChild(description);
+                };
+
+                // Add event location, if any.
+                if (event.location) {
+                    const location = document.createElement("p");
+                    location.classList.add("full-event-location");
+                    location.textContent = event.location;
+                    li.appendChild(location);
+                };
+
+                // Append to list.
+                list.appendChild(li);
+            });
+        };
     },
     delete(id) {
         /**

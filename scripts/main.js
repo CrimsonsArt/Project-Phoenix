@@ -4,10 +4,10 @@ import { menu } from "./menu.js";
 import { user } from "./user.js";
 import { toast } from "./toast.js";
 import { calendar } from "./calendar.js";
-import { journal } from "./journal.js";
 import { tasks } from "./tasks.js";
 import { pomodoro } from "./pomodoro.js";
 
+// TODO: Add a cheat for setting the current date.
 
 /*---------------------------------- ONLOAD ----------------------------------*/
 window.onload = function() {
@@ -45,16 +45,13 @@ window.onload = function() {
     /*------------------------------- CALENDAR -------------------------------*/
     // Render the calendar, and initialize its events.
     const today = new Date();
-    calendar.render.fullCalendar(today.getFullYear(), today.getMonth());
-
-    // Render the event picker.
-    //events.render.form();
+    calendar.render.table(today.getFullYear(), today.getMonth());
 
 
     /*-------------------------------- TASKS ---------------------------------*/
     // Load the tasks from local storage.
     //tasks.load();
-    tasks.render.list();
+    /*tasks.render.list();
 
     // Add event listener for the add task button.
     const taskButton = document.getElementById("add-task");
@@ -69,7 +66,7 @@ window.onload = function() {
             event.preventDefault(); // Prevent form from submitting.
             tasks.add(); // Add the task.
         };
-    });
+    });*/
 
 
     /*------------------------------- POMODORO -------------------------------*/
@@ -88,7 +85,7 @@ window.onload = function() {
 
     /*------------------------------- SETTINGS -------------------------------*/
     // Add event listeners for the settings buttons.
-    /*const settingsActions = {
+    const settingsActions = {
         "data-import": user.import,
         "data-export": user.export,
         "data-delete": user.format
@@ -98,5 +95,5 @@ window.onload = function() {
         if (button) {
             button.addEventListener("click", settingsActions[buttonId]);
         }
-    });*/
+    });
 };

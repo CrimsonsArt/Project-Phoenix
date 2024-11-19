@@ -75,6 +75,7 @@ export const user = {
         const tempLink = document.createElement("a");
         tempLink.href = url;
         tempLink.download = `Project-Phoenix-.json`; // FIXME: Add a timestamp to the filename.
+        console.log("Exporting user data...");
 
         // Click the link to download the file, and remove it from the DOM.
         tempLink.click();
@@ -82,7 +83,7 @@ export const user = {
 
         // Toast success message.
         // TODO: Make it so that the last toast is included.
-        toast.add("Exported user data successfully.", "success");
+        //toast.add("Exported user data successfully.", "success");
     },
     import: function() {
         /**
@@ -107,14 +108,14 @@ export const user = {
                     user.save();
 
                     // Show a success toast.
-                    toast.add("Imported and saved user data successfully.", "success");
+                    //toast.add("Imported and saved user data successfully.", "success");
 
                     // Re-render the calendar and tasks.
                     calendar.renderCalendar(calendar.thisMonth, calendar.thisYear);
                     tasks.renderTasks();
                 } catch (error) {
                     // Show error toast.
-                    toast.add("Failed to import user data. Please ensure it is a valid JSON file and try again.", "error");
+                    //toast.add("Failed to import user data. Please ensure it is a valid JSON file and try again.", "error");
                 };
             };
             // Read the file as text.
@@ -147,7 +148,7 @@ export const user = {
         window.location.reload();
 
         // Toast success message and log the message.
-        toast.add("Deleted user data successfully.", "success");
+        //toast.add("Deleted user data successfully.", "success");
         utils.log("User - format", "Deleted user data successfully.");
     },
     show: {

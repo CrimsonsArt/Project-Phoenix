@@ -1,298 +1,592 @@
 /*---------------------------------- IMPORT ----------------------------------*/
-import { utils } from "./utils.js";
 import { events } from "./events.js";
-import { user } from "./user.js";
 
-/*---------------------------- CALENDAR FUNCTIONS ----------------------------*/
+/*--------------------------------- PLANNER ----------------------------------*/
 export const calendar = {
     /**
-     * Calendar data and functions.
-     * 
-     * @variable displayMonth - The current month to display.
-     * @variable displayYear - The current year to display.
-     * 
-     * @object render - Functions for rendering the calendar.
-     * @object controls - Functions for controlling the calendar.
-     * 
-     * @returns {object} calendar - The calendar object.
+     * Planner functions.
      */
-    today: new Date(),
-    displayMonth: new Date().getMonth(), // 0-11 (Jan-Dec).
-    displayYear: new Date().getFullYear(),
-    lastClickedCell: null,
+    days: [
+        "Monday", "Tuesday", "Wednesday", "Thursday",
+        "Friday", "Saturday", "Sunday"
+    ],
+    months: [
+        "January", "February", "March", "April", "May", "June", "July",
+        "August", "September", "October", "November", "December"
+    ],
+    info: {
+        day: 1,
+        month: new Date().getMonth(),
+        year: new Date().getFullYear(),
+        startDay: null,
+        totalDays: null
+    },
     render: {
         /**
-         * Render the calendar elements.
-         * 
-         * @function calendar - Render the full calendar.
-         * @function days - Render the days of the month.
-         * @function title - Render the calendar title. 
-         * 
-         * @returns render - The calendar render object.
+         * Functions for rendering the parts of the calendar.
          */
-        fullCalendar(year, month) {
+        header () {
             /**
-             * Renders the full calendar.
+             * Render the calendar header.
              */
-            const calendarTable = document.getElementById("cal-table");
-            const calendarBody = document.getElementById("cal-body");
-            const date = {
-                year: year,
-                month: month
-            };
-
-            // Get the first day of the month.
-            const firstDayOfMonth = (((new Date(year, month)).getDay() - 1) + 7) % 7;
-
-            // Total days in the month.
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            calendarBody.innerHTML = ""; // Clear the table.
-            
-            // Update the table title to display the correct month and year.
-            calendar.render.title(year, month);
-
-            // Render the days.
-            calendar.render.days(daysInMonth, firstDayOfMonth, date);
-
-            // Make the previous and next month buttons.
-            const backButton = utils.button("previous", "month", null, "Go to the");
-            const forwardButton = utils.button("next", "month", null, "Go to the");
-
-            // Add the buttons to the calendar, if not there already.
-            if (!document.getElementById("cal-controller")) {
-                const controlWrapper = document.createElement("div");
-                controlWrapper.id = "cal-controller";
-                controlWrapper.classList.add("controller");
-                controlWrapper.appendChild(backButton).addEventListener("click", calendar.controls.previous);
-                controlWrapper.appendChild(forwardButton).addEventListener("click", calendar.controls.next);
-                document.getElementById("calendar").insertBefore(controlWrapper, calendarTable);
-            };
-
-            // Update the selected month and year in the select and input elements.
-            calendar.render.setSelectedDate();
-
-            // Add event listener to the table.
-            calendarTable.addEventListener("click", (event) => {
-                if (event.target.tagName === "TD") {
-                    calendar.render.controls(event.target);
-                }
-            });
-        },
-        days(daysInMonth, startDay, date) {
-            /**
-             * Renders the days of the month.
-             * 
-             * @param {number} daysInMonth - The total number of days in the month.
-             * @param {number} startDay - The first day of the month.
-             * @param {object} date - The date to display.
-             */
-            const calendarBody = document.getElementById("cal-body");
-            let day = 1;
-            for (let weeks = 0; weeks < 6; weeks++) { // Up to 6 weeks.
-                const weekRow = document.createElement("tr");
-
-                for (let days = 0; days < 7; days++) { // 7 days per week.
-                    const dayCell = document.createElement("td");
-
-                    // Add days for the previous month to fill the first week.
-                    if (weeks === 0 && days < startDay) {
-                        const prevMonth = date.month === 0 ? 11 : date.month - 1;
-                        const prevYear = date.month === 0 ? date.year - 1 : date.year;
-                        const daysInPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
-                        const prevMonthDay = daysInPrevMonth - (startDay - days - 1);
-                        const prevMonthDate = `${prevYear}-${prevMonth + 1}-${prevMonthDay}`;
-
-                        // Add data to the cell.
-                        dayCell.dataset.date = prevMonthDate;
-                        dayCell.classList.add("day", "faded");
-                        dayCell.textContent = prevMonthDay;
-                        weekRow.appendChild(dayCell);
-
-                    // Add days for the next month to fill the last week.
-                    } else if (day > daysInMonth) {
-                        const nextMonth = date.month === 11 ? 0 : date.month + 1;
-                        const nextYear = date.month === 11 ? date.year + 1 : date.year;
-                        const nextMonthDay = day - daysInMonth;
-                        const nextMonthDate = `${nextYear}-${nextMonth + 1}-${nextMonthDay}`;
-
-                        // Add data to the cell.
-                        dayCell.dataset.date = nextMonthDate;
-                        dayCell.classList.add("day","faded");
-                        dayCell.textContent = nextMonthDay;
-                        weekRow.appendChild(dayCell);
-                        day++;
-
-                    // Add days for the current month.
-                    } else {
-                        // Add the day number, and other data to the cell.
-                        dayCell.classList.add("day");
-                        dayCell.textContent = day;
-
-                        // Store the date in the cell, for later use.
-                        const dateData = `${date.year}-${date.month + 1}-${day}`;
-                        dayCell.dataset.date = dateData;
-
-                        // Check if the current day is today.
-                        if (date.year === calendar.today.getFullYear() && date.month === calendar.today.getMonth() && day === calendar.today.getDate()) {
-                            dayCell.classList.add("today");
-                        };
-
-                        // Check if there is an event on this day.
-                        const eventsForDate = events.search(dateData);
-                        if (eventsForDate) {
-                            // Add the event data to the cell.
-                            dayCell.classList.add("event");
-                            eventsForDate.forEach((event, index) => {
-                                if (index < 3) {
-                                    // Add event related data to the cell.
-                                    dayCell.appendChild(events.render.compact(event));
-                                } else {
-                                    // TODO: Add a [more] bit if there is too many to display.
-                                };
-                                // Add event related data to the cell.
-                                dayCell.appendChild(events.render.compact(event));
-                            });
-                        };
-
-                        // Add the cell to the week row and increment the day.
-                        weekRow.appendChild(dayCell);
-                        day++;
-                    };
-                };
-                // Add the week row to the calendar body.
-                calendarBody.appendChild(weekRow);
-            };
-        },
-        title(year, month) {
-            /**
-             * Renders the calendar title.
-             * 
-             * @param {number} year - The current year.
-             * @param {number} month - The current month.
-             */
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const monthDisplay = document.getElementById("cal-title-month");
-            const yearDisplay = document.getElementById("cal-title-year");
-
-            // Create month selector.
-            if (!document.getElementById("cal-nav-month")) {
-                const monthNav = document.createElement("select");
-                const monthNavLabel = document.createElement("label");
-
-                monthNavLabel.htmlFor = "cal-nav-month";
-                monthNavLabel.textContent = "Month:";
-                monthNavLabel.classList.add("sr-only");
-
-                monthNav.classList.add("cal-nav");
-                monthNav.id = "cal-nav-month";
-                months.forEach((month, index) => {
-                    const option = document.createElement("option");
-                    option.id = `cal-nav-month-${index}`;
-                    option.value = index;
-                    option.textContent = month;
-                    monthNav.appendChild(option);
-                });
-                monthNav.addEventListener("change", (event) => {
-                    calendar.displayMonth = parseInt(event.target.value);
-                    calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
-                })
-                monthDisplay.appendChild(monthNav);
-            };
-
-            // Let user change year by writing.
-            if (!document.getElementById("cal-nav-year")) {
-                const yearNav = document.createElement("input");
-                const yearNavLabel = document.createElement("label");
-
-                yearNavLabel.htmlFor = "cal-nav-year";
-                yearNavLabel.textContent = "Year:";
-                yearNavLabel.classList.add("sr-only");
-
-                yearNav.type = "number";
-                yearNav.id = "cal-nav-year";
-                yearNav.value = year;
-
-                yearNav.addEventListener("change", (event) => {
-                    calendar.displayYear = parseInt(event.target.value);
-                    calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
-                });
-                yearDisplay.appendChild(yearNavLabel);
-                yearDisplay.appendChild(yearNav);
-            };
-        },
-        setSelectedDate() {
-            /**
-             * Sets the currently selected month in the select element.
-             */
-            // Set the month selector.
-            const option = document.getElementById(`cal-nav-month-${calendar.displayMonth}`);
-            if (option) {
-                option.selected = "true";
-            };
-
-            // Set the year input.
-            const yearNav = document.getElementById("cal-nav-year");
-            if (yearNav) {
-                yearNav.value = calendar.displayYear;
-            };
-        },
-        controls(target) {
-            /**
-             * Renders the controls for a day.
-             */
-            if (calendar.lastClickedCell) {
-                const previous = document.getElementById("day-control");
-                if (previous) {
-                    previous.remove();
-                };
-            };
-            calendar.lastClickedCell = target;
-
+            // Create the wrapper.
+            const table = document.getElementById("calendar-table");
             const wrapper = document.createElement("div");
-            wrapper.id = "day-control";
+            wrapper.id = "calendar-header";
+            wrapper.classList.add("row", "week");
+            wrapper.role = "row";
 
-            const addButton = document.createElement("button");
-            wrapper.appendChild(addButton);
-            const addIcon = utils.icon("plus-lg");
-            addButton.appendChild(addIcon);
+            // Add the table title.
+            const title = document.createElement("h3");
+            title.textContent = `${calendar.months[calendar.info.month]} ${calendar.info.year}`;
+            table.appendChild(title);
+            // TODO: Add month and year navigation.
 
-            wrapper.addEventListener("click", (event) => {
-                events.render.form(target.dataset.date);
-                // BUG: Does not set date on faded days at the end of the month.
+            // Create a navigation wrapper.
+            const navWrapper = document.createElement("div");
+            navWrapper.classList.add("row");
+
+            // Create the "previous month" button.
+            const prev = document.createElement("button");
+            prev.ariaLabel = "Go to the previous month";
+            prev.title = "Go to the previous month";
+            prev.textContent = "Previous";
+            prev.type = "button";
+
+            // TODO: Add a button to go to the current month.
+
+            // Create the "next month" button.
+            const next = document.createElement("button");
+            next.ariaLabel = "Go to the next month";
+            next.title = "Go to the next month";
+            next.textContent = "Next";
+            next.type = "button";
+
+            // Add the buttons to the nav wrapper, and append it to the header.
+            navWrapper.appendChild(prev).addEventListener("click", calendar.control.previous);
+            navWrapper.appendChild(next).addEventListener("click", calendar.control.next);
+            table.appendChild(navWrapper);
+
+            // Render the week day headers.
+            calendar.days.forEach((day) => {
+                const header = document.createElement("div");
+                header.classList.add("cell", "day-header");
+                header.textContent = day;
+                wrapper.appendChild(header);
             });
 
-            target.appendChild(wrapper);
+            // Append the wrapper to the calendar container.
+            table.appendChild(wrapper);
+        },
+        table (year, month) {
+            /**
+             * Renders the calendar frame.
+             * 
+             * @param {number} year - The current year to render.
+             * @param {number} month - The current month to render (0-11).
+             */
+            // If no parameters are passed, use the current set month and year.
+            if (!year) year = calendar.info.year;
+            if (!month) month = calendar.info.month;
+
+            // Add the month and year to the render info.
+            calendar.info.month = month;
+            calendar.info.year = year;
+
+            // Reset the day counter.
+            calendar.info.day = 1;
+
+            // Calculate the first day of the month, and the month length.
+            calendar.info.startDay = (((new Date(year, month)).getDay() - 1) + 7) % 7;
+            calendar.info.totalDays = new Date(year, month + 1, 0).getDate();
+
+            // Create the table.
+            const table = document.createElement("section");
+
+            // Check if there is a pre-existing table.
+            if (document.getElementById("calendar-table")) {
+                document.getElementById("calendar-table").remove();
+            };
+
+            // Set the table attributes.
+            table.ariaLabel = "Calendar";
+            table.id = "calendar-table";
+            table.role = "grid";
+
+            // Append the table to the calendar container.
+            const wrapper = document.getElementById("calendar-container");
+            wrapper.appendChild(table);
+
+            // Render the week day headers.
+            calendar.render.header();
+
+            // Call for 6 weeks to be rendered.
+            for (let week = 1; week < 7; week++) {
+                calendar.render.row(week);
+            };
+
+            // Add event listener.
+            table.addEventListener("click", (event) => {
+                if (event.target.classList.contains("cell")) {
+                    // Spawn cell controls.
+                    calendar.control.select(event.target);
+                };
+            });
+        },
+        row (number) {
+            /**
+             * Renders a row in the calendar.
+             * 
+             * @param {number} number - The row number (1-6).
+             */
+            // Create the row.
+            const week = document.createElement("div");
+            week.dataset.week = number;
+            week.id = `week-${number}`;
+            week.classList.add("row", "week");
+            week.role = "row";
+
+            // Append the row to the table.
+            const table = document.getElementById("calendar-table");
+            table.appendChild(week);
+
+            // Call for 7 days to be rendered.
+            for (let cell = 0; cell < 7; cell++) {
+                calendar.render.cell.simplified(cell, week);
+            };
+        },
+        cell: {
+            /**
+             * Renders a specific cell in the calendar.
+             */
+            simplified (number, row) {
+                /**
+                 * Renders a simplified cell in the calendar. Each cell holds a
+                 * number that acts as coordinates.
+                 * 
+                 * @param {number} number - The cell number (1-42).
+                 * @param {object} row - The row to append the cell to.
+                 * 
+                 * TODO: Add icon for days with deadlines, events, journal entries, and for days where the user has checked in.
+                 * TODO: Check for deadlines.
+                 */
+                // Create the cell.
+                const cell = document.createElement("div");
+                cell.id = `cell-${row.dataset.week}-${number+1}`;
+                cell.classList.add("cell");
+                cell.role = "gridcell";
+                cell.tabIndex = 0;
+
+                // Set the number for the day to display.
+                const currentDay = calendar.info.day - calendar.info.startDay;
+
+                // Last month.
+                if (parseInt(row.dataset.week) === 1 && number < calendar.info.startDay) {
+                    // Calculate the number of days in the previous month.
+                    const prevMonth = calendar.info.month === 0 ? 11 : calendar.info.month - 1;
+                    const prevYear = calendar.info.month === 0 ? calendar.info.year - 1 : calendar.info.year;
+                    const prevTotalDays = new Date(prevYear, prevMonth + 1, 0).getDate();
+                    const prevDay = (prevTotalDays + 1) - (calendar.info.startDay - number);
+
+                    // Add data to the cell.
+                    cell.classList.add("faded");
+
+                    // Set the day number.
+                    const dateNumber = document.createElement("time");
+                    dateNumber.textContent = prevDay;
+                    dateNumber.dateTime = `${prevYear}-${prevMonth + 1}-${prevDay}`;
+                    cell.dataset.date = `${prevYear}-${prevMonth + 1}-${prevDay}`;
+                    cell.appendChild(dateNumber);
+
+                    // Check if there is any events on this day.
+                    events.find(cell.dataset.date, cell);
+                }
+
+                // Next month.
+                else if (currentDay > calendar.info.totalDays) {
+                    // Add data to the cell.
+                    cell.classList.add("faded");
+
+                    // Set the day number.
+                    const dateNumber = document.createElement("time");
+                    dateNumber.textContent = currentDay - calendar.info.totalDays;
+                    if (calendar.info.month === 11) {
+                        dateNumber.dateTime = `${calendar.info.year + 1}-01-${currentDay - calendar.info.totalDays}`;
+                        cell.dataset.date = `${calendar.info.year + 1}-01-${currentDay - calendar.info.totalDays}`;
+                    } else {
+                        dateNumber.dateTime = `${calendar.info.year}-${calendar.info.month + 2}-${currentDay - calendar.info.totalDays}`;
+                        cell.dataset.date = `${calendar.info.year}-${calendar.info.month + 2}-${currentDay - calendar.info.totalDays}`;
+                    };
+                    cell.appendChild(dateNumber);
+
+                    // Check if there is any events on this day.
+                    events.find(cell.dataset.date, cell);
+                }
+
+                // This month.
+                else {
+                    // Add days for this month.
+                    cell.dataset.date = `${calendar.info.year}-${calendar.info.month + 1}-${currentDay}`;
+
+                    // Set the day number.
+                    const dateNumber = document.createElement("time");
+                    dateNumber.textContent = currentDay;
+                    dateNumber.dateTime = `${calendar.info.year}-${calendar.info.month + 1}-${currentDay}`;
+                    cell.appendChild(dateNumber);
+
+                    cell.classList.add("day");
+
+                    // Check if the day is today.
+                    if (calendar.info.year === new Date().getFullYear() && calendar.info.month === new Date().getMonth() && currentDay === new Date().getDate()) {
+                        cell.classList.add("today");
+                    };
+
+                    // Check if there is any events on this day.
+                    events.find(cell.dataset.date, cell);
+                };
+
+                // Append the cell to the row, and increment the day counter.
+                row.appendChild(cell);
+                calendar.info.day++;
+            },
+            expanded (cell) {
+                /**
+                 * Renders an expanded cell in the calendar.
+                 * 
+                 * @param {object} cell - The cell to render.
+                 * 
+                 * TODO: Display events and journal entries, if any.
+                 */
+                // Create the wrapper, and append it to the cell.
+                const wrapper = document.createElement("div");
+                wrapper.id = "day-view";
+                cell.appendChild(wrapper);
+
+                // Create the close button.
+                const close = document.createElement("button");
+                close.textContent = "Close";
+                close.ariaLabel = "Close the day view.";
+                close.title = "Close the day view.";
+                close.type = "button";
+                close.id = "close-day-view";
+                wrapper.appendChild(close).addEventListener("click", () => calendar.control.close(cell));
+
+                // Get the date for the cell.
+                const datetime = cell.querySelector("time");
+                const day = parseInt(cell.dataset.date.split("-")[2], 10);
+                const month = parseInt(cell.dataset.date.split("-")[1], 10);
+
+                // Set suffix for the day number.
+                let suffix = "";
+                if (day % 100 >= 11 && day % 100 <= 13) {
+                    suffix = "th";
+                } else if (day % 10 === 1) {
+                    suffix = "st";
+                } else if (day % 10 === 2) {
+                    suffix = "nd";
+                } else if (day % 10 === 3) {
+                    suffix = "rd";
+                } else {
+                    suffix = "th";
+                };
+
+                // Set the content of the time element.
+                datetime.textContent = calendar.months[month-1] + " " + day + suffix;
+
+                // Create the title.
+                const title = document.createElement("h3");
+                title.appendChild(datetime);
+                wrapper.appendChild(title);
+
+                // Render the planner.
+                calendar.render.planner(cell);
+
+                // Render the journal.
+                calendar.render.journal();
+
+                console.log(`Showing expanded view of day ${cell.dataset.date}`);
+            }
+        },
+        planner (cell) {
+            /**
+             * Renders a daily planner.
+             */
+            // TODO: Render the planner.
+            // Create the wrapper, and append it to the day view.
+            const wrapper = document.createElement("div");
+            wrapper.id = "planner";
+            document.getElementById("day-view").appendChild(wrapper);
+
+            // Create the title.
+            const title = document.createElement("h4");
+            title.textContent = "Planner";
+            wrapper.appendChild(title);
+
+            // Create the list of events.
+            const list = document.createElement("ul");
+            list.id = "planner-list";
+            wrapper.appendChild(list);
+
+            // Find events for today, and add them to the planner.
+            events.list(cell.dataset.date, list);
+
+            // Create the control wrapper.
+            const controls = document.createElement("div");
+            controls.id = "planner-controls";
+            wrapper.appendChild(controls);
+
+            // Create the add event button.
+            const addButton = document.createElement("button");
+            addButton.type = "button";
+            addButton.ariaLabel = "Add an event to this day.";
+            addButton.title = "Add an event to this day.";
+            addButton.textContent = "Add event";
+            controls.appendChild(addButton).addEventListener("click", () => events.render.form(cell.dataset.date, wrapper));
+            //events.render.form(cell.dataset.date, wrapper);
+
+            console.log("Rendering the planner.");
+        },
+        journal () {
+            /**
+             * Renders a daily journal.
+             * 
+             * TODO: Check for existing journal entries.
+             * TODO: Render entries as articles.
+             * TODO: Click on an entry to edit it.
+             */
+            // Create the wrapper, and append it to the day view.
+            const wrapper = document.createElement("div");
+            wrapper.id = "journal";
+            document.getElementById("day-view").appendChild(wrapper);
+
+            // Create the title.
+            const title = document.createElement("h4");
+            title.textContent = "Journal";
+            wrapper.appendChild(title);
+
+            // Create the form.
+            const form = document.createElement("form");
+            form.id = "journal-form";
+            wrapper.appendChild(form);
+
+            // Create the journal textarea label.
+            const textareaLabel = document.createElement("label");
+            textareaLabel.setAttribute("for", "journal-text");
+            textareaLabel.textContent = "Journal entry:";
+            //textareaLabel.classList.add("sr-only");
+            form.appendChild(textareaLabel);
+
+            // Create the journal textarea.
+            const textarea = document.createElement("textarea");
+            textarea.id = "journal-text";
+            textarea.placeholder = "Today I...";
+            textarea.rows = "5";
+            textarea.autocomplete = "off";
+            textarea.spellcheck = "true";
+            textarea.required = "true";
+            form.appendChild(textarea);
+
+            // Create the mood select label.
+            const selectLabel = document.createElement("label");
+            selectLabel.setAttribute("for", "journal-mood");
+            selectLabel.textContent = "Current mood:";
+            //selectLabel.classList.add("sr-only");
+            form.appendChild(selectLabel);
+
+            // Create the mood select.
+            const select = document.createElement("select");
+            select.id = "journal-mood";
+            //select.required = "true";
+            const options = ["--- Select ---", "good", "neutral", "bad"];
+            options.forEach(option => {
+                const opt = document.createElement("option");
+                opt.value = option;
+                opt.textContent = option;
+                select.appendChild(opt);
+                if (option === "--- Select ---") {
+                    opt.value = "";
+                    opt.selected = "true";
+                };
+            });
+            form.appendChild(select);
+
+            // Create the save button.
+            const save = document.createElement("button");
+            save.ariaLabel = "Save the journal entry.";
+            save.title = "Save the journal entry.";
+            save.textContent = "Save";
+            save.id = "journal-save";
+            save.type = "submit";
+            form.appendChild(save);
+
+            // TODO: Stop default form submit handler.
+
+            console.log("Rendering the journal.");
         }
     },
-    controls: {
+    control: {
         /**
-         * Controls for the calendar.
-         * 
-         * @function next - Jump to the next month.
-         * @function previous - Jump to the previous month.
+         * Functions for controlling the calendar.
          */
-        next() {
+        selected: null,
+        next () {
             /**
-             * Jump to the next month.
+             * Go forward to the next month.
              */
-            calendar.displayMonth++;
-            if (calendar.displayMonth > 11) { // Move to next year.
-                calendar.displayMonth = 0;
-                calendar.displayYear++;
+            calendar.info.month++;
+            if (calendar.info.month > 11) { // Move to next year.
+                calendar.info.month = 0;
+                calendar.info.year++;
             };
-            calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
+            calendar.render.table();
         },
-        previous() {
+        previous () {
             /**
-             * Jump to the previous month.
+             * Go back to the previous month.
              */
-            calendar.displayMonth--;
-            if (calendar.displayMonth < 0) { // Move to previous year.
-                calendar.displayMonth = 11;
-                calendar.displayYear--;
+            calendar.info.month--;
+            if (calendar.info.month < 0) { // Move to previous year.
+                calendar.info.month = 11;
+                calendar.info.year--;
             };
-            calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
+            calendar.render.table();
+        },
+        select (cell) {
+            /**
+             * Selects a day in the calendar and spawns control buttons for it.
+             * 
+             * @param {object} cell - The cell to select.
+             */
+            // Remove previous controls, if any.
+            if (document.getElementById("day-controls")) {
+                document.getElementById("day-controls").remove();
+            };
+
+            // Don't spawn if cell is expanded.
+            if(cell.classList.contains("expanded-day")) return;
+
+            // Create the wrapper.
+            const wrapper = document.createElement("div");
+            wrapper.id = "day-controls";
+            cell.appendChild(wrapper);
+
+            // Create the open day button.
+            const openButton = document.createElement("button");
+            openButton.ariaLabel = "Open the detailed view for this day.";
+            openButton.title = "Open the detailed view for this day.";
+            openButton.textContent = "Open";
+            wrapper.appendChild(openButton).addEventListener("click", () => calendar.control.open(cell));
+
+            // Create the add event button.
+            const addButton = document.createElement("button");
+            addButton.ariaLabel = "Add an event to this day.";
+            addButton.title = "Add an event to this day.";
+            addButton.textContent = "Add event";
+            //wrapper.appendChild(addButton).addEventListener("click", () => events.render.form(cell.dataset.date));
+
+            // Add a button to add deadline.
+            const deadlineButton = document.createElement("button");
+            deadlineButton.ariaLabel = "Add a deadline to this day.";
+            deadlineButton.title = "Add a deadline to this day.";
+            deadlineButton.textContent = "Add deadline";
+            //wrapper.appendChild(deadlineButton);
+            // TODO: Add event listener to add task deadline.
+        },
+        open (cell) {
+            /**
+             * Opens a selected day in the calendar.
+             * 
+             * @param {object} cell - The cell to open.
+             * 
+             * CONSIDER: Hide sibling cells, and add a back and forward button.
+             */
+            // Close the previous day view.
+            if (calendar.control.selected) {
+                calendar.control.selected.classList.remove("expanded-day");
+                calendar.control.selected.parentElement.classList.remove("expanded-week");
+                cell.classList.remove("shrunk-day");
+
+                // Remove items from the day view, if any.
+                if (document.getElementById("day-view")) {
+                    document.getElementById("day-view").remove();
+                };
+
+                // BUG: Date number is not re-added when clicking from one day to another without closing it first.
+                // Re-add the day number.
+                const datetime = document.createElement("time");
+                datetime.setAttribute("datetime", cell.dataset.date);
+                datetime.textContent = parseInt(cell.dataset.date.split("-")[2], 10);
+                cell.appendChild(datetime);
+
+                // Re-add compact events, if any.
+                events.find(calendar.control.selected.dataset.date, calendar.control.selected);
+            };
+
+            // TODO: If selected day is a different month, go to that month first.
+            /*// Check if the month is different from the selected day.
+            const month = parseInt(cell.dataset.date.split("-")[1], 10);
+            console.log(month);
+
+            if (month !== calendar.info.month) {
+                if (month == calendar.info.month + 2) {
+                    calendar.control.next();
+                    console.log("Going to next month.");
+                } else if (month == calendar.info.month - 2) {
+                    calendar.control.previous();
+                    console.log("Going to previous month.");
+                }
+            };*/
+
+            // Set the selected day, and expand the cell.
+            calendar.control.selected = cell;
+            cell.classList.add("expanded-day", "expanded");
+
+            // Expand the week.
+            const cellWeek = cell.parentElement;
+            cellWeek.classList.add("expanded-week", "expanded");
+
+            // Shrink the other weeks.
+            const shrunkRows = document.querySelectorAll(".row:not(.expanded-week)");
+            shrunkRows.forEach(row => row.classList.add("shrunk-week", "shrunk"));
+
+            // Shrink the other days.
+            const shrunkCells = document.querySelectorAll(".cell:not(.expanded-day");
+            shrunkCells.forEach(day => day.classList.add("shrunk-day", "shrunk"));
+
+            // Remove the controls.
+            if (document.getElementById("day-controls")) {
+                document.getElementById("day-controls").remove();
+            };
+
+            // Remove compact events, if any.
+            const compactEvents = cell.querySelectorAll(".compact-event");
+            if (compactEvents) {
+                compactEvents.forEach(event => event.remove());
+            };
+
+            // Render the day view.
+            calendar.render.cell.expanded(cell);
+        },
+        close (cell) {
+            /**
+             * Close any opened day in the calendar.
+             */
+            // Remove the day view related classes.
+            const cells = document.querySelectorAll(".expanded-day, .expanded-week, .shrunk-day, .shrunk-week");
+            cells.forEach(cell => cell.classList.remove("expanded-day", "expanded-week", "shrunk-day", "shrunk-week"));
+
+            // Close the day view.
+            document.getElementById("day-view").remove();
+
+            // Re-add the day number.
+            const datetime = document.createElement("time");
+            const date = cell.dataset.date;
+            datetime.dataset.date = date;
+            datetime.textContent = parseInt(date.split("-")[2], 10);
+            cell.appendChild(datetime);
+
+            // Re-add compact events, if any.
+            events.find(cell.dataset.date, cell);
         }
     }
 };
