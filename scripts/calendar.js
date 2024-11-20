@@ -290,8 +290,9 @@ export const calendar = {
                     suffix = "th";
                 };
 
-                // Set the content of the time element.
+                // Set the attributes for the time element.
                 datetime.textContent = calendar.months[month-1] + " " + day + suffix;
+                datetime.id = "day-title";
 
                 // Create the title.
                 const title = document.createElement("h3");
@@ -299,7 +300,7 @@ export const calendar = {
                 wrapper.appendChild(title);
 
                 // Render the planner.
-                calendar.render.planner(cell);
+                events.render.planner(cell);
 
                 // Render the journal.
                 calendar.render.journal();
@@ -307,49 +308,11 @@ export const calendar = {
                 console.log(`Showing expanded view of day ${cell.dataset.date}`);
             }
         },
-        planner (cell) {
-            /**
-             * Renders a daily planner.
-             */
-            // TODO: Render the planner.
-            // Create the wrapper, and append it to the day view.
-            const wrapper = document.createElement("div");
-            wrapper.id = "planner";
-            document.getElementById("day-view").appendChild(wrapper);
-
-            // Create the title.
-            const title = document.createElement("h4");
-            title.textContent = "Planner";
-            wrapper.appendChild(title);
-
-            // Create the list of events.
-            const list = document.createElement("ul");
-            list.id = "planner-list";
-            wrapper.appendChild(list);
-
-            // Find events for today, and add them to the planner.
-            events.list(cell.dataset.date, list);
-
-            // Create the control wrapper.
-            const controls = document.createElement("div");
-            controls.id = "planner-controls";
-            wrapper.appendChild(controls);
-
-            // Create the add event button.
-            const addButton = document.createElement("button");
-            addButton.type = "button";
-            addButton.ariaLabel = "Add an event to this day.";
-            addButton.title = "Add an event to this day.";
-            addButton.textContent = "Add event";
-            controls.appendChild(addButton).addEventListener("click", () => events.render.form(cell.dataset.date, wrapper));
-            //events.render.form(cell.dataset.date, wrapper);
-
-            console.log("Rendering the planner.");
-        },
         journal () {
             /**
              * Renders a daily journal.
              * 
+             * TODO: Move to its own file.
              * TODO: Check for existing journal entries.
              * TODO: Render entries as articles.
              * TODO: Click on an entry to edit it.
@@ -512,11 +475,11 @@ export const calendar = {
                 };
 
                 // BUG: Date number is not re-added when clicking from one day to another without closing it first.
-                // Re-add the day number.
+                /*// Re-add the day number.
                 const datetime = document.createElement("time");
                 datetime.setAttribute("datetime", cell.dataset.date);
                 datetime.textContent = parseInt(cell.dataset.date.split("-")[2], 10);
-                cell.appendChild(datetime);
+                cell.appendChild(datetime);*/
 
                 // Re-add compact events, if any.
                 events.find(calendar.control.selected.dataset.date, calendar.control.selected);

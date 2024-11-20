@@ -22,7 +22,7 @@ export const events = {
          * 
          * @returns {object} events - The events render object.
          */
-        compact(data) {
+        compact (data) {
             /**
              * Render a compact event display in the calendar.
              * 
@@ -56,16 +56,156 @@ export const events = {
             // Return the wrapper.
             return wrapper;
         },
-        expanded(data) {
+        expanded (data) {
             /**
              * Renders an expanded event display in a closed day view.
              * 
              * @param {Object} data - The event data object.
              */
-            // TODO: Add expanded event display.
+            // TODO: Add expanded event display when clicking compact event.
             console.log(`Clicked on event ${data.id}`);
         },
-        form(date = null, parent) {
+        full (data) {
+            /**
+             * Renders a full event.
+             * 
+             * TODO: Add edit and delete buttons.
+             */
+            // Create the wrapper.
+            const wrapper = document.createElement("li");
+            wrapper.classList.add("full-event");
+            wrapper.dataset.id = data.id;
+
+            // Add the title.
+            const title = document.createElement("h6");
+            title.classList.add("full-event-title");
+            title.textContent = data.title;
+            wrapper.appendChild(title);
+
+            // Add the date.
+            const date = document.createElement("time");
+            date.classList.add("full-event-date");
+            date.textContent = data.date.start;
+            date.dateTime = data.date.start;
+            wrapper.appendChild(date);
+
+            // Add the time.
+            const timeWrapper = document.createElement("p");
+            timeWrapper.classList.add("full-event-time");
+            timeWrapper.textContent = "Time:";
+            wrapper.appendChild(timeWrapper);
+
+            if (data.time.allDay) {
+                const time = document.createElement("time");
+                time.classList.add("full-event-time");
+                time.textContent = "All day";
+                time.dateTime = data.date.start;
+                timeWrapper.appendChild(time);
+            } else {
+                if (data.time.start) {
+                    const startTime = document.createElement("time");
+                    startTime.classList.add("full-event-start-time");
+                    startTime.textContent = data.time.start;
+                    startTime.dateTime = data.time.start;
+                    timeWrapper.appendChild(startTime);
+                };
+                if (data.time.end) {
+                    const span = document.createElement("span");
+                    span.textContent = " - ";
+                    timeWrapper.appendChild(span);
+
+                    const endTime = document.createElement("time");
+                    endTime.classList.add("full-event-end-time");
+                    endTime.textContent = data.time.end;
+                    endTime.dateTime = data.time.end;
+                    timeWrapper.appendChild(endTime);
+                };
+            };
+
+            // Add the description.
+            if (data.description) {
+                const description = document.createElement("p");
+                description.classList.add("full-event-description");
+                description.textContent = data.description;
+                wrapper.appendChild(description);
+            };
+
+            // Add the location.
+            if (data.location) {
+                const location = document.createElement("p");
+                location.classList.add("full-event-location");
+                location.textContent = "Location: " + data.location;
+                wrapper.appendChild(location);
+            };
+
+            return wrapper;
+        },
+        plannerControls (cell) {
+            /**
+             * Renders the planner controls.
+             */
+            // Grab the planner wrapper.
+            const wrapper = document.getElementById("planner");
+
+            // Create the control wrapper.
+            const controls = document.createElement("div");
+            controls.id = "planner-controls";
+            wrapper.appendChild(controls);
+
+            // Create the add event button.
+            const addButton = document.createElement("button");
+            addButton.type = "button";
+            addButton.ariaLabel = "Add an event to this day.";
+            addButton.title = "Add an event to this day.";
+            addButton.textContent = "Add event";
+            controls.appendChild(addButton).addEventListener("click", () => events.render.form(cell.dataset.date, wrapper));
+        },
+        planner (cell) {
+            /**
+             * Renders a daily planner in the calendar day-view.
+             */
+            // Create the wrapper, and append it to the day view.
+            const wrapper = document.createElement("div");
+            wrapper.id = "planner";
+            document.getElementById("day-view").appendChild(wrapper);
+
+            // Create the title.
+            const title = document.createElement("h4");
+            title.textContent = "Planner";
+            wrapper.appendChild(title);
+
+            // Create the event list wrapper.
+            const listWrapper = document.createElement("div");
+            listWrapper.id = "planner-list-wrapper";
+            wrapper.appendChild(listWrapper);
+
+            // Create the event list title.
+            const listTitle = document.createElement("h5");
+            listTitle.textContent = "Events for this day:";
+            listWrapper.appendChild(listTitle);
+
+            // Create the list of events.
+            const list = document.createElement("ul");
+            list.id = "planner-list";
+            listWrapper.appendChild(list);
+
+            // Find events for today, and add them to the planner.
+            // TODO: Sort events by time, earliest first.
+            const eventsForDate = user.events.filter(event => event.date.start === cell.dataset.date);
+            if (eventsForDate) {
+                eventsForDate.forEach((event, index) => {
+                    let eventItem = events.render.full(event);
+                    list.appendChild(eventItem);
+                });
+            };
+
+            // Render the planner control panel.
+            // CONSIDER: Append this before the list.
+            events.render.plannerControls(cell);
+
+            console.log("Rendering the planner.");
+        },
+        form (date = null, parent) {
             /**
              * Renders the event picker form that lets users create new events.
              * 
@@ -73,208 +213,300 @@ export const events = {
              * @param {object} parent - The parent element to append the form to.
              * 
              */
+            function input (name, type, required, location = null) {
+                /**
+                 * Helper function for creating inputs with a label and wrapper.
+                 * 
+                 * @param {string} name - The name of the input group.
+                 * @param {string} type - The type of input to make.
+                 * @param {boolean} required - Whether the input is required.
+                 * @param {object} location - The location to append to.
+                 */
+                // Prepare the label text.
+                const rawText = name.split("-");
+                const text = rawText.map((word, index) => index === 0
+                ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                : word.toLowerCase())
+                .join(" ");
+
+                // Create the wrapper.
+                const wrapper = document.createElement("div");
+                wrapper.id = `event-${name}-wrapper`;
+                wrapper.classList.add("form-field");
+
+                // Create the label.
+                const label = document.createElement("label");
+                label.id = `event-${name}-label`;
+                label.htmlFor = `event-${name}`;
+                label.textContent = text + ":";
+                wrapper.appendChild(label);
+
+                // Create the input.
+                let input = document.createElement("input");
+
+                // If the input is a textarea, create one.
+                if (type === "textarea") {
+                    input = document.createElement("textarea");
+
+                // If the input is a button, create one.
+                } else if (type === "button") {
+                    input = document.createElement("button");
+                    input.textContent = text;
+
+                // Otherwise, create a normal input.
+                } else {
+                    input = document.createElement("input");
+                    input.type = type;
+                };
+
+                // Set the input properties, and append it to the wrapper.
+                input.id = `event-${name}`;
+                input.required = required;
+                wrapper.appendChild(input);
+
+                // Append the wrapper to the location, or return it.
+                if (location != null) {
+                    location.appendChild(wrapper);
+                } else {
+                    return wrapper;
+                };
+            };
+
+            // Get the cell that the form will be appended to.
+            const cell = document.getElementById("day-view").parentElement;
+
+            // If a previous form exists, remove it.
             if (document.getElementById("event-form")) {
                 document.getElementById("event-form").remove();
-            }
+            };
+
+            // Remove the "add event" button.
+            if (document.getElementById("planner-controls")) {
+                document.getElementById("planner-controls").remove();
+            };
 
             // Create the form, and set its properties.
             const form = document.createElement("form");
             form.id = "event-form";
+            parent.appendChild(form);
 
             // Create the header, set its properties, and add it to the form.
-            const header = document.createElement("h3");
+            const header = document.createElement("h5");
             header.textContent = "Add a new event";
             form.appendChild(header);
 
-            // Add the form to the calendar.
-            parent.appendChild(form);
-
-            // Time and date
+            // Add the date fieldset.
             const dateFieldset = document.createElement("fieldset");
             form.appendChild(dateFieldset);
 
+            // Add the legend for the date fieldset.
             const dateLegend = document.createElement("legend");
             dateLegend.textContent = "Date and time";
             dateFieldset.appendChild(dateLegend);
 
-            /// Date
-            const dateStartWrapper = document.createElement("div");
-            dateStartWrapper.classList.add("form-field");
-            dateFieldset.appendChild(dateStartWrapper);
+            // Add the start and end date inputs.
+            input("start-date", "date", true, dateFieldset);
+            if (date) document.getElementById("event-start-date").value = date;
+            input("end-date", "date", false, dateFieldset);
 
-            const dateStartLabel = document.createElement("label");
-            dateStartLabel.htmlFor = "event-date-start";
-            dateStartLabel.textContent = "Start date:";
-            dateStartWrapper.appendChild(dateStartLabel);
+            // Add the all day checkbox.
+            input("all-day", "checkbox", false, dateFieldset);
+            const allDay = document.getElementById("event-all-day");
+            allDay.checked = true;
 
-            const dateStartInput = document.createElement("input");
-            dateStartInput.id = "event-date-start";
-            dateStartInput.type = "date";
-            //dateStartInput.required = true; // BUGGED
-            dateStartWrapper.appendChild(dateStartInput);
-            if (date) dateStartInput.value = date;
+            // Add event listener for toggling the "all day" controls.
+            function toggleAllDay () {
+                /**
+                 * Helper function for toggling the "all day" controls.
+                 */
+                // Get the checkbox.
+                const checkbox = document.getElementById("event-all-day");
 
-            const dateEndWrapper = document.createElement("div");
-            dateEndWrapper.classList.add("form-field");
-            dateFieldset.appendChild(dateEndWrapper);
+                // If the checkbox is not checked, create the inputs.
+                if (!checkbox.checked) {
+                    if (!document.getElementById("event-start-time-wrapper")) {
+                        const startTime = input("start-time", "time", false);
+                        dateFieldset.insertBefore(startTime, document.getElementById("event-repeat-event-wrapper"));
+                    };
+                    if (!document.getElementById("event-end-time-wrapper")) {
+                        const endTime = input("end-time", "time", false);
+                        dateFieldset.insertBefore(endTime, document.getElementById("event-repeat-event-wrapper"));
+                    };
 
-            const dateEndLabel = document.createElement("label");
-            dateEndLabel.htmlFor = "event-date-end";
-            dateEndLabel.textContent = "End date:";
-            dateEndWrapper.appendChild(dateEndLabel);
+                // Otherwise, remove the inputs.
+                } else {
+                    if (document.getElementById("event-start-time-wrapper")) {
+                        document.getElementById("event-start-time-wrapper").remove();
+                    };
+                    if (document.getElementById("event-end-time-wrapper")) {
+                        document.getElementById("event-end-time-wrapper").remove();
+                    };
+                };
+            };
+            allDay.addEventListener("change", toggleAllDay);
 
-            const dateEndInput = document.createElement("input");
-            dateEndInput.id = "event-date-end";
-            dateEndInput.type = "date";
-            dateEndWrapper.appendChild(dateEndInput);
+            // Add the repeat date input.
+            input("repeat-event", "checkbox", false, dateFieldset);
+            const repeatEvent = document.getElementById("event-repeat-event");
+            repeatEvent.checked = false;
 
-            const dateRepeatWrapper = document.createElement("div");
-            dateRepeatWrapper.classList.add("form-field");
-            dateFieldset.appendChild(dateRepeatWrapper);
+            // Show repeat options.
+            function toggleRepeatEvent () {
+                /**
+                 * Helper function for toggling the repeat event options.
+                 */
+                const checkbox = document.getElementById("event-repeat-event");
 
-            const dateRepeatLabel = document.createElement("label");
-            dateRepeatLabel.htmlFor = "event-date-repeat";
-            dateRepeatLabel.textContent = "Repeat:";
-            dateRepeatWrapper.appendChild(dateRepeatLabel);
+                // If the checkbox is checked, render the repeat controls.
+                if (checkbox.checked) {
+                    // Create the wrapper for the repeat options.
+                    const wrapper = document.createElement("div");
+                    wrapper.id = "event-repeat-options";
+                    checkbox.parentElement.appendChild(wrapper);
 
-            const dateRepeatInput = document.createElement("input");
-            dateRepeatInput.id = "event-date-repeat";
-            dateRepeatInput.type = "checkbox";
-            dateRepeatWrapper.appendChild(dateRepeatInput);
-            // TODO: If "repeat" is checked, show the repeat options.
+                    // Create the label for the repeat select.
+                    const label = document.createElement("label");
+                    label.textContent = "Repeat:";
+                    label.htmlFor = "event-repeat-select";
+                    wrapper.appendChild(label);
 
-            /// Time
-            const allDayWrapper = document.createElement("div");
-            allDayWrapper.classList.add("form-field");
-            dateFieldset.appendChild(allDayWrapper);
+                    // Create the select for the repeat options.
+                    const select = document.createElement("select");
+                    select.id = "event-repeat-select";
+                    wrapper.appendChild(select);
 
-            const allDayLabel = document.createElement("label");
-            allDayLabel.htmlFor = "event-all-day";
-            allDayLabel.textContent = "All day:";
-            allDayWrapper.appendChild(allDayLabel);
+                    // Create the options for the select.
+                    const options = ["daily", "weekly", "monthly", "yearly", "custom"];
+                    options.forEach(option => {
+                        const opt = document.createElement("option");
+                        opt.value = option;
+                        opt.textContent = option.charAt(0).toUpperCase() + option.slice(1);
+                        select.appendChild(opt);
+                    });
 
-            const allDayInput = document.createElement("input");
-            allDayInput.id = "event-all-day";
-            allDayInput.type = "checkbox";
-            allDayInput.checked = true;
-            allDayWrapper.appendChild(allDayInput);
+                    // Add event listener for the select.
+                    select.addEventListener("change", () => {
+                        if (select.value === "custom") {
+                            toggleCustomRepeat();
+                        };
+                    });
+                } else {
+                    // Remove the repeat options.
+                    if (document.getElementById("event-repeat-options")) {
+                        document.getElementById("event-repeat-options").remove();
+                    };
+                };
+            };
 
-            // TODO: Show time only when "all day" is unchecked.
-            const timeStartWrapper = document.createElement("div");
-            timeStartWrapper.classList.add("form-field");
-            dateFieldset.appendChild(timeStartWrapper);
+            function toggleCustomRepeat () {
+                /**
+                 * Helper function for selecting custom repeat frequency.
+                 */
+                // Create the wrapper.
+                const wrapper = document.createElement("div");
+                wrapper.id = "custom-repeat-wrapper";
+                document.getElementById("event-repeat-options").appendChild(wrapper);
 
-            const timeStartLabel = document.createElement("label");
-            timeStartLabel.htmlFor = "event-time-start";
-            timeStartLabel.textContent = "Start time:";
-            timeStartWrapper.appendChild(timeStartLabel);
+                // Create the number input wrapper.
+                const numberWrapper = document.createElement("div");
+                numberWrapper.classList.add("form-field");
+                wrapper.appendChild(numberWrapper);
 
-            const timeStartInput = document.createElement("input");
-            timeStartInput.id = "event-time-start";
-            timeStartInput.type = "time";
-            timeStartWrapper.appendChild(timeStartInput);
+                // Create the number input label.
+                const numberLabel = document.createElement("label");
+                numberLabel.textContent = "Repeat every:";
+                numberLabel.htmlFor = "event-repeat-number";
+                numberWrapper.appendChild(numberLabel);
 
-            const timeEndWrapper = document.createElement("div");
-            timeEndWrapper.classList.add("form-field");
-            dateFieldset.appendChild(timeEndWrapper);
+                // Create the number input.
+                const numberInput = document.createElement("input");
+                numberInput.id = "event-repeat-number";
+                numberInput.type = "number";
+                numberInput.min = 1;
+                numberInput.value = 1;
+                numberInput.required = true;
+                numberWrapper.appendChild(numberInput);
 
-            const timeEndLabel = document.createElement("label");
-            timeEndLabel.htmlFor = "event-time-end";
-            timeEndLabel.textContent = "End time:";
-            timeEndWrapper.appendChild(timeEndLabel);
+                // Create the time frequency wrapper.
+                const timeWrapper = document.createElement("div");
+                timeWrapper.classList.add("form-field");
+                wrapper.appendChild(timeWrapper);
 
-            const timeEndInput = document.createElement("input");
-            timeEndInput.id = "event-time-end";
-            timeEndInput.type = "time";
-            timeEndWrapper.appendChild(timeEndInput);
+                // Create the time frequency label.
+                const timeLabel = document.createElement("label");
+                timeLabel.textContent = "Time frequency:";
+                timeLabel.htmlFor = "event-repeat-time";
+                timeLabel.classList.add("sr-only");
+                timeWrapper.appendChild(timeLabel);
 
-            // Details
+                // Create the time frequency selector.
+                const timeSelect = document.createElement("select");
+                timeSelect.id = "event-repeat-time";
+                timeWrapper.appendChild(timeSelect);
+
+                // Create the time frequency options.
+                const timeOptions = ["days", "weeks", "months", "years"];
+                timeOptions.forEach(option => {
+                    const opt = document.createElement("option");
+                    opt.value = option;
+                    opt.textContent = option.charAt(0).toUpperCase() + option.slice(1);
+                    timeSelect.appendChild(opt);
+                });
+            };
+
+            repeatEvent.addEventListener("change", toggleRepeatEvent);
+
+            // Add the info fieldset.
             const infoFieldset = document.createElement("fieldset");
             form.appendChild(infoFieldset);
 
+            // Add the legend for the info fieldset.
             const infoLegend = document.createElement("legend");
             infoLegend.textContent = "Details";
             infoFieldset.appendChild(infoLegend);
 
-            const titleWrapper = document.createElement("div");
-            titleWrapper.classList.add("form-field");
-            infoFieldset.appendChild(titleWrapper);
+            // Add the title, description and location inputs.
+            input("title", "text", true, infoFieldset);
+            input("description", "textarea", false, infoFieldset);
+            input("location", "text", false, infoFieldset);
 
-            const titleLabel = document.createElement("label");
-            titleLabel.htmlFor = "event-title";
-            titleLabel.textContent = "Title:";
-            titleWrapper.appendChild(titleLabel);
-
-            const titleInput = document.createElement("input");
-            titleInput.id = "event-title";
-            titleInput.type = "text";
-            titleInput.required = true;
-            titleWrapper.appendChild(titleInput);
-
-            const descriptionWrapper = document.createElement("div");
-            descriptionWrapper.classList.add("form-field");
-            infoFieldset.appendChild(descriptionWrapper);
-
-            const descriptionLabel = document.createElement("label");
-            descriptionLabel.htmlFor = "event-description";
-            descriptionLabel.textContent = "Description:";
-            descriptionWrapper.appendChild(descriptionLabel);
-
-            const descriptionInput = document.createElement("textarea");
-            descriptionInput.id = "event-description";
-            descriptionWrapper.appendChild(descriptionInput);
-
-            const locationWrapper = document.createElement("div");
-            locationWrapper.classList.add("form-field");
-            infoFieldset.appendChild(locationWrapper);
-
-            const locationLabel = document.createElement("label");
-            locationLabel.htmlFor = "event-location";
-            locationLabel.textContent = "Location:";
-            locationWrapper.appendChild(locationLabel);
-
-            const locationInput = document.createElement("input");
-            locationInput.id = "event-location";
-            locationInput.type = "text";
-            locationWrapper.appendChild(locationInput);
-
-            // Controls
+            // Add the form control panel fieldset.
             const buttonsFieldset = document.createElement("fieldset");
             form.appendChild(buttonsFieldset);
 
-            const cancelLabel = document.createElement("label");
-            cancelLabel.htmlFor = "event-cancel";
-            cancelLabel.textContent = "Cancel:";
-            cancelLabel.classList.add("sr-only");
-            buttonsFieldset.appendChild(cancelLabel);
+            // Add the form control panel legend.
+            const buttonsLegend = document.createElement("legend");
+            buttonsLegend.textContent = "Actions";
+            buttonsFieldset.appendChild(buttonsLegend);
 
-            const cancelButton = document.createElement("button");
-            cancelButton.id = "event-cancel";
-            cancelButton.type = "button";
-            cancelButton.textContent = "Cancel";
-            buttonsFieldset.appendChild(cancelButton);
-            // TODO: Add event cancel handler.
+            // Add the cancel button.
+            input("cancel", "button", false, buttonsFieldset);
+            document.getElementById("event-cancel-label").classList.add("sr-only");
+            document.getElementById("event-cancel").addEventListener("click", () => events.cancel(cell));
 
-            const submitLabel = document.createElement("label");
-            submitLabel.htmlFor = "event-submit";
-            submitLabel.textContent = "Submit:";
-            submitLabel.classList.add("sr-only");
-            buttonsFieldset.appendChild(submitLabel);
+            // Add the submit button.
+            input("submit", "button", false, buttonsFieldset);
+            document.getElementById("event-submit-label").classList.add("sr-only");
 
-            const submitButton = document.createElement("button");
-            submitButton.id = "event-submit";
-            submitButton.type = "submit";
-            submitButton.textContent = "Submit";
-            buttonsFieldset.appendChild(submitButton);
-            // TODO: Add event submit handler.
-            submitButton.addEventListener("click", () => {events.add();});
+            form.addEventListener("submit", (event) => {
+                event.preventDefault();
+                events.add();
+            });
+            form.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    events.add();
+                };
+            });
         }
     },
-    new() {
+    new () {
         /**
          * Creates a new event object to modify.
          * 
          * @returns {object} event - The new event object.
+         * 
+         * CONSIDER: Add a category and status to the event object.
          */
         return {
             id: null, // Unique ID.
@@ -284,60 +516,111 @@ export const events = {
                 end: null, // End date.
             },
             time: { // HH:MM.
+                allDay: null, // Boolean for all day events.
                 start: null, // Start time.
                 end: null // End time.
             },
-            summary: null, // Event summary.
             description: null, // Event description.
             location: null, // Event location.
-            category: null, // Event category.
-            status: null, // Event status.
-            recurring: null // If the event is recurring.
+            recurring: {
+                time: null, // Time frequency. (daily, weekly, monthly, yearly)
+                number: null // Number of times to repeat.
+            } // If the event is recurring.
         };
     },
-    add() {
+    add () {
         /**
          * Add a new event to the events array in the user object.
-         * 
-         * BUG: Does not work!
-         * TODO: Remove default submit handler.
          */
+        const form = document.getElementById("event-form");
         const event = events.new();
 
-        // Add event id.
+        // Add event id, and increment next event id.
         event.id = user.nextEventId;
+        user.nextEventId++;
 
-        // Add event title and date.
-        event.title = document.getElementById("event-title").value;
-        event.date.start = document.getElementById("event-date-start").value;
+        // Add event start date.
+        if (document.getElementById("event-start-date").value) {
+            event.date.start = document.getElementById("event-start-date").value;
+        };
 
-        // Add event data, if given.
-        const additionalData = [
-            document.getElementById("event-date-end"),
-            document.getElementById("event-time-start"),
-            document.getElementById("event-time-end"),
-            document.getElementById("event-description"),
-            document.getElementById("event-location")//,
-            //document.getElementById("event-category"),
-            //document.getElementById("event-status"),
-            //document.getElementById("event-recurring")
-        ];
+        // Add event end date.
+        if (document.getElementById("event-end-date").value) {
+            event.date.end = document.getElementById("event-end-date").value;
+        };
 
-        // Clear input fields.
-        document.getElementById("event-title").value = "";
-        document.getElementById("event-date-start").value = "";
+        // Check if the event is all day.
+        if (document.getElementById("event-all-day")) {
+            // If the event is all day.
+            if (document.getElementById("event-all-day").checked) {
+                event.time.allDay = true;
+                event.time.start = "00:00";
+                event.time.end = "23:59";
 
-        // Save to user and log to console.
+            // If the event is not all day.
+            } else {
+                if (document.getElementById("event-start-time").value) {
+                    event.time.start = document.getElementById("event-start-time").value;
+                };
+                if (document.getElementById("event-end-time").value) {
+                    event.time.end = document.getElementById("event-end-time").value;
+                };
+            };
+        };
+
+        // Add repeat event data.
+        if (document.getElementById("event-repeat-event").checked) {
+            const select = document.getElementById("event-repeat-select");
+            if (select.value === "custom") {
+                if (document.getElementById("event-repeat-number").value) {
+                    event.recurring.number = document.getElementById("event-repeat-number").value;
+                };
+                if (document.getElementById("event-repeat-time").value) {
+                    event.recurring.time = document.getElementById("event-repeat-time").value;
+                };
+            } else {
+                event.recurring.time = select.value;
+                event.recurring.number = 1;
+            };
+        };
+
+        // TODO: Do something with the repeat event data.
+
+        // Add event title.
+        if (document.getElementById("event-title").value) {
+            event.title = document.getElementById("event-title").value;
+        };
+
+        // Add event description.
+        if (document.getElementById("event-description").value) {
+            event.description = document.getElementById("event-description").value;
+        };
+
+        // Add event location.
+        if (document.getElementById("event-location").value) {
+            event.location = document.getElementById("event-location").value;
+        };
+
+        // Save to user.
         user.events.push(event);
         user.nextEventId++;
         user.save();
-        utils.log("Calendar", `Added event: ${event.title}, on ${event.date.start}.`);
 
-        // Rerender the calendar.
-        calendar.render.fullCalendar(calendar.displayYear, calendar.displayMonth);
-        // BUG: New events do not show up!
+        // TODO: Clear the form.
+
+        // TODO: Render the new event.
     },
-    find(lookupDate, cell) {
+    cancel (cell) {
+        /**
+         * Cancels the creation of a new event.
+         */
+        // Remove the event form.
+        document.getElementById("event-form").remove();
+
+        // Render the planner control panel.
+        events.render.plannerControls(cell);
+    },
+    find (lookupDate, cell) {
         /**
          * Checks if the given day has an event, and adds it to the cell.
          * 
@@ -361,67 +644,21 @@ export const events = {
             });
         };
     },
-    list (date, list) {
-        /**
-         * Renders a list of events for a given day.
-         * 
-         * @param {string} date - The date to check.
-         * @param {object} list - The list to add the listed events to.
-         * 
-         * TODO: Sort events by time.
-         */
-        const eventsForDate = user.events.filter(event => event.date.start === date);
-        if (eventsForDate) {
-            eventsForDate.forEach((event, index) => {
-                // Create list item.
-                const li = document.createElement("li");
-                li.classList.add("full-event");
-
-                // Add event title.
-                const title = document.createElement("h5");
-                title.textContent = event.title;
-                li.appendChild(title);
-
-                // TODO: Check if event is all day.
-                // TODO: Check if event is recurring.
-                // TODO: Add event start and end times, if any.
-
-                // Add event description, if any.
-                if (event.description) {
-                    const description = document.createElement("p");
-                    description.classList.add("full-event-description");
-                    description.textContent = event.description;
-                    li.appendChild(description);
-                };
-
-                // Add event location, if any.
-                if (event.location) {
-                    const location = document.createElement("p");
-                    location.classList.add("full-event-location");
-                    location.textContent = event.location;
-                    li.appendChild(location);
-                };
-
-                // Append to list.
-                list.appendChild(li);
-            });
-        };
-    },
-    delete(id) {
+    delete (id) {
         /**
          * Delete an event.
          * 
          * @param {number} id - The ID of the event to delete.
          */
     },
-    edit(id) {
+    edit (id) {
         /**
          * Edit an event.
          * 
          * @param {number} id - The ID of the event to edit.
          */
     },
-    import(url) {
+    import (url) {
         /**
          * Imports an iCalendar file from a given url.
          * 

@@ -46,6 +46,9 @@ window.onload = function() {
     // Render the calendar, and initialize its events.
     const today = new Date();
     calendar.render.table(today.getFullYear(), today.getMonth());
+    // CONSIDER: [ALT + SHIFT] to go to the next day with an event.
+    // CONSIDER: [LEFT ARROW | A] to go to the previous month.
+    // CONSIDER: [RIGHT ARROW | D] to go to the next month.
 
 
     /*-------------------------------- TASKS ---------------------------------*/

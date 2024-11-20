@@ -2,6 +2,7 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"); /* Bootstrap Icons */
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap'); /* Open Sans - Google Fonts: Primary font. */
 
+
 /* VARIABLES */
 :root {
     --primary-color: #0d1b2a;
@@ -14,6 +15,7 @@
 
     --borders: 2px solid var(--primary-color);
 }
+
 
 /* ACCESSIBILITY */
 .sr-only { /* Hide "skip to main content"-link. */
@@ -29,6 +31,7 @@
     width: auto;
     height: auto;
 }
+
 
 /* TEXT */
 h1, h2, h3, h4, h5, h6 {
@@ -47,6 +50,7 @@ p {
 a:visited {
     color: var(--main-font-color); /* TODO: Change color. */
 }
+
 
 /* CORE STYLE */
 html, body {
@@ -83,6 +87,7 @@ footer {
     width: 95%;
 }
 
+
 /* HEADER & NAVIGATION */
 #banner {
     position: sticky;
@@ -100,6 +105,7 @@ nav ul {
     top: 0;
     width: 100%;
 }
+
 
 /* CALENDAR */
 #calendar-container {
@@ -133,6 +139,7 @@ nav ul {
 .faded {
     color: var(--faded-font-color);
 }
+
 /* CALENDAR - HIGHLIGHTS */
 .today {
     border: 2px solid red;
@@ -141,9 +148,10 @@ nav ul {
     border: 2px solid green;
 }
 .today.event {
-    border: 4px solid yellow;
+    border: 2px solid yellow;
 }
-/* CALENDAR - EVENTS*/
+
+/* CALENDAR - EVENTS */
 .compact-event {
     background-color: var(--primary-color);
     border-radius: 5%;
@@ -152,6 +160,14 @@ nav ul {
     overflow: hidden;
     text-wrap: nowrap;
 }
+
+/* CALENDAR - ADD EVENT FORM */
+#custom-repeat-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+}
+
 /* CALENDAR - DAY VIEW */
 .expanded-day {
     flex: 100;
@@ -178,7 +194,7 @@ nav ul {
     height: 100%;
     justify-content: space-around;
 }
-.expanded-day time {
+.expanded-day #day-title {
     font-size: 2em;
     position: absolute;
     top: 0;
