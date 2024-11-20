@@ -482,6 +482,7 @@ export const calendar = {
                 cell.appendChild(datetime);*/
 
                 // Re-add compact events, if any.
+                // BUG: Events are doubled up.
                 events.find(calendar.control.selected.dataset.date, calendar.control.selected);
             };
 

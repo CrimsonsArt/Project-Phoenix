@@ -630,6 +630,7 @@ export const events = {
          * 
          * @returns {object} - The event object if it exists, otherwise null.
          */
+        console.log("Finding events for a day.");
         const eventsForDate = user.events.filter(event => event.date.start === lookupDate);
         if (eventsForDate) {
             eventsForDate.forEach((event, index) => {
