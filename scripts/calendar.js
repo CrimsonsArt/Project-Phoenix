@@ -471,51 +471,70 @@ export const calendar = {
 
                 // Remove items from the day view, if any.
                 if (document.getElementById("day-view")) {
+                    const selectedCell = document.getElementById("day-view").parentElement;
+                    selectedCell.classList.remove("expanded-day", "expanded");
+                    selectedCell.classList.add("shrunk-day", "shrunk");
+
+                    // Remove the shrunk week class from the row container.
+                    const selectedRow = selectedCell.parentElement;
+                    selectedRow.classList.remove("expanded-week");
+                    selectedRow.classList.add("shrunk-week");
+
+                    // Re-add day number.
+                    const datetime = document.createElement("time");
+                    datetime.setAttribute("datetime", selectedCell.dataset.date);
+                    datetime.textContent = parseInt(selectedCell.dataset.date.split("-")[2], 10);
+                    selectedCell.appendChild(datetime);
+
                     document.getElementById("day-view").remove();
                 };
 
-                // BUG: Date number is not re-added when clicking from one day to another without closing it first.
-                /*// Re-add the day number.
-                const datetime = document.createElement("time");
-                datetime.setAttribute("datetime", cell.dataset.date);
-                datetime.textContent = parseInt(cell.dataset.date.split("-")[2], 10);
-                cell.appendChild(datetime);*/
-
                 // Re-add compact events, if any.
-                // BUG: Events are doubled up.
                 events.find(calendar.control.selected.dataset.date, calendar.control.selected);
             };
 
-            // TODO: If selected day is a different month, go to that month first.
-            /*// Check if the month is different from the selected day.
-            const month = parseInt(cell.dataset.date.split("-")[1], 10);
+            let cellToOpen = cell;
+
+            // If the day is in a different month, go to that month first.
+            const month = parseInt(cellToOpen.dataset.date.split("-")[1], 10);
             console.log(month);
 
+            // BUG: Events are not being rendered after moving month.
             if (month !== calendar.info.month) {
+                // Grab the data-date attribute from the cell.
+                const moveToDate = cellToOpen.dataset.date;
                 if (month == calendar.info.month + 2) {
                     calendar.control.next();
                     console.log("Going to next month.");
                 } else if (month == calendar.info.month - 2) {
                     calendar.control.previous();
                     console.log("Going to previous month.");
-                }
-            };*/
+                };
+                // Use the data-date attribute to select the correct date.
+                const newCell = document.querySelector(`.cell[data-date="${moveToDate}"]`);
+                cellToOpen = newCell;
+            };
 
-            // Set the selected day, and expand the cell.
-            calendar.control.selected = cell;
-            cell.classList.add("expanded-day", "expanded");
+            // Set the selected cell.
+            calendar.control.selected = cellToOpen;
+
+            // Expand the cell and its parent.
+            cellToOpen.parentElement.classList.remove("shrunk-week");
+            cellToOpen.parentElement.classList.add("expanded-week");
+            cellToOpen.classList.remove("shrunk-day");
+            cellToOpen.classList.add("expanded-day");
 
             // Expand the week.
-            const cellWeek = cell.parentElement;
-            cellWeek.classList.add("expanded-week", "expanded");
+            const cellWeek = cellToOpen.parentElement;
+            cellWeek.classList.add("expanded-week");
 
             // Shrink the other weeks.
             const shrunkRows = document.querySelectorAll(".row:not(.expanded-week)");
-            shrunkRows.forEach(row => row.classList.add("shrunk-week", "shrunk"));
+            shrunkRows.forEach(row => row.classList.add("shrunk-week"));
 
             // Shrink the other days.
             const shrunkCells = document.querySelectorAll(".cell:not(.expanded-day");
-            shrunkCells.forEach(day => day.classList.add("shrunk-day", "shrunk"));
+            shrunkCells.forEach(day => day.classList.add("shrunk-day"));
 
             // Remove the controls.
             if (document.getElementById("day-controls")) {
@@ -523,13 +542,13 @@ export const calendar = {
             };
 
             // Remove compact events, if any.
-            const compactEvents = cell.querySelectorAll(".compact-event");
+            const compactEvents = cellToOpen.querySelectorAll(".compact-event");
             if (compactEvents) {
                 compactEvents.forEach(event => event.remove());
             };
 
             // Render the day view.
-            calendar.render.cell.expanded(cell);
+            calendar.render.cell.expanded(cellToOpen);
         },
         close (cell) {
             /**

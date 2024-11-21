@@ -88,10 +88,8 @@ export const user = {
     import: function() {
         /**
          * Import user data from a JSON file.
-         * 
-         * BUG: Import is not working.
          */
-        const file = document.getElementById("data-import").files[0];
+        const file = document.getElementById("import-file").files[0];
 
         if (file) {
             const reader = new FileReader();
@@ -110,9 +108,11 @@ export const user = {
                     // Show a success toast.
                     //toast.add("Imported and saved user data successfully.", "success");
 
-                    // Re-render the calendar and tasks.
-                    calendar.renderCalendar(calendar.thisMonth, calendar.thisYear);
-                    tasks.renderTasks();
+                    // Clear the settings form.
+                    document.getElementById("settings-form").reset();
+
+                    // Re-render the page.
+                    location.reload();
                 } catch (error) {
                     // Show error toast.
                     //toast.add("Failed to import user data. Please ensure it is a valid JSON file and try again.", "error");
@@ -145,7 +145,7 @@ export const user = {
         localStorage.removeItem("user");
 
         // Reload the page.
-        window.location.reload();
+        location.reload();
 
         // Toast success message and log the message.
         //toast.add("Deleted user data successfully.", "success");
