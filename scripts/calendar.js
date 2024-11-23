@@ -1,5 +1,6 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 import { events } from "./events.js";
+import { journal } from "./journal.js";
 
 /*--------------------------------- PLANNER ----------------------------------*/
 export const calendar = {
@@ -18,7 +19,7 @@ export const calendar = {
     ],
     info: {
         day: 1,
-        month: new Date().getMonth() + 1,
+        month: new Date().getMonth(),
         year: new Date().getFullYear(),
         startDay: null,
         totalDays: null
@@ -85,7 +86,7 @@ export const calendar = {
              * Renders the calendar frame.
              * 
              * @param {number} year - The current year to render.
-             * @param {number} month - The current month to render (1-12).
+             * @param {number} month - The current month to render (0-11).
              */
             // If no parameters are passed, use the current set month and year.
             if (!year) year = calendar.info.year;
@@ -100,7 +101,7 @@ export const calendar = {
 
             // Calculate the first day of the month, and the month length.
             calendar.info.startDay = (((new Date(year, month)).getDay() - 1) + 7) % 7;
-            calendar.info.totalDays = new Date(year, month, 0).getDate();
+            calendar.info.totalDays = new Date(year, month + 1, 0).getDate();
 
             // Create the table.
             const table = document.createElement("section");
@@ -127,10 +128,10 @@ export const calendar = {
                 calendar.render.row(week);
             };
 
-            // Add event listener.
+            // Add event listener to spawn cell controls.
             table.addEventListener("click", (event) => {
-                if (event.target.classList.contains("cell")) {
-                    // Spawn cell controls.
+                if (event.target.classList.contains("cell")
+                    && !event.target.querySelector("button")) {
                     calendar.control.select(event.target);
                 };
             });
@@ -171,8 +172,8 @@ export const calendar = {
                  * 
                  * TODO: Add icon for days with deadlines, events, journal entries, and for days where the user has checked in.
                  */
-
-                // Create the cell
+                // TODO: Check for recurring events.
+                // TODO: Check for deadlines.
                 const cell = document.createElement("div");
                 cell.id = `cell-${row.dataset.week}-${number+1}`;
                 cell.classList.add("cell");
@@ -182,111 +183,73 @@ export const calendar = {
                 // Create the date number display.
                 const dateNumber = document.createElement("time");
 
-                // TODO: Check for normal events.
-                // TODO: Check for recurring events.
-                // TODO: Check for deadlines.
+                // Calculate the index of the current cell in the grid.
+                const cellIndex = (parseInt(row.dataset.week) - 1) * 7 + number;
 
                 // Render the end of the previous month, if needed.
-                if (parseInt(row.dataset.week) === 1 && number < calendar.info.startDay) {
-                    // TODO: Render the end of the previous month.
+                if (cellIndex < calendar.info.startDay) {
+                    // Calculate the number of days in the previous month.
+                    const prevYear = calendar.info.month === 0 ? calendar.info.year - 1 : calendar.info.year;
+                    const prevMonth = calendar.info.month === 0 ? 11 : calendar.info.month - 1;
+                    const day = new Date(prevYear, prevMonth + 1, 0).getDate() - (calendar.info.startDay - number - 1);
+                    dateNumber.textContent = day;
+                    dateNumber.dateTime = createISODate({
+                        year: prevYear,
+                        month: prevMonth,
+                        day
+                    });
+                    cell.dataset.date = dateNumber.dateTime;
+                    cell.appendChild(dateNumber);
                     cell.classList.add("faded");
-                    dateNumber.textContent = calendar.info.totalDays - (calendar.info.startDay - number);
-                    // BUG: Incorrect date is being set.
 
-                // Render the start of next month, if needed.
-                } else if ((calendar.info.day - calendar.info.startDay) > calendar.info.totalDays) {
-                    // TODO: Render the start of the next month.
-                    cell.classList.add("faded");
+                    // Check if there is any events on this day.
+                    events.lookup(day, prevMonth, prevYear, cell);
+                    //console.log(cell.dataset.date);
 
                 // Render the current month.
-                } else {
-                    // Set the cell date.
-                    let date = createISODate({
+                } else if (cellIndex >= calendar.info.startDay && (cellIndex - calendar.info.startDay) < calendar.info.totalDays) {
+                    const day = cellIndex - calendar.info.startDay + 1;
+                    dateNumber.textContent = day;
+                    dateNumber.dateTime = createISODate({
                         year: calendar.info.year,
                         month: calendar.info.month,
-                        day: calendar.info.day - calendar.info.startDay
+                        day
                     });
-
-                    // Add data to the cell.
-                    cell.dataset.date = date;
+                    cell.dataset.date = dateNumber.dateTime;
+                    cell.appendChild(dateNumber);
                     cell.classList.add("day");
 
-                    // Set the day number.
-                    dateNumber.textContent = calendar.info.day - calendar.info.startDay;
-                    dateNumber.dateTime = date;
-
                     // Check if the day is today.
-                    if (calendar.info.year === new Date().getFullYear()
-                    && calendar.info.month === new Date().getMonth()
-                    && (calendar.info.day - calendar.info.startDay) === new Date().getDate()) {
-                        // Add the today class.
+                    const today = new Date();
+                    if (calendar.info.year === today.getFullYear()
+                    && calendar.info.month === today.getMonth()
+                    && day === today.getDate()) {
                         cell.classList.add("today");
                     };
-                };
 
-                // Append the date number to the cell.
-                cell.appendChild(dateNumber);
+                    // Check if there is any events on this day.
+                    events.lookup(day, calendar.info.month, calendar.info.year, cell);
+
+                // Render the start of next month, if needed.
+                } else {
+                    const day = cellIndex - calendar.info.startDay - calendar.info.totalDays + 1;
+                    dateNumber.textContent = day;
+                    dateNumber.dateTime = createISODate({
+                        year: calendar.info.month === 12 ? calendar.info.year + 1 : calendar.info.year,
+                        month: calendar.info.month === 12 ? 1 : calendar.info.month + 1,
+                        day
+                    });
+                    cell.dataset.date = dateNumber.dateTime;
+                    cell.appendChild(dateNumber);
+                    cell.classList.add("faded");
+
+                    // Check if there is any events on this day.
+                    events.lookup(day, calendar.info.month === 12 ? 1 : calendar.info.month + 1, calendar.info.month === 12 ? calendar.info.year + 1 : calendar.info.year, cell);
+                };
 
                 // Append the cell to the row, and increment the day counter.
                 row.appendChild(cell);
                 calendar.info.day++;
-
-                /*// Last month.
-                if (parseInt(row.dataset.week) === 1 && number < calendar.info.startDay) {
-                    // Calculate the number of days in the previous month.
-                    // TODO: Update to use createISODate function.
-                    const prevMonth = calendar.info.month === 0 ? 11 : calendar.info.month - 1;
-                    const prevYear = calendar.info.month === 0 ? calendar.info.year - 1 : calendar.info.year;
-                    const prevTotalDays = new Date(prevYear, prevMonth + 1, 0).getDate();
-                    const prevDay = (prevTotalDays + 1) - (calendar.info.startDay - number);
-
-                    // Add data to the cell.
-                    cell.classList.add("faded");
-
-                    // Set the day number.
-                    const dateNumber = document.createElement("time");
-                    dateNumber.textContent = prevDay;
-                    dateNumber.dateTime = `${prevYear}-${prevMonth + 1}-${prevDay}`;
-                    cell.dataset.date = `${prevYear}-${prevMonth + 1}-${prevDay}`;
-                    cell.appendChild(dateNumber);
-
-                    // Check if there is any events on this day.
-                    events.find(cell.dataset.date, cell);
-                }
-
-                // Next month.
-                else if (currentDay > calendar.info.totalDays) {
-                    // Add data to the cell.
-                    cell.classList.add("faded");
-
-                    // Set the day number.
-                    const dateNumber = document.createElement("time");
-                    dateNumber.textContent = currentDay - calendar.info.totalDays;
-
-                    // If the month is December, go to January of the next year.
-                    // TODO: Update to use createISODate function.
-                    if (calendar.info.month === 11) {
-                        dateNumber.dateTime = `${calendar.info.year + 1}-01-${currentDay - calendar.info.totalDays}`;
-                        cell.dataset.date = `${calendar.info.year + 1}-01-${currentDay - calendar.info.totalDays}`;
-
-                    // Otherwise, go to the next month.
-                    } else {
-                        dateNumber.dateTime = `${calendar.info.year}-${calendar.info.month + 2}-${currentDay - calendar.info.totalDays}`;
-                        cell.dataset.date = `${calendar.info.year}-${calendar.info.month + 2}-${currentDay - calendar.info.totalDays}`;
-                    };
-                    cell.appendChild(dateNumber);
-
-                    // Check if there is any events on this day.
-                    events.find(cell.dataset.date, cell);
-                }
-
-                // This month.
-                else {
-                    // Check if the day is today.
-
-                    // Check if there is any events on this day.
-                    events.find(cell.dataset.date, cell);
-                };*/
             },
             expanded (cell) {
                 /**
@@ -294,7 +257,7 @@ export const calendar = {
                  * 
                  * @param {object} cell - The cell to render.
                  * 
-                 * TODO: Display events and journal entries, if any.
+                 * TODO: Display journal entries, if any.
                  */
                 // Create the wrapper, and append it to the cell.
                 const wrapper = document.createElement("div");
@@ -330,7 +293,7 @@ export const calendar = {
                 };
 
                 // Set the attributes for the time element.
-                datetime.textContent = calendar.months[month-1] + " " + day + suffix;
+                datetime.textContent = calendar.months[month] + " " + day + suffix;
                 datetime.id = "day-title";
 
                 // Create the title.
@@ -342,89 +305,9 @@ export const calendar = {
                 events.render.planner(cell);
 
                 // Render the journal.
-                calendar.render.journal();
-
-                console.log(`Showing expanded view of day ${cell.dataset.date}`);
+                journal.render();
             }
         },
-        journal () {
-            /**
-             * Renders a daily journal.
-             * 
-             * TODO: Move to its own file.
-             * TODO: Check for existing journal entries.
-             * TODO: Render entries as articles.
-             * TODO: Click on an entry to edit it.
-             */
-            // Create the wrapper, and append it to the day view.
-            const wrapper = document.createElement("div");
-            wrapper.id = "journal";
-            document.getElementById("day-view").appendChild(wrapper);
-
-            // Create the title.
-            const title = document.createElement("h4");
-            title.textContent = "Journal";
-            wrapper.appendChild(title);
-
-            // Create the form.
-            const form = document.createElement("form");
-            form.id = "journal-form";
-            wrapper.appendChild(form);
-
-            // Create the journal textarea label.
-            const textareaLabel = document.createElement("label");
-            textareaLabel.setAttribute("for", "journal-text");
-            textareaLabel.textContent = "Journal entry:";
-            //textareaLabel.classList.add("sr-only");
-            form.appendChild(textareaLabel);
-
-            // Create the journal textarea.
-            const textarea = document.createElement("textarea");
-            textarea.id = "journal-text";
-            textarea.placeholder = "Today I...";
-            textarea.rows = "5";
-            textarea.autocomplete = "off";
-            textarea.spellcheck = "true";
-            textarea.required = "true";
-            form.appendChild(textarea);
-
-            // Create the mood select label.
-            const selectLabel = document.createElement("label");
-            selectLabel.setAttribute("for", "journal-mood");
-            selectLabel.textContent = "Current mood:";
-            //selectLabel.classList.add("sr-only");
-            form.appendChild(selectLabel);
-
-            // Create the mood select.
-            const select = document.createElement("select");
-            select.id = "journal-mood";
-            //select.required = "true";
-            const options = ["--- Select ---", "good", "neutral", "bad"];
-            options.forEach(option => {
-                const opt = document.createElement("option");
-                opt.value = option;
-                opt.textContent = option;
-                select.appendChild(opt);
-                if (option === "--- Select ---") {
-                    opt.value = "";
-                    opt.selected = "true";
-                };
-            });
-            form.appendChild(select);
-
-            // Create the save button.
-            const save = document.createElement("button");
-            save.ariaLabel = "Save the journal entry.";
-            save.title = "Save the journal entry.";
-            save.textContent = "Save";
-            save.id = "journal-save";
-            save.type = "submit";
-            form.appendChild(save);
-
-            // TODO: Stop default form submit handler.
-
-            console.log("Rendering the journal.");
-        }
     },
     control: {
         /**
@@ -434,12 +317,10 @@ export const calendar = {
         next () {
             /**
              * Go forward to the next month.
-             * 
-             * BUG: Events are not being rendered after moving month.
              */
             calendar.info.month++;
-            if (calendar.info.month > 12) { // Move to next year.
-                calendar.info.month = 1;
+            if (calendar.info.month > 11) { // Move to next year.
+                calendar.info.month = 0;
                 calendar.info.year++;
             };
             calendar.render.table();
@@ -447,12 +328,10 @@ export const calendar = {
         previous () {
             /**
              * Go back to the previous month.
-             * 
-             * BUG: Events are not being rendered after moving month.
              */
             calendar.info.month--;
-            if (calendar.info.month < 1) { // Move to previous year.
-                calendar.info.month = 12;
+            if (calendar.info.month < 0) { // Move to previous year.
+                calendar.info.month = 11;
                 calendar.info.year--;
             };
             calendar.render.table();
@@ -533,16 +412,15 @@ export const calendar = {
                 };
 
                 // Re-add compact events, if any.
-                events.find(calendar.control.selected.dataset.date, calendar.control.selected);
+                const [year, month, day] = calendar.control.selected.dataset.date.split("-");
+                events.lookup(day, month, year, calendar.control.selected);
             };
 
             let cellToOpen = cell;
 
             // If the day is in a different month, go to that month first.
             const month = parseInt(cellToOpen.dataset.date.split("-")[1], 10);
-            console.log(month);
 
-            // BUG: Events are not being rendered after moving month.
             if (month !== calendar.info.month) {
                 // Grab the data-date attribute from the cell.
                 const moveToDate = cellToOpen.dataset.date;
@@ -611,8 +489,10 @@ export const calendar = {
             datetime.textContent = parseInt(date.split("-")[2], 10);
             cell.appendChild(datetime);
 
+            const [year, month, day] = date.split("-");
+
             // Re-add compact events, if any.
-            events.find(cell.dataset.date, cell);
+            events.lookup(day, month, year, cell);
         }
     }
 };
@@ -626,7 +506,7 @@ function createISODate (info) {
     const year = info.year;
 
     // Add 1 to month to match the Date object, and pad with 0 if needed.
-    const month = String(info.month + 1).padStart(2, "0");
+    const month = String(info.month).padStart(2, "0");
 
     // Pad the day with 0 if needed.
     const day = String(info.day).padStart(2, "0");

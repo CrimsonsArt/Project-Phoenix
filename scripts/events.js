@@ -71,8 +71,6 @@ export const events = {
              * 
              * @param {Object} data - The event data object.
              * @param {Object} update - The full event to update.
-             * 
-             * TODO: Add edit and delete buttons.
              */
             // Create the wrapper.
             const wrapper = document.createElement("li");
@@ -192,9 +190,6 @@ export const events = {
             addButton.ariaLabel = "Add an event to this day.";
             addButton.title = "Add an event to this day.";
             addButton.textContent = "Add event";
-
-            // BUG: The dataset date is not being set correctly.
-            console.log(`[events.render.plannerControls]: Adding add event button for the date: ${cell.dataset.date}`);
             controls.appendChild(addButton).addEventListener("click", () => events.render.form("new-event", cell.dataset.date, wrapper));
         },
         planner (cell) {
@@ -227,7 +222,7 @@ export const events = {
             listWrapper.appendChild(list);
 
             // Find events for today, and add them to the planner.
-            // TODO: Sort events by time, earliest first.
+            // CONSIDER: Sort events by time, earliest first.
             console.log(`events.render.planner: Finding events for ${cell.dataset.date}`);
             const eventsForDate = user.events.filter(event => event.date.start === cell.dataset.date);
             if (eventsForDate) {
@@ -240,8 +235,6 @@ export const events = {
             // Render the planner control panel.
             // CONSIDER: Append this before the list.
             events.render.plannerControls(cell);
-
-            console.log("Rendering the planner.");
         },
         form (id, date = null, parent = null, action = null) {
             /**
@@ -397,7 +390,7 @@ export const events = {
             location: null, // Event location.
             recurring: {
                 isRecurring: false, // Boolean for recurring events.
-                time: null, // Time frequency. (daily, weekly, monthly, yearly)
+                time: null, // Time frequency. (daily, weekly, monthly, yearly, custom)
                 number: null // Number of times to repeat.
             } // If the event is recurring.
         };
@@ -408,8 +401,6 @@ export const events = {
          * 
          * @param {string} id - The id of the form to get event data from.
          * @param {string} action - The action to take when adding the event.
-         * 
-         * BUG: When adding new events, a compact event renders twice.
          */
         const form = document.getElementById(`${id}-form`);
         const data = events.new();
@@ -517,11 +508,16 @@ export const events = {
             // Render the new event.
             const renderedEvent = events.render.full(data);
             document.getElementById("planner-list").appendChild(renderedEvent);
+            if (document.getElementById(`${id}-all-day`)) {
+                document.getElementById(`${id}-all-day`).checked = true;
+            };
         };
     },
     cancel (form, cell) {
         /**
          * Cancels the creation of a new event.
+         * 
+         * TODO: Fix this.
          */
         // Remove the event form.
         //document.getElementById("event-form").remove();
@@ -529,28 +525,40 @@ export const events = {
         // Render the planner control panel.
         events.render.plannerControls(cell);
     },
-    find (lookupDate, cell) {
+    lookup (day, month, year, cell = null) {
         /**
          * Checks if the given day has an event, and adds it to the cell.
          * 
-         * @param {string} lookupDate - The date to check.
-         * @param {string} lookupDate - YYYY-MM-DD format.
+         * @param {number} day - The day to check for events.
+         * @param {number} month - The month to check for events.
+         * @param {number} year - The year to check for events.
          * @param {object} cell - The cell to add the event data to.
          * 
          * @returns {object} - The event object if it exists, otherwise null.
          */
-        //console.log("[events.find]: Looking for events for a day.");
-        const eventsForDate = user.events.filter(event => event.date.start === lookupDate);
-        if (eventsForDate) {
+        const lookupDay = year + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+
+        // Find events for this date.
+        const eventsForDate = user.events.filter(event => event.date.start === lookupDay);
+
+        if (eventsForDate.length) {
             eventsForDate.forEach((event, index) => {
-                if (index < 3) {
-                    // Add event related data to the cell.
+                if (index < 1) {
+                    // Add event-related data to the cell.
                     cell.classList.add("event");
                     cell.appendChild(events.render.compact(event));
-                    console.log(`[events.find]: Found event ${event.id} for ${lookupDate}`);
-                } else {
-                    // TODO: Add a [more] bit if there is too many to display.
-                    console.log("Too many events to display.");
+                    console.log(`[events.find]: Found event ${event.id} for ${lookupDay}`);
+
+                // Add a more indicator if there are too many events.
+                } else if (!cell.querySelector(`#more-events-${lookupDay}`)) {
+                    const moreIndicator = document.createElement("button");
+                    moreIndicator.textContent = `+${eventsForDate.length - 1} more`;
+                    moreIndicator.onclick = () => calendar.control.open(cell);
+                    moreIndicator.classList.add("compact-event", "more-events");
+                    moreIndicator.id = `more-events-${lookupDay}`;
+                    moreIndicator.ariaLabel = `Open this day and see ${eventsForDate.length - 1} more events for this day.`;
+                    cell.appendChild(moreIndicator);
+                    console.log("[events.find]: Too many events to display more for " + lookupDay);
                 };
             });
         };
@@ -676,7 +684,7 @@ function input (name, type, required = null, location = null, extra = null) {
 
     // If no text is found, log an error.
     } else {
-        console.log("ERROR: No text found for an input label. Please report this issue on GitHub.");
+        console.log("[events input]: ERROR - No text found for an input label. Please report this issue on GitHub.");
         return "Untitled";
     };
 
@@ -721,8 +729,6 @@ function input (name, type, required = null, location = null, extra = null) {
         input = document.createElement("input");
         input.type = type;
     };
-
-    // Set the input ID.
     input.id = name;
 
     // If the input is required, set the required attribute.
@@ -737,12 +743,11 @@ function input (name, type, required = null, location = null, extra = null) {
         };
     };
 
-    // BUG: Does not insert the date into the input after changing months.
+    // Add extra data to the input.
     if (type === "date" && extra) {
         console.log(`[events - input]: Adding date ${extra} to input ${name}`);
         input.value = extra;
     };
-
     wrapper.appendChild(input);
 
     // Append the wrapper to the location, or return it.
@@ -800,7 +805,7 @@ function toggleAllDay (id) {
     
     // If the checkbox is not found, log an error.
     } else {
-        console.log("ERROR: All day checkbox not found! Please report this issue on GitHub.");
+        console.log("[events toggleAllDay]: ERROR - All day checkbox not found! Please report this issue on GitHub.");
     };
 };
 function toggleRepeatEvent (id) {

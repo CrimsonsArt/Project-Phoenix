@@ -19,6 +19,22 @@ export const utils = {
          * */
         console.log(`[${origin}]: ${message}`);
     },
+    createISODate (info) {
+        /**
+         * Create an ISO date string from the calendar info.
+         */
+        // Set the year, month, and day.
+        const year = info.year;
+    
+        // Add 1 to month to match the Date object, and pad with 0 if needed.
+        const month = String(info.month).padStart(2, "0");
+    
+        // Pad the day with 0 if needed.
+        const day = String(info.day).padStart(2, "0");
+    
+        // Return the ISO date string.
+        return `${year}-${month}-${day}`;
+    },
     formatRelativeTime(timestamp, continuous = false) {
         /**
          * Formats a timestamp as a relative time.

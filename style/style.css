@@ -128,7 +128,7 @@ nav ul {
     border: var(--borders);
     flex: 1;
     height: 70px;
-    overflow: hidden; /* TODO: TESTING ONLY! */
+    /*overflow: hidden;  TODO: TESTING ONLY! */
     text-align: center;
 }
 .day-header {
@@ -152,7 +152,7 @@ nav ul {
 }
 
 /* CALENDAR - EVENTS */
-.compact-event {
+.compact-event:not(.more-events) {
     background-color: var(--primary-color);
     border-radius: 5%;
     font-size: 1em;

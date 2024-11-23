@@ -6,6 +6,7 @@ import { toast } from "./toast.js";
 import { calendar } from "./calendar.js";
 import { tasks } from "./tasks.js";
 import { pomodoro } from "./pomodoro.js";
+import { journal } from "./journal.js";
 
 // TODO: Add a cheat for setting the current date.
 
