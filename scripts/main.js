@@ -23,6 +23,7 @@ window.onload = function() {
 
     // Load user data from local storage.
     user.load();
+    user.debug = true; // Enable debug mode.
 
 
     /* --------------------------- USER INTERFACE ----------------------------*/
@@ -54,8 +55,8 @@ window.onload = function() {
 
     /*-------------------------------- TASKS ---------------------------------*/
     // Load the tasks from local storage.
-    //tasks.load();
-    /*tasks.render.list();
+    tasks.load();
+    tasks.render.list();
 
     // Add event listener for the add task button.
     const taskButton = document.getElementById("add-task");
@@ -70,7 +71,7 @@ window.onload = function() {
             event.preventDefault(); // Prevent form from submitting.
             tasks.add(); // Add the task.
         };
-    });*/
+    });
 
 
     /*------------------------------- POMODORO -------------------------------*/

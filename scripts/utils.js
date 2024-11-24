@@ -210,7 +210,7 @@ export const utils = {
             };
         };
     },
-    input (name, type, required, location = null) {
+    input (name, type, required = null, location = null, extra = null) {
         /**
          * Helper function for creating inputs with a label and wrapper.
          * 
@@ -218,50 +218,101 @@ export const utils = {
          * @param {string} type - The type of input to make.
          * @param {boolean} required - Whether the input is required.
          * @param {object} location - The location to append to.
+         * @param {object} extra - Extra data for the input.
          */
         // Create the wrapper.
         const wrapper = document.createElement("div");
-        wrapper.id = `event-${name}-wrapper`;
+        wrapper.id = `${name}-wrapper`;
         wrapper.classList.add("form-field");
-
-        // Prepare the label text.
-        const rawText = name.split("-");
-        const text = rawText.map((word, index) => index === 0
-        ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        : word.toLowerCase())
-        .join(" ");
-
+    
+        // If the input is invalid, log an error.
+        if (!name || typeof name !== "string") {
+            return "[utils input]: ERROR - Input name is not formatted correctly. Please report this issue on GitHub.";
+        };
+    
+        // Replace dashes with spaces, and split the text.
+        const rawText = name.replace(/-/g, " ").split(" ").filter(word => word.trim() !== "");
+    
+        // Remove the first two words from the text.
+        const labelText = rawText.slice(2);
+    
+        // Check if the first word is a number, and remove it for the label.
+        if (labelText.length > 0 && !isNaN(labelText[0])) {
+            labelText.shift();
+        };
+    
+        // Capitalize the first letter of the first word.
+        if (labelText.length > 0) {
+            labelText[0] = labelText[0][0].toUpperCase() + labelText[0].slice(1);
+    
+        // If no text is found, log an error.
+        } else {
+            console.log("[utils input]: ERROR - No text found for an input label. Please report this issue on GitHub.");
+            return "Untitled";
+        };
+    
+        // Join the text back together.
+        const text = labelText.join(" ");
+    
         // Create the label.
         const label = document.createElement("label");
-        label.id = `event-${name}-label`;
-        label.htmlFor = `event-${name}`;
+        label.id = `${name}-label`;
+        label.htmlFor = name;
         label.textContent = text + ":";
         wrapper.appendChild(label);
-
+    
         // Create the input.
         let input = document.createElement("input");
-
+    
         // If the input is a textarea, create one.
         if (type === "textarea") {
             input = document.createElement("textarea");
-
+    
         // If the input is a button, create one.
         } else if (type === "button") {
             input = document.createElement("button");
+            label.classList.add("sr-only");
             input.textContent = text;
             input.type = "button";
-
+    
+            // Check if the button is a submit button.
+            if (name.includes("submit")) {
+                input.type = "submit";
+    
+                // Check if the button is for adding or editing an event.
+                if (name.includes("new-event")) {
+                    input.textContent = "Add event";
+                } else if (name.includes("edit-event")) {
+                    input.textContent = "Update event";
+                };
+            };
+    
         // Otherwise, create a normal input.
         } else {
             input = document.createElement("input");
             input.type = type;
         };
-
-        // Set the input properties, and append it to the wrapper.
-        input.id = `event-${name}`; // TODO: Remove event from id.
-        input.required = required;
+        input.id = name;
+    
+        // If the input is required, set the required attribute.
+        if (required === true) {
+            input.required = true;
+        };
+    
+        // If the input is a checkbox, and the text is "All day", check it.
+        if (type === "checkbox" && text === "All day") {
+            if (location != null) {
+                input.checked = true;
+            };
+        };
+    
+        // Add extra data to the input.
+        if (type === "date" && extra) {
+            console.log(`[utils - input]: Adding date ${extra} to input ${name}`);
+            input.value = extra;
+        };
         wrapper.appendChild(input);
-
+    
         // Append the wrapper to the location, or return it.
         if (location != null) {
             location.appendChild(wrapper);
@@ -269,51 +320,6 @@ export const utils = {
             return wrapper;
         };
     },
-    // TODO: Remove this function, it is deprecated.
-    //makeInput(id, labelText, type, placeholder = null, required = false) {
-        /**
-         * Creates an input element with a label, wrapped in a div.
-         * 
-         * @param {string} id - The ID of the input element.
-         * @param {string} label - The label text.
-         * @param {string} type - The type of the input element.
-         * @param {string} placeholder - The placeholder text.
-         * @param {boolean} required - Whether the input is required.
-         * 
-         * @returns {object} - The input element.
-         */
-        /*// Create the elements.
-        const wrapper = document.createElement("div");
-        const label = document.createElement("label");
-        let input = document.createElement("input");
-    
-        // Set the label properties.
-        label.htmlFor = id;
-        label.textContent = `${labelText.charAt(0).toUpperCase()}${labelText.slice(1)}:`;
-    
-        // Set the input properties.
-        if (type === "textarea") {
-            input = document.createElement("textarea");
-        } else {
-            input.type = type;
-        };
-        input.required = required;
-        input.name = labelText;
-        input.id = id;
-    
-        // Set the placeholder if provided.
-        if (placeholder) {
-            input.placeholder = placeholder;
-        };
-    
-        // Add the elements to the wrapper.
-        wrapper.appendChild(label);
-        wrapper.appendChild(input);
-    
-        // Set the wrapper properties, and return it.
-        wrapper.classList.add("input-wrapper");
-        return wrapper;
-    },*/
     modal(title, content) {
         /**
          * Creates a modal element.

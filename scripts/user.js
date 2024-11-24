@@ -26,9 +26,13 @@ export const user = {
      * TODO: Add github-like activity display.
      */
     name: "",
+    debug: false,
     events: [],
     nextEventId: 1,
+    journals: [],
+    nextJournalId: 1,
     tasks: [],
+    focusTask: null,
     nextTaskId: 1,
     pomodoros: [],
     nextPomId: 1,

@@ -62,7 +62,7 @@ export const events = {
              * 
              * @param {Object} data - The event data object.
              */
-            // TODO: Add expanded event display when clicking compact event.
+            // CONSIDER: Add expanded event display when clicking compact event.
             console.log(`Clicked on event ${data.id}`);
         },
         full (data, update = null) {
@@ -146,6 +146,7 @@ export const events = {
             wrapper.appendChild(controls);
 
             // TODO: Add button icons.
+
             // Add the edit button.
             const editButton = document.createElement("button");
             editButton.type = "button";
@@ -175,6 +176,8 @@ export const events = {
         plannerControls (cell) {
             /**
              * Renders the planner controls.
+             * 
+             * @param {object} cell - The cell to get the date from.
              */
             // Grab the planner wrapper.
             const wrapper = document.getElementById("planner");
@@ -187,10 +190,16 @@ export const events = {
             // Create the add event button.
             const addButton = document.createElement("button");
             addButton.type = "button";
-            addButton.ariaLabel = "Add an event to this day.";
-            addButton.title = "Add an event to this day.";
-            addButton.textContent = "Add event";
-            controls.appendChild(addButton).addEventListener("click", () => events.render.form("new-event", cell.dataset.date, wrapper));
+            addButton.ariaLabel = "Add a new event to this day.";
+            addButton.title = "Add a new event to this day.";
+            addButton.textContent = "Add new event";
+            controls.appendChild(addButton).addEventListener("click", () => {
+                events.render.form("new-event", cell.dataset.date, wrapper);
+                if (document.getElementById("new-event-cancel")) {
+                    document.getElementById("new-event-cancel").addEventListener("click", () => events.cancel("new-event", cell));
+                };
+            });
+            // TODO: Add keydown event listener for the cancel button.
         },
         planner (cell) {
             /**
@@ -226,7 +235,7 @@ export const events = {
             console.log(`events.render.planner: Finding events for ${cell.dataset.date}`);
             const eventsForDate = user.events.filter(event => event.date.start === cell.dataset.date);
             if (eventsForDate) {
-                eventsForDate.forEach((event, index) => {
+                eventsForDate.forEach((event) => {
                     let eventItem = events.render.full(event);
                     list.appendChild(eventItem);
                 });
@@ -284,15 +293,18 @@ export const events = {
             dateFieldset.appendChild(dateLegend);
 
             // Add the start and end date inputs.
-            input(`${id}-start-date`, "date", true, dateFieldset, date);
-            //if (date) document.getElementById(`${id}-start-date`).value = date;
-            input(`${id}-end-date`, "date", false, dateFieldset);
+            utils.input(`${id}-start-date`, "date", true, dateFieldset, date);
+            if (date) {
+                if (document.getElementById(`${id}-start-date`)) {
+                    document.getElementById(`${id}-start-date`).value = date;
+                };
+            };
+            // TODO: Add a button for "add end date", that spawns this.
+            utils.input(`${id}-end-date`, "date", false, dateFieldset);
 
-            // Add the all day checkbox.
-            input(`${id}-all-day`, "checkbox", false, dateFieldset);
-
-            // Add the repeat date input.
-            input(`${id}-repeat`, "checkbox", false, dateFieldset);
+            // Add the all day and repeat checkboxes.
+            utils.input(`${id}-all-day`, "checkbox", false, dateFieldset);
+            utils.input(`${id}-repeat`, "checkbox", false, dateFieldset);
 
             // Add the info fieldset.
             const infoFieldset = document.createElement("fieldset");
@@ -305,9 +317,9 @@ export const events = {
             infoFieldset.appendChild(infoLegend);
 
             // Add the title, description and location inputs.
-            input(`${id}-title`, "text", true, infoFieldset);
-            input(`${id}-description`, "textarea", false, infoFieldset);
-            input(`${id}-location`, "text", false, infoFieldset);
+            utils.input(`${id}-title`, "text", true, infoFieldset);
+            utils.input(`${id}-description`, "textarea", false, infoFieldset);
+            utils.input(`${id}-location`, "text", false, infoFieldset);
 
             // Add the form control panel fieldset.
             const buttonsFieldset = document.createElement("fieldset");
@@ -319,12 +331,9 @@ export const events = {
             buttonsLegend.textContent = "Actions";
             buttonsFieldset.appendChild(buttonsLegend);
 
-            // Add the cancel button.
-            input(`${id}-cancel`, "button", false, buttonsFieldset);
-            //document.getElementById("event-cancel").addEventListener("click", () => events.cancel(cell));
-
-            // Add the submit button.
-            input(`${id}-submit`, "button", false, buttonsFieldset);
+            // Add the cancel and submit buttons.
+            utils.input(`${id}-cancel`, "button", false, buttonsFieldset);
+            utils.input(`${id}-submit`, "button", false, buttonsFieldset);
 
             // Add event listener for form interactions.
             form.addEventListener("change", (event) => {
@@ -334,7 +343,6 @@ export const events = {
                     toggleRepeatEvent(id);
                 };
             });
-            //document.getElementById(`${id}-cancel`);
 
             // Add event listener for the form submission.
             form.addEventListener("submit", (event) => {
@@ -353,7 +361,7 @@ export const events = {
                     } else {
                         events.add(id);
                     };
-                }; // TODO: Add esc key to cancel.
+                };
             });
 
             // Append the form to the parent element.
@@ -390,8 +398,10 @@ export const events = {
             location: null, // Event location.
             recurring: {
                 isRecurring: false, // Boolean for recurring events.
+                isCustom: false, // Boolean for custom recurring events.
                 time: null, // Time frequency. (daily, weekly, monthly, yearly, custom)
-                number: null // Number of times to repeat.
+                number: null, // Number of times to repeat.
+                day: null // Day of the week to repeat. (0-6)
             } // If the event is recurring.
         };
     },
@@ -438,7 +448,14 @@ export const events = {
         if (document.getElementById(`${id}-repeat`).checked) {
             const select = document.getElementById(`${id}-repeat-select`);
             data.recurring.isRecurring = true;
+
+            // Add the day of the week for the event.
+            if (data.date.start) {
+                data.recurring.day = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.day;
+            };
+
             if (select.value === "custom") {
+                data.recurring.isCustom = true;
                 if (document.getElementById(`${id}-repeat-number`).value) {
                     data.recurring.number = document.getElementById(`${id}-repeat-number`).value;
                 };
@@ -513,17 +530,32 @@ export const events = {
             };
         };
     },
-    cancel (form, cell) {
+    cancel (id = null, cell = null) {
         /**
          * Cancels the creation of a new event.
          * 
-         * TODO: Fix this.
+         * @param {object} id - The id of the form to cancel.
+         * @param {object} cell - The cell to get the date from.
          */
-        // Remove the event form.
-        //document.getElementById("event-form").remove();
+        // Get the form element to remove.
+        const form = document.getElementById(`${id}-form`);
 
-        // Render the planner control panel.
-        events.render.plannerControls(cell);
+        // Find the form variant.
+        const formVariant = id.split("-")[0];
+        if (formVariant === "edit") {
+            // Get the event ID, and find the event in the user events array.
+            const eventId = Number(id.split("-")[2]);
+            const event = user.events.find(event => event.id === eventId);
+
+            // If the event is found, re-render the full event.
+            if (event) {
+                const fullEvent = events.render.full(event);
+                form.parentElement.replaceWith(fullEvent);
+            };
+        } else if (formVariant === "new") {
+            form.remove();
+            events.render.plannerControls(cell);
+        };
     },
     lookup (day, month, year, cell = null) {
         /**
@@ -547,7 +579,7 @@ export const events = {
                     // Add event-related data to the cell.
                     cell.classList.add("event");
                     cell.appendChild(events.render.compact(event));
-                    console.log(`[events.find]: Found event ${event.id} for ${lookupDay}`);
+                    //console.log(`[events.lookup]: Found event ${event.id} for ${lookupDay}`);
 
                 // Add a more indicator if there are too many events.
                 } else if (!cell.querySelector(`#more-events-${lookupDay}`)) {
@@ -558,10 +590,95 @@ export const events = {
                     moreIndicator.id = `more-events-${lookupDay}`;
                     moreIndicator.ariaLabel = `Open this day and see ${eventsForDate.length - 1} more events for this day.`;
                     cell.appendChild(moreIndicator);
-                    console.log("[events.find]: Too many events to display more for " + lookupDay);
+                    //console.log("[events.lookup]: Too many events to display more for " + lookupDay);
                 };
             });
         };
+    },
+    recurring (weekNr = null, cell = null, index = null, request = null) {
+        /**
+         * Checks for recurring events and adds them to the calendar.
+         * 
+         * @param {number} week - The week to check for recurring events. (1-6)
+         * @param {object} cell - The cell to add the event data to.
+         * 
+         * TODO: Ensure that recurring events with end dates are added correctly.
+         * TODO: Ensure that events with end dates can't be repeated more often than their length. (Eg, an event that lasts all week can't be repeated daily.)
+         * TODO: Add recurring events to the planner too.
+         */
+        user.events.forEach(event => {
+            if (event.recurring.isRecurring) {
+                const { time, number } = event.recurring;
+                let frequency = 0;
+                if (event.recurring.isCustom) {
+                    frequency = parseInt(event.recurring.number);
+                };
+
+                // TODO: Add daily events.
+                /* // Add daily events.
+                if (time === "daily") {
+                    if (eventDate === cellDate) {
+                        return;
+                    } else {
+                        cell.appendChild(events.render.compact(event));
+                    };
+                };*/
+
+                // Add weekly events.
+                // TODO: Test with different custom frequencies.
+                if (
+                    (time === "weekly" || time === "weeks")
+                    && event.recurring.day === cell.dataset.day
+                    && event.recurring.isRecurring
+                ) {
+                    // Normalize event.date.start to zero-based month.
+                    const [year, month, day] = event.date.start.split("-").map(Number);
+                    const startDate = new Date(year, month - 1, day);
+                    const cellDateObj = new Date(cell.dataset.date);
+                
+                    // Avoid rendering on the event's start date.
+                    if (event.date.start === cell.dataset.date) return;
+                
+                    if (event.recurring.isCustom) {
+                        // Calculate the difference in weeks
+                        const diffInMilliseconds = cellDateObj - startDate;
+                        const diffInWeeks = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 7));
+                
+                        // Check custom recurrence conditions.
+                        if (diffInWeeks >= 0 && diffInWeeks % parseInt(event.recurring.number) === 0) {
+                            cell.appendChild(events.render.compact(event));
+                        };
+                    } else {
+                        // Handle standard weekly recurrence.
+                        if (event.date.start <= cell.dataset.date) {
+                            cell.appendChild(events.render.compact(event));
+                        };
+                    };
+                };
+
+                // TODO: Add monthly events.
+                /*// Add monthly events.
+                } else if (time === "monthly" && eventDay === cellDay) {
+                    if (
+                        eventDate === cellDate
+                        || eventMonth > cellMonth && eventYear === cellYear
+                        || eventYear > cellYear
+                    ) {
+                        return;
+                    } else {
+                        cell.appendChild(events.render.compact(event));
+                    };
+                }*/
+
+                // TODO: Add yearly events.
+                /*// Add yearly events.
+                if (time === "yearly" && eventMonth === cellMonth && eventDay === cellDay) {
+                    if (eventYear <= cellYear && eventDate !== cellDate) {
+                        cell.appendChild(events.render.compact(event));
+                    };
+                }:*/
+            };
+        });
     },
     delete (id) {
         /**
@@ -616,13 +733,48 @@ export const events = {
                 // Add repeat event data.
                 if (data.recurring.isRecurring) {
                     document.getElementById(`edit-event-${id}-repeat`).checked = true;
+
+                    // Add the day of the week for the event.
+                    if (data.date.start) {
+                        data.recurring.day = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.day;
+                    };
+
                     toggleRepeatEvent(`edit-event-${id}`);
-                    if (data.recurring.time) {
-                        document.getElementById(`edit-event-${id}-repeat-select`).value = data.recurring.time;
-                        if (data.recurring.time === "custom") {
+                    if (data.recurring.isCustom === true) {
+                        if (document.getElementById(`edit-event-${id}-repeat-select`)) {
+                            document.getElementById(`edit-event-${id}-repeat-select`).selectedIndex = 4;
                             toggleCustomRepeat(`edit-event-${id}`);
+
+                            // Add repeat number.
                             if (data.recurring.number) {
+                                if (document.getElementById(`edit-event-${id}-repeat-number`)) {
+                                    document.getElementById(`edit-event-${id}-repeat-number`).value = data.recurring.number;
+                                };
+                            };
+
+                            // Add repeat frequency.
+                            if (data.recurring.time) {
+                                if (document.getElementById(`edit-event-${id}-repeat-time`)) {
+                                    document.getElementById(`edit-event-${id}-repeat-time`).value = data.recurring.time;
+                                };
+                            };
+                        };
+
+                    // If the event is not custom.
+                    } else {
+                        data.recurring.isCustom = false;
+
+                        // Add repeat number.
+                        if (data.recurring.number) {
+                            if (document.getElementById(`edit-event-${id}-repeat-number`)) {
                                 document.getElementById(`edit-event-${id}-repeat-number`).value = data.recurring.number;
+                            };
+                        };
+
+                        // Add repeat frequency.
+                        if (data.recurring.time) {
+                            if (document.getElementById(`edit-event-${id}-repeat-select`)) {
+                                document.getElementById(`edit-event-${id}-repeat-select`).value = data.recurring.time;
                             };
                         };
                     };
@@ -633,6 +785,13 @@ export const events = {
                 document.getElementById(`edit-event-${id}-description`).value = data.description;
                 document.getElementById(`edit-event-${id}-location`).value = data.location;
             };
+        };
+        //  Add event listener for cancel button.
+        const cancelButton = document.getElementById(`edit-event-${id}-cancel`);
+        if (cancelButton) {
+            cancelButton.addEventListener("click", () => {
+                events.cancel(`edit-event-${id}`);
+            });
         };
     },
     import (url) {
@@ -647,116 +806,6 @@ export const events = {
 };
 
 /*----------------------------- HELPER FUNCTIONS -----------------------------*/
-function input (name, type, required = null, location = null, extra = null) {
-    /**
-     * Helper function for creating inputs with a label and wrapper.
-     * 
-     * @param {string} name - The name of the input group.
-     * @param {string} type - The type of input to make.
-     * @param {boolean} required - Whether the input is required.
-     * @param {object} location - The location to append to.
-     * @param {object} extra - Extra data for the input.
-     */
-    // Create the wrapper.
-    const wrapper = document.createElement("div");
-    wrapper.id = `${name}-wrapper`;
-    wrapper.classList.add("form-field");
-
-    // If the input is invalid, log an error.
-    if (!name || typeof name !== "string") {
-        return "ERROR: Input name is not formatted correctly. Please report this issue on GitHub.";
-    };
-
-    // Replace dashes with spaces, and split the text.
-    const rawText = name.replace(/-/g, " ").split(" ").filter(word => word.trim() !== "");
-
-    // Remove the first two words from the text.
-    const labelText = rawText.slice(2);
-
-    // Check if the first word is a number, and remove it for the label.
-    if (labelText.length > 0 && !isNaN(labelText[0])) {
-        labelText.shift();
-    };
-
-    // Capitalize the first letter of the first word.
-    if (labelText.length > 0) {
-        labelText[0] = labelText[0][0].toUpperCase() + labelText[0].slice(1);
-
-    // If no text is found, log an error.
-    } else {
-        console.log("[events input]: ERROR - No text found for an input label. Please report this issue on GitHub.");
-        return "Untitled";
-    };
-
-    // Join the text back together.
-    const text = labelText.join(" ");
-
-    // Create the label.
-    const label = document.createElement("label");
-    label.id = `${name}-label`;
-    label.htmlFor = name;
-    label.textContent = text + ":";
-    wrapper.appendChild(label);
-
-    // Create the input.
-    let input = document.createElement("input");
-
-    // If the input is a textarea, create one.
-    if (type === "textarea") {
-        input = document.createElement("textarea");
-
-    // If the input is a button, create one.
-    } else if (type === "button") {
-        input = document.createElement("button");
-        label.classList.add("sr-only");
-        input.textContent = text;
-        input.type = "button";
-
-        // Check if the button is a submit button.
-        if (name.includes("submit")) {
-            input.type = "submit";
-
-            // Check if the button is for adding or editing an event.
-            if (name.includes("new-event")) {
-                input.textContent = "Add event";
-            } else if (name.includes("edit-event")) {
-                input.textContent = "Update event";
-            };
-        };
-
-    // Otherwise, create a normal input.
-    } else {
-        input = document.createElement("input");
-        input.type = type;
-    };
-    input.id = name;
-
-    // If the input is required, set the required attribute.
-    if (required === true) {
-        input.required = true;
-    };
-
-    // If the input is a checkbox, and the text is "All day", check it.
-    if (type === "checkbox" && text === "All day") {
-        if (location != null) {
-            input.checked = true;
-        };
-    };
-
-    // Add extra data to the input.
-    if (type === "date" && extra) {
-        console.log(`[events - input]: Adding date ${extra} to input ${name}`);
-        input.value = extra;
-    };
-    wrapper.appendChild(input);
-
-    // Append the wrapper to the location, or return it.
-    if (location != null) {
-        location.appendChild(wrapper);
-    } else {
-        return wrapper;
-    };
-};
 function toggleAllDay (id) {
     /**
      * Helper function for toggling the "all day" controls.
@@ -775,20 +824,35 @@ function toggleAllDay (id) {
             // Create the start time input.
             const dateFieldset = document.getElementById(`${id}-date-fieldset`);
             const repeatWrapper = document.getElementById(`${id}-repeat-wrapper`);
+            const idVariant = id.split("-")[0];
+
+            // Get the event data if it exists.
+            let event = null;
+            if (idVariant === "edit") {
+                event = user.events.find(event => event.id === Number(id.split("-")[2]));
+            };
 
             // If no start time input exists, create one.
             if (!document.getElementById(`${id}-start-time-wrapper`)) {
-                const startTime = input(`${id}-start-time`, "time", true);
+                const startTime = utils.input(`${id}-start-time`, "time", true);
                 dateFieldset.insertBefore(startTime, repeatWrapper);
+
+                // If the event has a start time, add it to the input.
+                if (event && event.time.start) {
+                    document.getElementById(`${id}-start-time`).value = event.time.start;
+                };
             };
 
             // If no end time input exists, create one.
             if (!document.getElementById(`${id}-end-time-wrapper`)) {
-                const endTime = input(`${id}-end-time`, "time");
+                const endTime = utils.input(`${id}-end-time`, "time");
                 dateFieldset.insertBefore(endTime, repeatWrapper);
-            };
 
-            // TODO: Add event data for time inputs if they exist.
+                // If the event has an end time, add it to the input.
+                if (event && event.time.end) {
+                    document.getElementById(`${id}-end-time`).value = event.time.end;
+                };
+            };
 
         // Otherwise, remove the inputs.
         } else {

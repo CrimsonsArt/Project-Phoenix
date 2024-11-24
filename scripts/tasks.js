@@ -1,7 +1,7 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 import { utils } from "./utils.js";
 import { user } from "./user.js";
-import { toast } from "./toast.js";
+//import { toast } from "./toast.js";
 
 /*--------------------------- TO-DO LIST FUNCTIONS ---------------------------*/
 export const tasks = {
@@ -39,7 +39,7 @@ export const tasks = {
                 completed: false,
                 completedDate: null
             };
-            toast.add("Added task successfully.", "success"); // Success toast.
+            //toast.add("Added task successfully.", "success"); // Success toast.
             user.tasks.push(task); // Add task to user.tasks array.
             user.nextTaskId++; // Increment ID.
             user.save(); // Save changes to user object.
@@ -47,7 +47,7 @@ export const tasks = {
             document.getElementById("todo-list").prepend(tasks.render.task(task.id));
 
         } else { // If task input is empty.
-            toast.add("Task title can't be empty.", "error"); // Error toast.
+            //toast.add("Task title can't be empty.", "error"); // Error toast.
         };
     },
     load() {
@@ -57,7 +57,7 @@ export const tasks = {
         // Check if user has any tasks.
         if (user.tasks && user.tasks.length > 0) {
             user.tasks.forEach(task => {
-                this.render(task);
+                tasks.render.task(task);
             });
         };
     },
@@ -82,6 +82,7 @@ export const tasks = {
              */
             // Get the task data.
             const task = user.tasks.find(task => task.id === id);
+            if (!task) return; // Return if the task doesn't exist.
 
             // Create the wrapper.
             const wrapper = document.createElement("li");
@@ -95,6 +96,8 @@ export const tasks = {
             text.textContent = task.text;
             wrapper.appendChild(text);
 
+            // TODO: Add due date, if any.
+
             // Create the checkbox.
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
@@ -103,7 +106,7 @@ export const tasks = {
             if (task.completed) {
                 checkbox.checked = true;
             };
-            wrapper.appendChild(checkbox);
+            wrapper.appendChild(checkbox).addEventListener("change", () => tasks.complete(task.id));
 
             // Create the timestamp.
             const timestamp = document.createElement("time");
@@ -125,6 +128,7 @@ export const tasks = {
             delBtn.textContent = "Remove";
             controls.appendChild(delBtn);
             delBtn.addEventListener("click", () => tasks.delete(task.id));
+            // TODO: Move this to the dropdown menu.
 
             // Create the dropdown wrapper.
             const dropWrapper = document.createElement("div");
@@ -163,13 +167,7 @@ export const tasks = {
             options.appendChild(dependency);
             // TODO: Add event listener to dependency button.
 
-            // Create the due date button.
-            const due = document.createElement("button");
-            due.classList.add("task-due");
-            due.id = `task-due-${task.id}`;
-            due.textContent = "Due date";
-            options.appendChild(due);
-            // TODO: Add event listener to due date button.
+            // TODO: Add a "set as current goal" button.
 
             // Return the HTML object.
             return wrapper;
@@ -330,11 +328,11 @@ export const tasks = {
         // Reload the task.
         const wrapper = document.getElementById(`task-${id}`);
         if (wrapper) {
-            const reloadedWrapper = this.render(task, "object");
+            const reloadedWrapper = tasks.render.task(task.id, "object");
             wrapper.replaceWith(reloadedWrapper);
             if (task.completed) {
                 utils.log("Task", `Completed task with ID: ${id}`);
-                toast.add("Task complete, good job!", "success");
+                //toast.add("Task complete, good job!", "success");
             } else {
                 utils.log("Task", `Marked task incomplete with ID: ${id}`);
             };

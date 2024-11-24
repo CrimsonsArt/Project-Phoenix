@@ -1,4 +1,5 @@
 /*---------------------------------- IMPORT ----------------------------------*/
+import { utils } from "./utils.js";
 import { events } from "./events.js";
 import { journal } from "./journal.js";
 
@@ -6,8 +7,6 @@ import { journal } from "./journal.js";
 export const calendar = {
     /**
      * Planner functions.
-     * 
-     * TODO: Add a function for displaying repeating events.
      */
     days: [
         "Monday", "Tuesday", "Wednesday", "Thursday",
@@ -43,7 +42,54 @@ export const calendar = {
             const title = document.createElement("h3");
             title.textContent = `${calendar.months[calendar.info.month]} ${calendar.info.year}`;
             table.appendChild(title);
-            // TODO: Add month and year navigation.
+
+            // Create the month and year wrappers.
+            const monthWrapper = document.createElement("span");
+            const yearWrapper = document.createElement("span");
+
+            // Create the month label and select, and append them to the wrapper.
+            const monthLabel = document.createElement("label");
+            monthLabel.classList.add("sr-only");
+            monthLabel.textContent = "Month:";
+            monthWrapper.appendChild(monthLabel);
+
+            const monthSelect = document.createElement("select");
+            monthSelect.classList.add("set-calendar");
+            monthSelect.id = "calendar-nav-month";
+            calendar.months.forEach((month, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent = month;
+                if (index === calendar.info.month) option.selected = true;
+                monthSelect.appendChild(option);
+            });
+            monthWrapper.appendChild(monthSelect);
+
+            // Create the year label and input, and append them to the wrapper.
+            const yearLabel = document.createElement("label");
+            yearLabel.classList.add("sr-only");
+            yearLabel.textContent = "Year:";
+            yearWrapper.appendChild(yearLabel);
+
+            const yearInput = document.createElement("input");
+            yearInput.classList.add("set-calendar");
+            yearInput.id = "calendar-nav-year";
+            yearInput.type = "number";
+            yearInput.min = "1900";
+            yearInput.max = "2100";
+            yearInput.value = calendar.info.year;
+            yearWrapper.appendChild(yearInput);
+
+            // Append the month and year wrappers to the title.
+            title.innerHTML = "";
+            title.appendChild(monthWrapper).addEventListener("change", () => {
+                calendar.info.month = parseInt(monthSelect.value, 10);
+                calendar.render.table(calendar.info.year, calendar.info.month);
+            });
+            title.appendChild(yearWrapper).addEventListener("change", () => {
+                calendar.info.year = parseInt(yearInput.value, 10);
+                calendar.render.table(calendar.info.year, calendar.info.month);
+            });
 
             // Create a navigation wrapper.
             const navWrapper = document.createElement("div");
@@ -55,8 +101,7 @@ export const calendar = {
             prev.title = "Go to the previous month";
             prev.textContent = "Previous";
             prev.type = "button";
-
-            // TODO: Add a button to go to the current month.
+            prev.id = "calendar-nav-previous";
 
             // Create the "next month" button.
             const next = document.createElement("button");
@@ -64,10 +109,23 @@ export const calendar = {
             next.title = "Go to the next month";
             next.textContent = "Next";
             next.type = "button";
+            next.id = "calendar-nav-next";
+
+            // Add a button to go to the current month.
+            const current = document.createElement("button");
+            current.ariaLabel = "Go to this month";
+            current.title = "Go to this month";
+            current.textContent = "Current";
+            current.type = "button";
+            current.id = "calendar-nav-current";
 
             // Add the buttons to the nav wrapper, and append it to the header.
             navWrapper.appendChild(prev).addEventListener("click", calendar.control.previous);
             navWrapper.appendChild(next).addEventListener("click", calendar.control.next);
+            navWrapper.appendChild(current).addEventListener("click", () => {
+                const today = new Date();
+                calendar.render.table(today.getFullYear(), today.getMonth());
+            });
             table.appendChild(navWrapper);
 
             // Render the week day headers.
@@ -75,6 +133,7 @@ export const calendar = {
                 const header = document.createElement("div");
                 header.classList.add("cell", "day-header");
                 header.textContent = day;
+                header.id = `${day.toLowerCase()}-header`;
                 wrapper.appendChild(header);
             });
 
@@ -172,11 +231,11 @@ export const calendar = {
                  * 
                  * TODO: Add icon for days with deadlines, events, journal entries, and for days where the user has checked in.
                  */
-                // TODO: Check for recurring events.
                 // TODO: Check for deadlines.
                 const cell = document.createElement("div");
                 cell.id = `cell-${row.dataset.week}-${number+1}`;
                 cell.classList.add("cell");
+                cell.dataset.day = number;
                 cell.role = "gridcell";
                 cell.tabIndex = 0;
 
@@ -204,7 +263,6 @@ export const calendar = {
 
                     // Check if there is any events on this day.
                     events.lookup(day, prevMonth, prevYear, cell);
-                    //console.log(cell.dataset.date);
 
                 // Render the current month.
                 } else if (cellIndex >= calendar.info.startDay && (cellIndex - calendar.info.startDay) < calendar.info.totalDays) {
@@ -247,6 +305,9 @@ export const calendar = {
                     events.lookup(day, calendar.info.month === 12 ? 1 : calendar.info.month + 1, calendar.info.month === 12 ? calendar.info.year + 1 : calendar.info.year, cell);
                 };
 
+                // Check if there is any recurring events on this day.
+                events.recurring(row.dataset.week, cell, cellIndex);
+
                 // Append the cell to the row, and increment the day counter.
                 row.appendChild(cell);
                 calendar.info.day++;
@@ -256,8 +317,6 @@ export const calendar = {
                  * Renders an expanded cell in the calendar.
                  * 
                  * @param {object} cell - The cell to render.
-                 * 
-                 * TODO: Display journal entries, if any.
                  */
                 // Create the wrapper, and append it to the cell.
                 const wrapper = document.createElement("div");
@@ -305,7 +364,7 @@ export const calendar = {
                 events.render.planner(cell);
 
                 // Render the journal.
-                journal.render();
+                journal.render(cell.dataset.date);
             }
         },
     },
@@ -383,6 +442,8 @@ export const calendar = {
              * 
              * @param {object} cell - The cell to open.
              * 
+             * TODO: Highlight the day header for the selected day.
+             * CONSIDER: Widen cells for the same day in different weeks.
              * CONSIDER: Hide sibling cells, and add a back and forward button.
              */
             // Close the previous day view.
@@ -493,6 +554,9 @@ export const calendar = {
 
             // Re-add compact events, if any.
             events.lookup(day, month, year, cell);
+
+            // Re-add any recurring events on this day.
+            events.recurring(cell.parentElement.dataset.week, cell);
         }
     }
 };
