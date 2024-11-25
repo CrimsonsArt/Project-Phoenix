@@ -128,7 +128,7 @@ nav ul {
     border: var(--borders);
     display: table-cell;
     flex: 1 1 0;
-    height: 70px;
+    min-height: 70px;
     /*overflow: hidden;  TODO: TESTING ONLY! */
     text-align: center;
     width: 0;

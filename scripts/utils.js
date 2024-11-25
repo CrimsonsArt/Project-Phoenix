@@ -27,7 +27,7 @@ export const utils = {
         const year = info.year;
     
         // Add 1 to month to match the Date object, and pad with 0 if needed.
-        const month = String(info.month).padStart(2, "0");
+        const month = String(info.month + 1).padStart(2, "0");
     
         // Pad the day with 0 if needed.
         const day = String(info.day).padStart(2, "0");
@@ -309,7 +309,10 @@ export const utils = {
         // Add extra data to the input.
         if (type === "date" && extra) {
             console.log(`[utils - input]: Adding date ${extra} to input ${name}`);
-            input.value = extra;
+            const [year, month, day] = extra.split("-").map(Number);
+            const date = `${year}-${(month + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+            input.value = date;
+            console.log(`[utils - input]: Adding date ${date} to input ${name}`);
         };
         wrapper.appendChild(input);
     
@@ -319,39 +322,5 @@ export const utils = {
         } else {
             return wrapper;
         };
-    },
-    modal(title, content) {
-        /**
-         * Creates a modal element.
-         * 
-         * @param {string} title - The title of the modal.
-         * @param {string} content - The content of the modal.
-         * 
-         * @returns {object} - The modal element.
-         */
-        const modal = document.createElement("aside");
-
-        // Set the modal properties.
-        modal.classList.add("modal");
-
-        // Add header.
-        const header = document.createElement("header");
-        const titleElement = document.createElement("h2");
-        const closeButton = utils.button("cancel", "modal");
-        titleElement.textContent = title;
-
-        header.appendChild(titleElement);
-        modal.appendChild(header);
-
-        // Add content.
-        const contentElement = document.createElement("p");
-        contentElement.textContent = content;
-        modal.appendChild(contentElement);
-
-        // Add footer.
-        const footer = document.createElement("footer");
-
-        // Return the modal.
-        return modal;
     }
 };

@@ -451,7 +451,8 @@ export const events = {
 
             // Add the day of the week for the event.
             if (data.date.start) {
-                data.recurring.day = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.day;
+                // BUG: This is not working as expected.
+                data.recurring.day = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.date;
             };
 
             if (select.value === "custom") {
@@ -567,6 +568,8 @@ export const events = {
          * @param {object} cell - The cell to add the event data to.
          * 
          * @returns {object} - The event object if it exists, otherwise null.
+         * 
+         * TODO: Combine with recurring.
          */
         const lookupDay = year + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
 
@@ -608,67 +611,111 @@ export const events = {
          */
         user.events.forEach(event => {
             if (event.recurring.isRecurring) {
+                // Get the event's recurring data.
                 const { time, number } = event.recurring;
+
+                // Normalize the dates to UTC.
+                const [eventYear, eventMonth, eventDay] = event.date.start.split("-").map(Number);
+                const startDate = new Date(Date.UTC(eventYear, eventMonth, eventDay));
+
+                const [cellYear, cellMonth, cellDay] = cell.dataset.date.split("-").map(Number);
+                const cellDateObj = new Date(Date.UTC(cellYear, cellMonth, cellDay));
+
+                // Calculate the difference in weeks
+                const diffInMilliseconds = cellDateObj - startDate;
+                const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
+                const diffInWeeks = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 7));
+                const diffInMonths = (cellDateObj.getUTCFullYear() - startDate.getUTCFullYear()) * 12 + (cellDateObj.getUTCMonth() - startDate.getUTCMonth());
+
                 let frequency = 0;
                 if (event.recurring.isCustom) {
-                    frequency = parseInt(event.recurring.number);
+                    frequency = parseInt(number);
                 };
 
-                // TODO: Add daily events.
-                /* // Add daily events.
-                if (time === "daily") {
-                    if (eventDate === cellDate) {
-                        return;
-                    } else {
-                        cell.appendChild(events.render.compact(event));
-                    };
-                };*/
-
-                // Add weekly events.
-                // TODO: Test with different custom frequencies.
+                // Add daily events.
                 if (
-                    (time === "weekly" || time === "weeks")
-                    && event.recurring.day === cell.dataset.day
-                    && event.recurring.isRecurring
+                    time === "daily" || time === "days"
                 ) {
-                    // Normalize event.date.start to zero-based month.
-                    const [year, month, day] = event.date.start.split("-").map(Number);
-                    const startDate = new Date(year, month - 1, day);
-                    const cellDateObj = new Date(cell.dataset.date);
-                
-                    // Avoid rendering on the event's start date.
-                    if (event.date.start === cell.dataset.date) return;
-                
+                    // Handle custom daily recurrence.
                     if (event.recurring.isCustom) {
-                        // Calculate the difference in weeks
-                        const diffInMilliseconds = cellDateObj - startDate;
-                        const diffInWeeks = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 7));
-                
-                        // Check custom recurrence conditions.
-                        if (diffInWeeks >= 0 && diffInWeeks % parseInt(event.recurring.number) === 0) {
+                        if (diffInDays >= 0 && diffInDays % frequency === 0) {
                             cell.appendChild(events.render.compact(event));
+                            if (user.debug === true) {
+                                //console.log(`[events.recurring]: Adding custom daily event ${event.id} that started ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
+                            };
                         };
+
+                    // Handle standard daily recurrence.
                     } else {
-                        // Handle standard weekly recurrence.
                         if (event.date.start <= cell.dataset.date) {
                             cell.appendChild(events.render.compact(event));
+                            if (user.debug === true) {
+                                //console.log(`[events.recurring]: Adding daily event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
+                            }
+                        };
+                    };
+
+                // Add weekly events.
+                } else if (
+                    (time === "weekly" || time === "weeks")
+                    && event.recurring.day === cell.dataset.day
+                ) {
+                    // Handle custom weekly recurrence.
+                    if (event.recurring.isCustom) {
+                        if (diffInWeeks >= 0 && diffInWeeks % frequency === 0) {
+                            cell.appendChild(events.render.compact(event));
+                            if (user.debug === true) {
+                                //console.log(`[events.recurring]: Adding custom weekly event ${event.id} for the date ${event.date.start} with the frequency $${frequency} to ${cell.dataset.date}`);
+                            };
+                        };
+
+                    // Handle standard weekly recurrence.
+                    } else {
+                        if (event.date.start <= cell.dataset.date) {
+                            cell.appendChild(events.render.compact(event));
+                            if (user.debug === true) {
+                                //console.log(`[events.recurring]: Adding weekly event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
+                            };
+                        };
+                    };
+
+                // Add monthly events.
+                } else if (
+                    time === "monthly" || time === "months"
+                ) {
+                    // Handle custom monthly recurrence.
+                    const lastDayOfMonth = new Date(cellYear, cellMonth, 0).getUTCDate();
+                    if (event.recurring.isCustom) {
+                        if (diffInMonths >= 0 && diffInMonths % frequency === 0) {
+
+                            // Handle edge case: Ensure day matches or is valid for the month.
+                            if (eventDay <= lastDayOfMonth && eventDay === cellDay) {
+                                cell.appendChild(events.render.compact(event));
+                                if (user.debug === true) {
+                                    console.log(`[events.recurring]: Adding custom monthly event ${event.id} for the date ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
+                                };
+
+                            // Allow events on the 31st to fall on the last day of shorter months.
+                            } else if (eventDay > lastDayOfMonth && cellDay === lastDayOfMonth) {
+                                cell.appendChild(events.render.compact(event));
+                                if (user.debug === true) {
+                                    console.log(`[events.recurring]: Adding custom monthly event ${event.id} for the date ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
+                                };
+                            };
+                        };
+
+                    // Handle standard monthly recurrence.
+                    } else {
+                        if (eventDay === cellDay || (eventDay > lastDayOfMonth && cellDay === lastDayOfMonth)) {
+                            if (event.date.start <= cell.dataset.date) {
+                                cell.appendChild(events.render.compact(event));
+                                if (user.debug === true) {
+                                    console.log(`[events.recurring]: Adding monthly event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
+                                };
+                            };
                         };
                     };
                 };
-
-                // TODO: Add monthly events.
-                /*// Add monthly events.
-                } else if (time === "monthly" && eventDay === cellDay) {
-                    if (
-                        eventDate === cellDate
-                        || eventMonth > cellMonth && eventYear === cellYear
-                        || eventYear > cellYear
-                    ) {
-                        return;
-                    } else {
-                        cell.appendChild(events.render.compact(event));
-                    };
-                }*/
 
                 // TODO: Add yearly events.
                 /*// Add yearly events.
