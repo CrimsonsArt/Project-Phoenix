@@ -95,6 +95,7 @@ export const calendar = {
             // Create a navigation wrapper.
             const navWrapper = document.createElement("div");
             navWrapper.classList.add("row");
+            navWrapper.id = "calendar-nav";
 
             // Create the "previous month" button.
             const prev = document.createElement("button");
@@ -134,6 +135,7 @@ export const calendar = {
                 const header = document.createElement("div");
                 header.classList.add("cell", "day-header");
                 header.textContent = day;
+                header.dataset.weekday = calendar.days.indexOf(day);
                 header.id = `${day.toLowerCase()}-header`;
                 wrapper.appendChild(header);
             });
@@ -153,9 +155,7 @@ export const calendar = {
                 year = calendar.info.year;
                 month = calendar.info.month;
                 if (user.debug === true) {
-                    console.log("[calendar.render.table]:"
-                        + "Year and month not provided. Using current date."
-                        + `\n\tYear: ${year}, Month: ${month}`);
+                    console.log("[calendar.render.table]: Year and month not provided. Using current date." + `\n\tYear: ${year}, Month: ${month}`);
                 };
 
             // If the year and month are provided, update the calendar info.
@@ -163,9 +163,7 @@ export const calendar = {
                 calendar.info.month = month;
                 calendar.info.year = year;
                 if (user.debug === true) {
-                    console.log("[calendar.render.table]:"
-                        + "Year and month provided."
-                        + `\n\tYear: ${year}, Month: ${month}`);
+                    console.log("[calendar.render.table]: Year and month provided." + `\n\tYear: ${year}, Month: ${month}`);
                 };
             };
 
@@ -274,8 +272,8 @@ export const calendar = {
                 } else {
                     day = day - calendar.info.totalDays;
                     dateNumber.dateTime = utils.createISODate({
-                        year: calendar.info.month === 12 ? calendar.info.year + 1 : calendar.info.year,
-                        month: calendar.info.month === 12 ? 1 : calendar.info.month + 1,
+                        year: calendar.info.month === 11 ? calendar.info.year + 1 : calendar.info.year,
+                        month: calendar.info.month === 11 ? 0 : calendar.info.month + 1,
                         day
                     });
                     cell.classList.add("faded");
@@ -286,7 +284,66 @@ export const calendar = {
                 cell.dataset.date = dateNumber.dateTime;
                 cell.appendChild(dateNumber);
                 row.appendChild(cell);
-                calendar.info.day++;
+
+                // Look for events to display in the cell.
+                events.find(dateNumber.dateTime, cell);
+
+                // Increment the cell index.
+                calendar.info.cellIndex++;
+            },
+            expanded (cell) {
+                /**
+                 * Renders an expanded cell in the calendar.
+                 * 
+                 * @param {object} cell - The cell to render.
+                 */
+                // Create the wrapper, and append it to the cell.
+                const wrapper = document.createElement("div");
+                wrapper.id = "day-view";
+                cell.appendChild(wrapper);
+
+                // Create the close button.
+                const close = document.createElement("button");
+                close.textContent = "Close";
+                close.ariaLabel = "Close the day view.";
+                close.title = "Close the day view.";
+                close.type = "button";
+                close.id = "close-day-view";
+                wrapper.appendChild(close).addEventListener("click", () => calendar.control.close(cell));
+
+                // Get the date for the cell.
+                const datetime = cell.querySelector("time");
+                const day = parseInt(cell.dataset.date.split("-")[2], 10);
+                const month = parseInt(cell.dataset.date.split("-")[1], 10);
+
+                // Set suffix for the day number.
+                let suffix = "";
+                if (day % 100 >= 11 && day % 100 <= 13) {
+                    suffix = "th";
+                } else if (day % 10 === 1) {
+                    suffix = "st";
+                } else if (day % 10 === 2) {
+                    suffix = "nd";
+                } else if (day % 10 === 3) {
+                    suffix = "rd";
+                } else {
+                    suffix = "th";
+                };
+
+                // Set the attributes for the time element.
+                datetime.textContent = calendar.months[month - 1] + " " + day + suffix;
+                datetime.id = "day-title";
+
+                // Create the title.
+                const title = document.createElement("h3");
+                title.appendChild(datetime);
+                wrapper.appendChild(title);
+
+                // Render the planner.
+                events.render.planner(cell);
+
+                // Render the journal.
+                journal.render(cell.dataset.date);
             }
         }
     },
@@ -384,24 +441,27 @@ export const calendar = {
 
                 // Re-add compact events, if any.
                 const [year, month, day] = calendar.control.selected.dataset.date.split("-");
-                events.lookup(day, month, year, calendar.control.selected);
+                //events.lookup(day, month, year, calendar.control.selected);
             };
 
             let cellToOpen = cell;
 
             // If the day is in a different month, go to that month first.
             const month = parseInt(cellToOpen.dataset.date.split("-")[1], 10) - 1;
-            console.log(month + " " + calendar.info.month);
 
             if (month !== calendar.info.month) {
                 // Grab the data-date attribute from the cell.
                 const moveToDate = cellToOpen.dataset.date;
-                if (month == calendar.info.month + 1) {
+                if (month == calendar.info.month + 1 || month === 0 && calendar.info.month === 11) {
                     calendar.control.next();
-                    console.log("Going to next month.");
-                } else if (month == calendar.info.month - 1) {
+                    if (user.debug === true) {
+                        console.log("[calendar.control.open]: Going to next month.");
+                    };
+                } else if (month == calendar.info.month - 1 || month === 11 && calendar.info.month === 0) {
                     calendar.control.previous();
-                    console.log("Going to previous month.");
+                    if (user.debug === true) {
+                        console.log("[calendar.control.open]: Going to previous month.");
+                    };
                 };
                 // Use the data-date attribute to select the correct date.
                 const newCell = document.querySelector(`.cell[data-date="${moveToDate}"]`);
@@ -421,8 +481,12 @@ export const calendar = {
             const cellWeek = cellToOpen.parentElement;
             cellWeek.classList.add("expanded-week");
 
+            // Expand the column.
+            const cellColumn = document.querySelectorAll(`.cell[data-weekday="${cellToOpen.dataset.weekday}"]`);
+            cellColumn.forEach(cell => cell.classList.add("expanded-column"));
+
             // Shrink the other weeks.
-            const shrunkRows = document.querySelectorAll(".row:not(.expanded-week)");
+            const shrunkRows = document.querySelectorAll(".row:not(.expanded-week, #calendar-header, #calendar-nav)");
             shrunkRows.forEach(row => row.classList.add("shrunk-week"));
 
             // Shrink the other days.
@@ -442,6 +506,27 @@ export const calendar = {
 
             // Render the day view.
             calendar.render.cell.expanded(cellToOpen);
+        },
+        close (cell) {
+            /**
+             * Close any opened day in the calendar.
+             */
+            // Remove the day view related classes.
+            const cells = document.querySelectorAll(".expanded-day, .expanded-week, .shrunk-day, .shrunk-week, .expanded-column");
+            cells.forEach(cell => cell.classList.remove("expanded-day", "expanded-week", "shrunk-day", "shrunk-week", "expanded-column"));
+
+            // Close the day view.
+            document.getElementById("day-view").remove();
+
+            // Re-add the day number.
+            const datetime = document.createElement("time");
+            const date = cell.dataset.date;
+            datetime.dataset.date = date;
+            datetime.textContent = parseInt(date.split("-")[2], 10);
+            cell.appendChild(datetime);
+
+            // Re-add compact events, if any.
+            events.find(date, cell);
         }
     }
 };

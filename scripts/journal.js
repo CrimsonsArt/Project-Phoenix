@@ -67,7 +67,7 @@ export const journal = {
         wrapper.appendChild(title);
 
         // Check for existing journal entries.
-        console.log(date);
+        //console.log(date);
         const entry = user.journals.find(entry => entry.date === date);
         if (entry) {
             // Create the journal entries.
@@ -101,7 +101,7 @@ export const journal = {
 
         } else {
             // No journal entries found.
-            console.log("No journal entries found, rendering the form.");
+            //console.log("No journal entries found, rendering the form.");
             journal.edit();
         }
     },

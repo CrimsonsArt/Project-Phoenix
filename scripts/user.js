@@ -39,15 +39,17 @@ export const user = {
     toasts: [],
     nextToastId: 1,
 
-    save: function() {
+    save () {
         /**
          * Save user data to local storage.
          */
         const userData = JSON.stringify(this);
         localStorage.setItem("user", userData);
-        utils.log("User - save", "User data successfully saved to local storage.");
+        if (user.debug === true) {
+            console.log("[user.save]: User data successfully saved to local storage.");
+        };
     },
-    load: function() {
+    load () {
         /**
          * Load user data from local storage.
          */
@@ -57,12 +59,16 @@ export const user = {
 
             // Update user object with saved data.
             Object.assign(this, parsedUser);
-            utils.log("User - load", "User data successfully loaded from local storage.");
+            if (user.debug === true) {
+                console.log("[user.load]: User data successfully loaded from local storage.");
+            };
         } else {
-            utils.log("User - load", "No user data found in local storage.");
+            if (user.debug === true) {
+                console.log("[user.load]: No user data found in local storage.");
+            };
         };
     },
-    export: function() {
+    export () {
         /**
          * Export user data to a JSON file.
          */
@@ -79,7 +85,9 @@ export const user = {
         const tempLink = document.createElement("a");
         tempLink.href = url;
         tempLink.download = `Project-Phoenix-.json`; // FIXME: Add a timestamp to the filename.
-        console.log("Exporting user data...");
+        if (user.debug === true) {
+            console.log("[user.export]: Exporting user data...");
+        };
 
         // Click the link to download the file, and remove it from the DOM.
         tempLink.click();
@@ -89,7 +97,7 @@ export const user = {
         // TODO: Make it so that the last toast is included.
         //toast.add("Exported user data successfully.", "success");
     },
-    import: function() {
+    import () {
         /**
          * Import user data from a JSON file.
          */
@@ -104,7 +112,9 @@ export const user = {
 
                     // Update user object with imported data.
                     Object.assign(user, importedData);
-                    utils.log("User - import", "Imported user data successfully from file.");
+                    if (user.debug === true) {
+                        console.log("[user.import]: Imported user data successfully from file.");
+                    };
 
                     // Save the imported data to local storage.
                     user.save();
@@ -126,7 +136,7 @@ export const user = {
             reader.readAsText(file);
         };
     },
-    format: function() {
+    format () {
         /**
          * Delete user data from local storage.
          * 
@@ -153,27 +163,29 @@ export const user = {
 
         // Toast success message and log the message.
         //toast.add("Deleted user data successfully.", "success");
-        utils.log("User - format", "Deleted user data successfully.");
+        if (user.debug === true) {
+            console.log("[user.format]: Deleted user data successfully.");
+        };
     },
     show: {
-        events() {
+        events () {
             /**
              * Show all of the user's events in the console.
              * 
              * TODO: Update.
              */
-            utils.log("Console - showEvents", "Showing all of the user's events in the console...");
+            console.log("[user.show.events]: Showing all of the user's events in the console...");
             user.events.forEach((event, index) => {
-                utils.log(`Console - event ${index + 1}`, `${event.title}, Date: ${event.date}, Time: ${event.time}, Description: ${event.description}`);
+                console.log(`[user.show.event]: ${index + 1} - ${event.title}, Date: ${event.date}, Time: ${event.time}, Description: ${event.description}`);
             });
         },
-        tasks() {
+        tasks () {
             /**
              * Show all of the user's tasks in the console.
              */
-            utils.log("Console - showTasks", "Showing all of the user's tasks in the console...");
+            console.log("[user.show.tasks]: Showing all of the user's tasks in the console...");
             user.tasks.forEach((task) => {
-                utils.log(`Console - task ${task.id}`, `${task.text} - ${task.completed ? "Complete" : "Incomplete"} - ${task.archived ? "Archived" : "Not archived"}`);
+                console.log(`[user.show.tasks]: ${task.id} - ${task.text} - ${task.completed ? "Complete" : "Incomplete"} - ${task.archived ? "Archived" : "Not archived"}`);
             });
         }
     }

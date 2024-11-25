@@ -1,24 +1,17 @@
+import { user } from "./user.js";
+
 /*---------------------------- UTILITY FUNCTIONS -----------------------------*/
 export const utils = {
     /**
      * Utility functions.
      * 
-     * @function log - Logs messages to the console.
+     * @function createISODate - Creates an ISO date string from calendar info.
      * @function formatRelativeTime - Formats a timestamp as a relative time.
      * @function icon - Generates an icon HTML string.
-     * @function controls - Generate control panels.
+     * @function input - Creates an input with a label and wrapper.
      * 
      * @returns {object} - The utility object.
      */
-    log(origin, message) {
-        /**
-         * Logs messages to the console.
-         * 
-         * @param {string} origin - The origin of the message.
-         * @param {string} message - The message to log.
-         * */
-        console.log(`[${origin}]: ${message}`);
-    },
     createISODate (info) {
         /**
          * Create an ISO date string from the calendar info.
@@ -88,127 +81,13 @@ export const utils = {
     icon(i) {
         /**
          * Generates a formatted icon.
+         * 
+         * TODO: Remove this function and use the icon directly.
          */
         const wrapper = document.createElement("span");
         wrapper.classList.add("bi", `bi-${i}`);
         wrapper.setAttribute("aria-hidden", "true");
         return wrapper;
-    },
-    button(type, source, id = null, context = null) {
-        /**
-         * Generates a button HTML string.
-         * 
-         * Will throw an error if the button type is invalid. This was a great
-         * opportunity to let me learn how to throw errors in JS.
-         * 
-         * @param {string} type - The type of button, valid options in defaults.
-         * @param {string} source - The source of the button, for accessibility.
-         * @param {string} id - The ID of the newly created button.
-         * 
-         * TODO: Update icons.
-         */
-        const defaults = {
-            add: {
-                label: "add",
-                icon: "plus-circle"
-            },
-            submit: {
-                label: "submit",
-                icon: "plus-circle"
-            },
-            delete: {
-                label: "delete",
-                icon: "trash"
-            },
-            edit: {
-                label: "edit",
-                icon: "pencil-square"
-            },
-            cancel: {
-                label: "cancel",
-                icon: "x-square"
-            },
-            close: {
-                label: "close",
-                icon: "x-square"
-            },
-            save: {
-                label: "save",
-                icon: "floppy"
-            },
-            archive: {
-                label: "archive",
-                icon: "archive"
-            },
-            next: {
-                label: "next",
-                icon: "chevron-right"
-            },
-            previous: {
-                label: "previous",
-                icon: "chevron-left"
-            },
-            down: {
-                label: "open",
-                icon: "chevron-down"
-            },
-            hierarchy: {
-                label: "hierarchy",
-                icon: "diagram-2"
-            }
-        };
-
-        // Check if the button type is valid.
-        if (!defaults[type]) { 
-            // If not, throw an error.
-            throw new Error(`Invalid button type: "${type}"`);
-        };
-
-        let buttonId = "";
-        if (!id) {
-            buttonId = `${type}-${source}`;
-        } else {
-            buttonId = `${type}-${source}-${id}`;
-        }
-
-        let buttonLabel = "";
-        if (context) {
-            buttonLabel = `${context} ${defaults[type].label} ${source}`;
-        } else {
-            buttonLabel = `${defaults[type].label} ${source}`;
-        };
-
-        // Create the button, and add classes and attributes.
-        const button = document.createElement("button");
-        button.type = "button";
-        button.id = buttonId;
-        button.classList.add("button", `button-${type}`);
-        button.title = buttonLabel;
-        button.ariaLabel = buttonLabel;
-
-        const icon = document.createElement("span");
-        icon.setAttribute("aria-hidden", "true");
-        icon.classList.add("bi", `bi-${defaults[type].icon}`);
-        button.appendChild(icon);
-
-        // Return the button.
-        return button;
-    },
-    meetsRequirements(formId) {
-        /**
-         * Checks if the requirements are met.
-         * 
-         * @param {string} formId - The ID of the form to check.
-         * 
-         * @returns {boolean} - True if the requirements are met, false if not.
-         */
-        const form = document.getElementById(formId);
-        const requiredInputs = form.querySelectorAll("[required]");
-        for (let input of requiredInputs) {
-            if (!input.value.trim()) {
-                return false;
-            };
-        };
     },
     input (name, type, required = null, location = null, extra = null) {
         /**
@@ -227,7 +106,7 @@ export const utils = {
     
         // If the input is invalid, log an error.
         if (!name || typeof name !== "string") {
-            return "[utils input]: ERROR - Input name is not formatted correctly. Please report this issue on GitHub.";
+            return "[utils.input]: ERROR - Input name is not formatted correctly. Please report this issue on GitHub.";
         };
     
         // Replace dashes with spaces, and split the text.
@@ -247,7 +126,7 @@ export const utils = {
     
         // If no text is found, log an error.
         } else {
-            console.log("[utils input]: ERROR - No text found for an input label. Please report this issue on GitHub.");
+            console.log("[utils.input]: ERROR - No text found for an input label. Please report this issue on GitHub.");
             return "Untitled";
         };
     
@@ -308,11 +187,10 @@ export const utils = {
     
         // Add extra data to the input.
         if (type === "date" && extra) {
-            console.log(`[utils - input]: Adding date ${extra} to input ${name}`);
-            const [year, month, day] = extra.split("-").map(Number);
-            const date = `${year}-${(month + 1).toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-            input.value = date;
-            console.log(`[utils - input]: Adding date ${date} to input ${name}`);
+            input.value = extra;
+            if (user.debug === true) {
+                console.log(`[utils.input]: Adding date ${extra} to input ${name}`);
+            };
         };
         wrapper.appendChild(input);
     

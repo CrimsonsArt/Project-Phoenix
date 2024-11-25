@@ -21,6 +21,7 @@ export const tasks = {
      * 
      * TODO: Allow users to set due dates for tasks.
      * TODO: Allow users to create task hierarchies.
+     * TODO: Add confirmation dialog for completing tasks, and then archive them.
      */
     add() {
         /**
@@ -189,7 +190,9 @@ export const tasks = {
         };
 
         // Log to console, and save changes.
-        utils.log("Task", `Deleting task with ID: ${id}`);
+        if (user.debug === true) {
+            console.log("[tasks.delete]: ", `Deleting task with ID: ${id}`);
+        };
         user.save();
     },
     openMenu(id) {
@@ -251,19 +254,17 @@ export const tasks = {
         editForm.appendChild(editLabel);
         editForm.appendChild(editInput).addEventListener("keydown", (event) => {
             // BUG: Fix, still saves on button and enter press.
-            if (utils.meetsRequirements("task-form")) { // Check if the form is valid.
-                if (event.key === "Enter") {
-                    event.preventDefault(); // Prevent the form from submitting.
-                    this.save(id);
-                } else if (event.key === "Escape") {
-                    this.cancel(id);
-                };
-            } else {
-                utils.log("Task", "Form requirements not met.");
+            if (event.key === "Enter") {
+                event.preventDefault(); // Prevent the form from submitting.
+                this.save(id);
+            } else if (event.key === "Escape") {
+                this.cancel(id);
             };
         });
         wrapper.prepend(editForm); // Add the edit form to the task wrapper.
-        utils.log("Task", `Editing task with ID: ${id}`); // Log to console.
+        if (user.debug === true) {
+            console.log("[tasks.edit]: ", `Editing task with ID: ${id}`);
+        };
         editInput.focus(); // Focus on the input element.
     },
     cancelEdit(id) {
@@ -289,7 +290,9 @@ export const tasks = {
         const newText = document.getElementById(`editing-task-${id}`);
         const taskIndex = user.tasks.findIndex(task => task.id === id);
         if (taskIndex === -1) {
-            utils.log("Task", `Could not find task with ID: ${id}`);
+            if (user.debug === true) {
+                console.log("[tasks.save]: ", `Could not find task with ID: ${id}`);
+            };
             return; // Return if the task doesn't exist.
         };
 
@@ -331,10 +334,14 @@ export const tasks = {
             const reloadedWrapper = tasks.render.task(task.id, "object");
             wrapper.replaceWith(reloadedWrapper);
             if (task.completed) {
-                utils.log("Task", `Completed task with ID: ${id}`);
+                if (user.debug === true) {
+                    console.log("[tasks.complete]: " + `Completed task with ID: ${id}`);
+                };
                 //toast.add("Task complete, good job!", "success");
             } else {
-                utils.log("Task", `Marked task incomplete with ID: ${id}`);
+                if (user.debug === true) {
+                    console.log("[tasks.complete]: " + `Marked task incomplete with ID: ${id}`);
+                };
             };
         };
     },

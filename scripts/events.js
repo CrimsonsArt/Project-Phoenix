@@ -76,7 +76,9 @@ export const events = {
             const wrapper = document.createElement("li");
             wrapper.classList.add("full-event");
             wrapper.dataset.id = data.id;
-            console.log(`[events.render.compact]: Rendering full event ${data.id}`);
+            if (user.debug === true) {
+                console.log(`[events.render.full]: Rendering full event ${data.id}`);
+            };
 
             // Add the title.
             const title = document.createElement("h6");
@@ -153,8 +155,10 @@ export const events = {
             editButton.ariaLabel = "Edit this event.";
             editButton.title = "Edit this event.";
             editButton.textContent = "Edit";
-            console.log(`[events.render.full]: Adding edit button for event ${data.id}`);
             controls.appendChild(editButton).addEventListener("click", () => events.edit(data.id));
+            if (user.debug === true) {
+                console.log(`[events.render.full]: Adding edit button for event ${data.id}`);
+            };
 
             // Add the delete button.
             const deleteButton = document.createElement("button");
@@ -227,19 +231,13 @@ export const events = {
 
             // Create the list of events.
             const list = document.createElement("ul");
+            list.dataset.date = cell.dataset.date;
+            list.dataset.weekday = cell.dataset.weekday;
             list.id = "planner-list";
             listWrapper.appendChild(list);
 
             // Find events for today, and add them to the planner.
-            // CONSIDER: Sort events by time, earliest first.
-            console.log(`events.render.planner: Finding events for ${cell.dataset.date}`);
-            const eventsForDate = user.events.filter(event => event.date.start === cell.dataset.date);
-            if (eventsForDate) {
-                eventsForDate.forEach((event) => {
-                    let eventItem = events.render.full(event);
-                    list.appendChild(eventItem);
-                });
-            };
+            events.find(cell.dataset.date, list, "full");
 
             // Render the planner control panel.
             // CONSIDER: Append this before the list.
@@ -255,7 +253,9 @@ export const events = {
              * @param {string} action - The action to take when adding the event.
              */
             // Set the form ID.
-            console.log(`[events.render.form]: Rendering form for ${id}`);
+            if (user.debug === true) {
+                console.log(`[events.render.form]: Rendering form for ${id}`);
+            };
             const formId = `${id}-form`;
 
             // If a previous form exists, remove it.
@@ -401,7 +401,7 @@ export const events = {
                 isCustom: false, // Boolean for custom recurring events.
                 time: null, // Time frequency. (daily, weekly, monthly, yearly, custom)
                 number: null, // Number of times to repeat.
-                day: null // Day of the week to repeat. (0-6)
+                weekday: null // Day of the week to repeat. (0-6)
             } // If the event is recurring.
         };
     },
@@ -452,7 +452,7 @@ export const events = {
             // Add the day of the week for the event.
             if (data.date.start) {
                 // BUG: This is not working as expected.
-                data.recurring.day = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.date;
+                data.recurring.weekday = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.weekday;
             };
 
             if (select.value === "custom") {
@@ -558,148 +558,98 @@ export const events = {
             events.render.plannerControls(cell);
         };
     },
-    lookup (day, month, year, cell = null) {
+    find (date, cell, renderVariant = "compact") {
         /**
-         * Checks if the given day has an event, and adds it to the cell.
+         * Finds events for the currently displayed days.
          * 
-         * @param {number} day - The day to check for events.
-         * @param {number} month - The month to check for events.
-         * @param {number} year - The year to check for events.
+         * @param {string} date - The date to find events for. (YYYY-MM-DD)
          * @param {object} cell - The cell to add the event data to.
-         * 
-         * @returns {object} - The event object if it exists, otherwise null.
-         * 
-         * TODO: Combine with recurring.
-         */
-        const lookupDay = year + "-" + String(month).padStart(2, "0") + "-" + String(day).padStart(2, "0");
-
-        // Find events for this date.
-        const eventsForDate = user.events.filter(event => event.date.start === lookupDay);
-
-        if (eventsForDate.length) {
-            eventsForDate.forEach((event, index) => {
-                if (index < 1) {
-                    // Add event-related data to the cell.
-                    cell.classList.add("event");
-                    cell.appendChild(events.render.compact(event));
-                    //console.log(`[events.lookup]: Found event ${event.id} for ${lookupDay}`);
-
-                // Add a more indicator if there are too many events.
-                } else if (!cell.querySelector(`#more-events-${lookupDay}`)) {
-                    const moreIndicator = document.createElement("button");
-                    moreIndicator.textContent = `+${eventsForDate.length - 1} more`;
-                    moreIndicator.onclick = () => calendar.control.open(cell);
-                    moreIndicator.classList.add("compact-event", "more-events");
-                    moreIndicator.id = `more-events-${lookupDay}`;
-                    moreIndicator.ariaLabel = `Open this day and see ${eventsForDate.length - 1} more events for this day.`;
-                    cell.appendChild(moreIndicator);
-                    //console.log("[events.lookup]: Too many events to display more for " + lookupDay);
-                };
-            });
-        };
-    },
-    recurring (weekNr = null, cell = null, index = null, request = null) {
-        /**
-         * Checks for recurring events and adds them to the calendar.
-         * 
-         * @param {number} week - The week to check for recurring events. (1-6)
-         * @param {object} cell - The cell to add the event data to.
-         * 
-         * TODO: Ensure that recurring events with end dates are added correctly.
-         * TODO: Ensure that events with end dates can't be repeated more often than their length. (Eg, an event that lasts all week can't be repeated daily.)
-         * TODO: Add recurring events to the planner too.
+         * @param {function} renderVariant - The function to use for rendering the event.
          */
         user.events.forEach(event => {
+
+            // If the event is recurring, add it to the calendar multiple times.
             if (event.recurring.isRecurring) {
-                // Get the event's recurring data.
                 const { time, number } = event.recurring;
-
-                // Normalize the dates to UTC.
+                const eventDate = new Date(event.date.start);
+                const cellDate = new Date(cell.dataset.date);
                 const [eventYear, eventMonth, eventDay] = event.date.start.split("-").map(Number);
-                const startDate = new Date(Date.UTC(eventYear, eventMonth, eventDay));
-
                 const [cellYear, cellMonth, cellDay] = cell.dataset.date.split("-").map(Number);
-                const cellDateObj = new Date(Date.UTC(cellYear, cellMonth, cellDay));
-
-                // Calculate the difference in weeks
-                const diffInMilliseconds = cellDateObj - startDate;
+                const diffInMilliseconds = cellDate - eventDate;
                 const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
-                const diffInWeeks = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 7));
-                const diffInMonths = (cellDateObj.getUTCFullYear() - startDate.getUTCFullYear()) * 12 + (cellDateObj.getUTCMonth() - startDate.getUTCMonth());
-
+                const lastDayOfMonth = new Date(cellYear, cellMonth, 0).getUTCDate();
                 let frequency = 0;
                 if (event.recurring.isCustom) {
                     frequency = parseInt(number);
                 };
 
-                // Add daily events.
-                if (
-                    time === "daily" || time === "days"
-                ) {
-                    // Handle custom daily recurrence.
+                // Add yearly events.
+                if (time === "yearly" || time === "years") {
+                    const diffInYears = cellYear - eventYear;
+
+                    // Handle custom yearly recurrence.
                     if (event.recurring.isCustom) {
-                        if (diffInDays >= 0 && diffInDays % frequency === 0) {
-                            cell.appendChild(events.render.compact(event));
-                            if (user.debug === true) {
-                                //console.log(`[events.recurring]: Adding custom daily event ${event.id} that started ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
+                        if (diffInDays >= 0 && diffInYears % frequency === 0) {
+                            if (eventDay === cellDay || (eventDay > lastDayOfMonth && cellDay === lastDayOfMonth)) {
+                                if (renderVariant === "full") {
+                                    cell.appendChild(events.render.full(event));
+                                } else {
+                                    cell.appendChild(events.render.compact(event));
+                                    cell.classList.add("event");
+                                };
+                                if (user.debug === true) {
+                                    console.log(`[events.find]: Adding custom yearly event ${event.id} for the date ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
+                                };
                             };
                         };
 
-                    // Handle standard daily recurrence.
+                    // Handle standard yearly recurrence.
                     } else {
-                        if (event.date.start <= cell.dataset.date) {
-                            cell.appendChild(events.render.compact(event));
-                            if (user.debug === true) {
-                                //console.log(`[events.recurring]: Adding daily event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
-                            }
-                        };
-                    };
-
-                // Add weekly events.
-                } else if (
-                    (time === "weekly" || time === "weeks")
-                    && event.recurring.day === cell.dataset.day
-                ) {
-                    // Handle custom weekly recurrence.
-                    if (event.recurring.isCustom) {
-                        if (diffInWeeks >= 0 && diffInWeeks % frequency === 0) {
-                            cell.appendChild(events.render.compact(event));
-                            if (user.debug === true) {
-                                //console.log(`[events.recurring]: Adding custom weekly event ${event.id} for the date ${event.date.start} with the frequency $${frequency} to ${cell.dataset.date}`);
-                            };
-                        };
-
-                    // Handle standard weekly recurrence.
-                    } else {
-                        if (event.date.start <= cell.dataset.date) {
-                            cell.appendChild(events.render.compact(event));
-                            if (user.debug === true) {
-                                //console.log(`[events.recurring]: Adding weekly event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
+                        if (eventMonth === cellMonth && eventDay === cellDay) {
+                            if (eventYear <= cellYear && eventDate !== cellDate) {
+                                if (renderVariant === "full") {
+                                    cell.appendChild(events.render.full(event));
+                                } else {
+                                    cell.appendChild(events.render.compact(event));
+                                    cell.classList.add("event");
+                                };
+                                if (user.debug === true) {
+                                    console.log(`[events.find]: Adding yearly event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
+                                };
                             };
                         };
                     };
 
                 // Add monthly events.
-                } else if (
-                    time === "monthly" || time === "months"
-                ) {
+                } else if (time === "monthly" || time === "months") {
+                    const diffInMonths = (cellDate.getUTCFullYear() - eventDate.getUTCFullYear()) * 12 + (cellDate.getUTCMonth() - eventDate.getUTCMonth());
+
                     // Handle custom monthly recurrence.
-                    const lastDayOfMonth = new Date(cellYear, cellMonth, 0).getUTCDate();
                     if (event.recurring.isCustom) {
                         if (diffInMonths >= 0 && diffInMonths % frequency === 0) {
 
                             // Handle edge case: Ensure day matches or is valid for the month.
                             if (eventDay <= lastDayOfMonth && eventDay === cellDay) {
-                                cell.appendChild(events.render.compact(event));
+                                if (renderVariant === "full") {
+                                    cell.appendChild(events.render.full(event));
+                                } else {
+                                    cell.appendChild(events.render.compact(event));
+                                    cell.classList.add("event");
+                                };
                                 if (user.debug === true) {
-                                    console.log(`[events.recurring]: Adding custom monthly event ${event.id} for the date ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
+                                    console.log(`[events.find]: Adding custom monthly event ${event.id} for the date ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
                                 };
 
                             // Allow events on the 31st to fall on the last day of shorter months.
                             } else if (eventDay > lastDayOfMonth && cellDay === lastDayOfMonth) {
-                                cell.appendChild(events.render.compact(event));
+                                if (renderVariant === "full") {
+                                    cell.appendChild(events.render.full(event));
+                                } else {
+                                    cell.appendChild(events.render.compact(event));
+                                    cell.classList.add("event");
+                                };
                                 if (user.debug === true) {
-                                    console.log(`[events.recurring]: Adding custom monthly event ${event.id} for the date ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
+                                    console.log(`[events.find]: Adding custom monthly event ${event.id} for the date ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
                                 };
                             };
                         };
@@ -708,22 +658,94 @@ export const events = {
                     } else {
                         if (eventDay === cellDay || (eventDay > lastDayOfMonth && cellDay === lastDayOfMonth)) {
                             if (event.date.start <= cell.dataset.date) {
-                                cell.appendChild(events.render.compact(event));
-                                if (user.debug === true) {
-                                    console.log(`[events.recurring]: Adding monthly event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
+                                if (renderVariant === "full") {
+                                    cell.appendChild(events.render.full(event));
+                                } else {
+                                    cell.appendChild(events.render.compact(event));
+                                    cell.classList.add("event");
                                 };
+                                if (user.debug === true) {
+                                    console.log(`[events.find]: Adding monthly event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
+                                };
+                            };
+                        };
+                    };
+
+                // Add weekly events.
+                } else if (time === "weekly" || time === "weeks") {
+                    // Handle custom weekly recurrence.
+                    if (event.recurring.isCustom) {
+                        const diffInWeeks = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 7));
+                        if (diffInWeeks >= 0 && diffInWeeks % frequency === 0 && event.recurring.weekday === cell.dataset.weekday) {
+                            if (renderVariant === "full") {
+                                cell.appendChild(events.render.full(event));
+                            } else {
+                                cell.appendChild(events.render.compact(event));
+                                cell.classList.add("event");
+                            };
+                            if (user.debug === true) {
+                                console.log(`[events.find]: Adding custom weekly event ${event.id} for the date ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
+                            };
+                        };
+
+                    // Handle standard weekly recurrence.
+                    } else {
+                        if (event.date.start <= cell.dataset.date && event.recurring.weekday === cell.dataset.weekday) {
+                            if (renderVariant === "full") {
+                                cell.appendChild(events.render.full(event));
+                            } else {
+                                cell.appendChild(events.render.compact(event));
+                                cell.classList.add("event");
+                            };
+                            if (user.debug === true) {
+                                console.log(`[events.find]: Adding weekly event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
+                            };
+                        };
+                    };
+
+                // Add daily events
+                } else if (time === "daily" || time === "days") {
+                    // Handle custom daily recurrence.
+                    if (event.recurring.isCustom) {
+                        if (diffInDays >= 0 && diffInDays % frequency === 0) {
+                            if (renderVariant === "full") {
+                                cell.appendChild(events.render.full(event));
+                            } else {
+                                cell.appendChild(events.render.compact(event));
+                                cell.classList.add("event");
+                            };
+                            if (user.debug === true) {
+                                console.log(`[events.find]: Adding custom daily event ${event.id} for the date ${event.date.start} with the frequency ${frequency} to ${cell.dataset.date}`);
+                            };
+                        };
+
+                    // Handle standard daily recurrence.
+                    } else {
+                        if (event.date.start <= cell.dataset.date) {
+                            if (renderVariant === "full") {
+                                cell.appendChild(events.render.full(event));
+                            } else {
+                                cell.appendChild(events.render.compact(event));
+                                cell.classList.add("event");
+                            };
+                            if (user.debug === true) {
+                                console.log(`[events.find]: Adding daily event ${event.id} for the date ${event.date.start} to ${cell.dataset.date}`);
                             };
                         };
                     };
                 };
 
-                // TODO: Add yearly events.
-                /*// Add yearly events.
-                if (time === "yearly" && eventMonth === cellMonth && eventDay === cellDay) {
-                    if (eventYear <= cellYear && eventDate !== cellDate) {
-                        cell.appendChild(events.render.compact(event));
-                    };
-                }:*/
+            // If the event is not recurring, add it to the calendar once.
+            } else if (!event.recurring.isRecurring && event.date.start === date) {
+                if (renderVariant === "full") {
+                    cell.appendChild(events.render.full(event));
+                } else {
+                    cell.appendChild(events.render.compact(event));
+                    cell.classList.add("event");
+                };
+                if (user.debug === true) {
+                    console.log(`[events.find]: Found event ${event.id} for ${date}`);
+                };
             };
         });
     },
@@ -735,7 +757,9 @@ export const events = {
          */
         const event = user.events.findIndex(event => event.id === id);
         if (event !== -1) {
-            console.log(`Deleting event ${id}`);
+            if (user.debug === true) {
+                console.log(`[events.delete]: Deleting event ${id}`);
+            };
             user.events.splice(event, 1);
             user.save();
         };
@@ -747,7 +771,10 @@ export const events = {
          * 
          * @param {number} id - The ID of the event to edit.
          */
-        console.log(`[events.edit]: Editing event ${id}`);
+        if (user.debug === true) {
+            console.log(`[events.edit]: Editing event ${id}`);
+        };
+
         // If the form exists, remove it.
         if (document.getElementById(`edit-event-${id}-form`)) {
             document.getElementById(`edit-event-${id}-form`).remove();

@@ -86,6 +86,9 @@ footer {
     margin: 1% 0;
     width: 95%;
 }
+.closed {
+    display: none;
+}
 
 
 /* HEADER & NAVIGATION */
@@ -189,11 +192,12 @@ nav ul {
     flex: 0.5;
     overflow: hidden;
 }
-.shrunk-week {
+.shrunk-week, .shrunk-week .cell {
     height: 35px;
+    overflow: hidden;
 }
-.shrunk-week .cell {
-    height: 35px;
+.expanded-column {
+    flex: 100;
 }
 #day-view { /*TODO: Change on screen size*/
     display: flex;

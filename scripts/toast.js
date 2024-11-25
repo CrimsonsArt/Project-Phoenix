@@ -16,7 +16,6 @@ export const toast = {
      * 
      * @returns {object} ui - The toast object. 
      * 
-     * CONSIDER: If there are 25 toasts, delete the oldest toast.
      * TODO: Expand the toast log to a menu, with a toast log in it.
      * TODO: Add another tab for the companion log.
      * TODO: Add icons to toast.
@@ -140,24 +139,24 @@ export const toast = {
             });
         //};
     },
-    toggleLog() {
+    toggle () {
         /**
          * Open the toast log list.
          */
-        let logTitle = document.getElementById("log-title");
-        let logList = document.getElementById("log-list");
+        //let logTitle = document.getElementById("log-title");
+        let logList = document.getElementById("toast-list");
         if (!toast.toastLogOpen) {
             // Open toast log.
-            utils.log("UI", "Opening toast log.");
+            console.log("[toast.toggle]: Opening toast log.");
             toast.toastLogOpen = true;
-            logTitle.classList.remove("sr-only");
-            logList.classList.remove("log-closed");
+            //logTitle.classList.remove("sr-only");
+            logList.classList.remove("closed");
         } else {
             // Close toast log.
-            utils.log("UI", "Closing toast log.");
+            console.log("[toast.toggle]: Closing toast log.");
             toast.toastLogOpen = false;
-            logTitle.classList.add("sr-only");
-            logList.classList.add("log-closed");
+            //logTitle.classList.add("sr-only");
+            logList.classList.add("closed");
         };
     }
 };

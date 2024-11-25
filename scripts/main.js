@@ -1,12 +1,11 @@
 /*---------------------------------- IMPORT ----------------------------------*/
-import { utils } from "./utils.js";
-import { menu } from "./menu.js";
 import { user } from "./user.js";
+import { utils } from "./utils.js";
 import { toast } from "./toast.js";
-import { calendar } from "./calendar.js";
 import { tasks } from "./tasks.js";
-import { pomodoro } from "./pomodoro.js";
 import { journal } from "./journal.js";
+import { calendar } from "./calendar.js";
+import { pomodoro } from "./pomodoro.js";
 
 // TODO: Add a cheat for setting the current date.
 
@@ -23,16 +22,17 @@ window.onload = function() {
 
     // Load user data from local storage.
     user.load();
-    user.debug = true; // Enable debug mode.
+    //user.debug = true; // Enable debug mode.
+    user.debug = false; // Disable debug mode.
 
 
     /* --------------------------- USER INTERFACE ----------------------------*/
     // Add event listener for the sidebar menu toggle button.
-    //const menuToggle = document.getElementById("menu-toggle");
-    //menuToggle.addEventListener("click", menu.toggle);
+    const menuToggle = document.getElementById("toast-menu-toggle");
+    menuToggle.addEventListener("click", toast.toggle);
 
     // Load toast messages from local storage.
-    //toast.load();
+    toast.load();
 
     // Update the toast timestamps once every minute.
     //setInterval(toast.updateTimestamps, 60000);
