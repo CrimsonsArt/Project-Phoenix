@@ -566,7 +566,9 @@ export const events = {
          * @param {object} cell - The cell to add the event data to.
          * @param {function} renderVariant - The function to use for rendering the event.
          */
+        if (user.events.length === 0) return; // Skip if there are no events.
         user.events.forEach(event => {
+            if (!event) return; // Skip if the event is not found.
 
             // If the event is recurring, add it to the calendar multiple times.
             if (event.recurring.isRecurring) {
