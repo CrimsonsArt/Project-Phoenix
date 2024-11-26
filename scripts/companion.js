@@ -1,7 +1,7 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 
 /*----------------------------- HELPER FUNCTIONS -----------------------------*/
-export const helper = {
+export const companion = {
     /**
      * Adds functions for the emotional support creature.
      * 
@@ -14,7 +14,12 @@ export const helper = {
      * TODO: Greet the user at the start of the day.
      * TODO: Remind the user to go to bed.
      */
-    summon: function() {
-        let phoenix = document.getElementById("phoenix");
+    summon() {
+        /**
+         * Summons the companion as the page is loaded.
+         * 
+         * TODO: Add summon animation.
+         */
+        let buddy = document.getElementById("buddy");
     }
 };

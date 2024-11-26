@@ -2,9 +2,9 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"); /* Bootstrap Icons */
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap'); /* Open Sans - Google Fonts: Primary font. */
 
+
 /* VARIABLES */
 :root {
-    --base-color: #1b263b;
     --primary-color: #0d1b2a;
     --secondary-color: #415a77;
     --tertiary-color: #778da9;
@@ -13,8 +13,9 @@
     --secondary-font-color: #1b263b;
     --faded-font-color: #aaa;
 
-    --borders: 1px solid #415a77;
+    --borders: 2px solid var(--primary-color);
 }
+
 
 /* ACCESSIBILITY */
 .sr-only { /* Hide "skip to main content"-link. */
@@ -31,117 +32,126 @@
     height: auto;
 }
 
-/* GENERAL */
-html {
-    background-color: var(--primary-color);
-    color: var(--main-font-color);
-    font-family: 'Open Sans', sans-serif;
+
+/* TEXT */
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+h2, h3 {
+    text-align: center;
+}
+h2, h3 {
+    margin: 1% 0 0 0;
+}
+p {
+    margin: 0;
+    padding: 0;
 }
 a:visited {
     color: var(--main-font-color); /* TODO: Change color. */
 }
-h2 {
-    text-align: center;
-}
 
-/* BODY */
-body {
-    height: 100vh;
-    margin: 50px 0 0 0;
+
+/* CORE STYLE */
+html, body {
+    margin: 0;
     padding: 0;
+}
+html {
+    background-color: var(--primary-color);
+    color: var(--main-font-color);
+    font-family: 'Open Sans', sans-serif;
+    height: 100vh;
     width: 100%;
 }
-header {
-    background-color: var(--base-color);
+main {
+    align-items: center;
+    background-color: var(--secondary-color);
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
-    height: 50px;
-    left: 0;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 999;
+    margin: 0;
+    padding: 0 0 3% 0;
 }
-nav ul {
+footer {
+    background-color: var(--primary-color);
+    display: flex;
+    flex-flow: row nowrap;
+    font-size: 0.8em;
+    justify-content: space-between;
+    padding: 0 1%;
+}
+.container {
+    height: 100%;
+    margin: 1% 0;
+    width: 95%;
+}
+.closed {
+    display: none;
+}
+
+
+/* HEADER & NAVIGATION */
+#banner {
     align-items: center;
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
-    list-style: none;
-    margin: 0;
-    padding: 0 1%;
-}
-nav ul li {
-    display: inline;
-}
-main, section {
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
-    margin: auto;
+    position: sticky;
+    top: 0;
+    z-index: 1;
     width: 100%;
 }
-main {
-    position: relative;
+nav {
+    margin: 0;
+    width: 100%;
 }
-section {
-    width: 75%;
-}
-footer {
-    background-color: var(--base-color);
+nav ul {
+    align-items: center;
+    background-color: var(--primary-color);
     display: flex;
-    flex-flow: row nowrap;
     justify-content: space-between;
-    margin: 2% 0 0 0;
-    padding: 0 1%;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
 }
-footer section:last-of-type {
-    text-align: right;
+nav ul li {
+    margin: 0;
+    padding: 0;
 }
 
-/* Toast styling */
-/*
-TODO: Add animation for timeout.
-TODO: Add a progress bar for timeout.
-TODO: Increase toast area size.
-TODO: Move close button to the top right corner, and increase its size.
-BUG: The event date picker overlaps the toast.
-*/
-#log {
-    background-color: var(--base-color);
-    max-height: 100%;
-    max-width: 25%;
+
+/* TOASTS */
+#menu {
+    background-color: var(--primary-color);
+    max-height: calc(100vh - 50px);
+    max-width: 40%;
+    min-width: 25%;
+    overflow: scroll;
     position: fixed;
     right: 0;
     top: 50px;
 }
-#log-list {
-    list-style: none;
-    margin: 0;
-    overflow: scroll;
-    padding: 0;
-}
-#log-toggle {
+#menu-toggle {
     border: none;
     font-size: 1.5em;
-    height: 40px;
-    width: 40px;
+    height: 100%;
+    min-height: 50px;
+    min-width: 50px;
+    width: 100%;
 }
-#log-list.log-closed .toast {
+#toast-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+#toast-list.closed-menu .toast {
     display: none;
 }
-#log-list.log-closed .toast.show-temp {
+#toast-list.closed-menu .toast.show-temp {
     display: block;
 }
-/*.toast {
-    background-color: var(--tertiary-color);
-    color: var(--secondary-font-color);
-    padding: 0 2%;;
-    position: fixed;
-    right: 1%;
-    top: 1%;
-}*/
 .toast {
     margin: 0;
     padding: 2% 5%;
@@ -165,79 +175,119 @@ BUG: The event date picker overlaps the toast.
     border: 1px solid red;
 }
 
-/* Calendar styling */
-#calendar {
+/* CALENDAR */
+#calendar-container {
+    border: var(--borders);
+}
+.calendar-table {
     border: var(--borders);
     display: flex;
     flex-flow: column nowrap;
-    justify-content: center;
 }
-#cal-controller, #cal-events {
+.row {
+    align-content: stretch;
+    border: var(--borders);
     display: flex;
     flex-flow: row nowrap;
     justify-content: center;
 }
-#cal-events {
-    flex-flow: column nowrap;
-}
-#cal-body tr td {
+.cell {
+    align-content: center;
     border: var(--borders);
+    display: table-cell;
+    flex: 1 1 0;
+    min-height: 70px;
+    /*overflow: hidden;  TODO: TESTING ONLY! */
     text-align: center;
+    width: 0;
 }
-/* Calendar event highlighting */
-#cal-body tr td.today {
-    border: 2px solid red;
-}
-#cal-body tr td.event-day {
-    border: 2px solid green;
-}
-#cal-body tr td.today.event-day {
-    border: 4px solid yellow;
-}
-#cal-body tr td.faded-day {
-    color: var(--faded-font-color);
-    opacity: 0.5;
-}
-.cal-date {
-    font-size: 1.2em;
+.day-header {
+    background-color: var(--tertiary-color);
+    color: var(--primary-color);
     font-weight: bold;
 }
-.cal-event {
-    border: var(--borders);
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
-}
-.compact-event {
-    /* TODO: Update colors. */
-    background-color: var(--tertiary-color);
-    border: var(--borders);
-    border-radius: 5%;
-    color: black;
-}
-.dropdown-menu {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    position: absolute;
-}
-.dropdown-closed {
-    display: none;
+.faded {
+    color: var(--faded-font-color);
 }
 
-/* Task styling */
-.task-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+/* CALENDAR - HIGHLIGHTS */
+.today {
+    border: 2px solid red;
 }
-.task-list li {
-    align-items: center;
+.event {
+    border: 2px solid green;
+}
+.today.event {
+    border: 2px solid yellow;
+}
+
+/* CALENDAR - EVENTS */
+.compact-event:not(.more-events) {
+    background-color: var(--primary-color);
+    border-radius: 5%;
+    font-size: 1em;
+    margin: 1%;
+    overflow: hidden;
+    text-wrap: nowrap;
+}
+
+/* CALENDAR - ADD EVENT FORM */
+#custom-repeat-wrapper {
     display: flex;
     flex-flow: row nowrap;
+    justify-content: center;
 }
-.todo-check {
-    order: -1;
+
+/* CALENDAR - DAY VIEW */
+.expanded-day {
+    flex: 100;
+    padding-top: 3%;
+    position: relative;
+}
+.expanded-week, .expanded-week .cell {
+    height: 100%;
+    min-height: 70vh;
+    /*position: relative;*/
+}
+/*.expanded-week .shrunk-day {
+    position: absolute;
+}*/
+.shrunk-day {
+    align-self: stretch;
+    flex: 0.5;
+    overflow: hidden;
+}
+.shrunk-week, .shrunk-week .cell {
+    height: 35px;
+    overflow: hidden;
+}
+.expanded-column {
+    flex: 100;
+}
+#day-view { /*TODO: Change on screen size*/
+    display: flex;
+    flex-flow: row nowrap;
+    height: 100%;
+    justify-content: space-around;
+}
+.expanded-day #day-title {
+    font-size: 2em;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+#close-day-view {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+#planner, #journal, #journal form {
+    background-color: var(--tertiary-color);
+    display: flex;
+    flex-flow: column nowrap;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
 }
 
 /* Pomodoro styling */
@@ -273,46 +323,10 @@ BUG: The event date picker overlaps the toast.
 }
 #pom-circle {
     fill: none;
-    stroke: var(--secondary-color);
+    stroke: var(--primary-color);
     stroke-dasharray: 565.48;
     stroke-dashoffset: 0;
     stroke-width: 8px;
     transform: rotate(-90deg);
     transform-origin: 100px 100px;
-}
-
-/* Settings styling */
-#settings section {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: center;
-}
-
-/* Media queries */
-/* Extra small devices (phones, 600px and down) */
-@media only screen and (max-width: 600px) {
-}
-
-
-
-/* Small devices (portrait tablets and large phones, 600px and up) */
-@media only screen and (min-width: 600px) {
-}
-
-
-
-/* Medium devices (landscape tablets, 768px and up) */
-@media only screen and (min-width: 768px) {
-}
-
-
-
-/* Large devices (laptops/desktops, 992px and up) */
-@media only screen and (min-width: 992px) {
-}
-
-
-
-/* Extra large devices (large laptops and desktops, 1200px and up) */
-@media only screen and (min-width: 1200px) {
 }

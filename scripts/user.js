@@ -1,5 +1,6 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 import { utils } from "./utils.js";
+import { toast } from "./toast.js";
 import { calendar } from "./calendar.js";
 import { pomodoro } from "./pomodoro.js";
 
@@ -21,28 +22,32 @@ export const user = {
      * @function showTasks - See all of the user's tasks in the console.
      * 
      * @returns {object} user - The user's data.
-     * 
-     * TODO: Add settings for the user.
      */
     name: "",
+    debug: false,
     events: [],
     nextEventId: 1,
+    journals: [],
+    nextJournalId: 1,
     tasks: [],
+    focusTask: null,
     nextTaskId: 1,
     pomodoros: [],
     nextPomId: 1,
     toasts: [],
     nextToastId: 1,
 
-    save: function() {
+    save () {
         /**
          * Save user data to local storage.
          */
         const userData = JSON.stringify(this);
         localStorage.setItem("user", userData);
-        utils.log("User - save", "User data successfully saved to local storage.");
+        if (user.debug === true) {
+            console.log("[user.save]: User data successfully saved to local storage.");
+        };
     },
-    load: function() {
+    load () {
         /**
          * Load user data from local storage.
          */
@@ -52,12 +57,16 @@ export const user = {
 
             // Update user object with saved data.
             Object.assign(this, parsedUser);
-            utils.log("User - load", "User data successfully loaded from local storage.");
+            if (user.debug === true) {
+                console.log("[user.load]: User data successfully loaded from local storage.");
+            };
         } else {
-            utils.log("User - load", "No user data found in local storage.");
+            if (user.debug === true) {
+                console.log("[user.load]: No user data found in local storage.");
+            };
         };
     },
-    export: function() {
+    export () {
         /**
          * Export user data to a JSON file.
          */
@@ -73,23 +82,23 @@ export const user = {
         // Create a temporary link element.
         const tempLink = document.createElement("a");
         tempLink.href = url;
-        tempLink.download = `Project-Phoenix-.json`; // FIXME: Add a timestamp to the filename.
+        tempLink.download = `Project-Phoenix-.json`;
+        if (user.debug === true) {
+            console.log("[user.export]: Exporting user data...");
+        };
+
+        // Toast success message.
+        toast.add("Exported user data successfully.", "success");
 
         // Click the link to download the file, and remove it from the DOM.
         tempLink.click();
         URL.revokeObjectURL(url);
-
-        // Toast success message.
-        // TODO: Make it so that the last toast is included.
-        toast.add("Exported user data successfully.", "success");
     },
-    import: function() {
+    import () {
         /**
          * Import user data from a JSON file.
-         * 
-         * BUG: Import is not working.
          */
-        const file = document.getElementById("data-import").files[0];
+        const file = document.getElementById("import-file").files[0];
 
         if (file) {
             const reader = new FileReader();
@@ -100,27 +109,31 @@ export const user = {
 
                     // Update user object with imported data.
                     Object.assign(user, importedData);
-                    utils.log("User - import", "Imported user data successfully from file.");
+                    if (user.debug === true) {
+                        console.log("[user.import]: Imported user data successfully from file.");
+                    };
 
                     // Save the imported data to local storage.
                     user.save();
 
                     // Show a success toast.
-                    toast.add("Imported and saved user data successfully.", "success");
+                    //toast.add("Imported and saved user data successfully.", "success");
 
-                    // Re-render the calendar and tasks.
-                    calendar.renderCalendar(calendar.thisMonth, calendar.thisYear);
-                    tasks.renderTasks();
+                    // Clear the settings form.
+                    document.getElementById("settings-form").reset();
+
+                    // Re-render the page.
+                    location.reload();
                 } catch (error) {
                     // Show error toast.
-                    toast.add("Failed to import user data. Please ensure it is a valid JSON file and try again.", "error");
+                    //toast.add("Failed to import user data. Please ensure it is a valid JSON file and try again.", "error");
                 };
             };
             // Read the file as text.
             reader.readAsText(file);
         };
     },
-    format: function() {
+    format () {
         /**
          * Delete user data from local storage.
          * 
@@ -143,32 +156,12 @@ export const user = {
         localStorage.removeItem("user");
 
         // Reload the page.
-        window.location.reload();
+        location.reload();
 
         // Toast success message and log the message.
-        toast.add("Deleted user data successfully.", "success");
-        utils.log("User - format", "Deleted user data successfully.");
-    },
-    show: {
-        events() {
-            /**
-             * Show all of the user's events in the console.
-             * 
-             * TODO: Update.
-             */
-            utils.log("Console - showEvents", "Showing all of the user's events in the console...");
-            user.events.forEach((event, index) => {
-                utils.log(`Console - event ${index + 1}`, `${event.title}, Date: ${event.date}, Time: ${event.time}, Description: ${event.description}`);
-            });
-        },
-        tasks() {
-            /**
-             * Show all of the user's tasks in the console.
-             */
-            utils.log("Console - showTasks", "Showing all of the user's tasks in the console...");
-            user.tasks.forEach((task) => {
-                utils.log(`Console - task ${task.id}`, `${task.text} - ${task.completed ? "Complete" : "Incomplete"} - ${task.archived ? "Archived" : "Not archived"}`);
-            });
-        }
+        //toast.add("Deleted user data successfully.", "success");
+        if (user.debug === true) {
+            console.log("[user.format]: Deleted user data successfully.");
+        };
     }
 };

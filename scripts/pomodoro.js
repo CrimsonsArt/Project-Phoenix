@@ -45,19 +45,25 @@ export const pomodoro = {
             pomodoro.isBreak = false;
             pomodoro.timer = setInterval(() => pomodoro.update(), 1000);
             updateButton("pause");
-            utils.log("Pomodoro", "Starting timer.");
+            if (user.debug === true) {
+                console.log("[pomodoro.start]: Starting timer.");
+            };
 
         // Else, act as resume.
         } else if (pomodoro.isPaused) {
             pomodoro.isPaused = false;
             updateButton("pause");
-            utils.log("Pomodoro", "Resuming timer.");
+            if (user.debug === true) {
+                console.log("[pomodoro.start]: Resuming timer.");
+            };
 
         // Else, act as pause.
         } else {
             pomodoro.isPaused = true;
             updateButton("resume");
-            utils.log("Pomodoro", "Pausing timer.");
+            if (user.debug === true) {
+                console.log("[pomodoro.start]: Pausing timer.");
+            };
         };
     },
     startBreak(duration = 5) {
@@ -77,7 +83,9 @@ export const pomodoro = {
             if (pomMessage) {
                 pomMessage.textContent = `${duration} minute break`;
             };
-            utils.log("Pomodoro", "Starting break.");
+            if (user.debug === true) {
+                console.log("[pomodoro.startBreak]: Starting break.");
+            };
         };
     },
     advance() {
@@ -102,18 +110,20 @@ export const pomodoro = {
             pomodoro.minutes = pomodoro.defaultPomLength;
             pomodoro.seconds = 0;
             pomodoro.timerLength = pomodoro.defaultPomLength;
-            utils.log("Pomodoro", `Starting round ${pomodoro.rounds + 1}`);
+            if (user.debug === true) {
+                console.log("[pomodoro.advance]: " + `Starting round ${pomodoro.rounds + 1}`);
+            };
             pomodoro.start();
         } else {
-            utils.log("Pomodoro", "Finishing up.");
+            if (user.debug === true) {
+                console.log("[pomodoro.advance]: Ending pomodoro session.");
+            };
             pomodoro.endSession();
         };
     },
     endSession(caller = "system") {
         /**
          * Finishes the pomodoro session.
-         * 
-         * TODO: If less than 5 minutes have passed, don't ask if they completed their task.
          */
         const pomLog = {
             id: user.nextPomId,
@@ -129,14 +139,14 @@ export const pomodoro = {
 
         // If the requester is the user, ask if they completed their task.
         if (caller === "user") {
-            utils.log("Pomodoro", `${caller} is ending the pomodoro session.`);
+            /*utils.log("Pomodoro", `${caller} is ending the pomodoro session.`);
             // TODO: Use HTML for this.
             const isTaskComplete = confirm("Did you complete your task?");
 
             // If task is not complete, mark as incomplete.
             if (!isTaskComplete) {
                 pomLog.complete = false;
-            };
+            };*/
 
             // Log seconds spent.
             if (pomodoro.isBreak) {
@@ -153,12 +163,16 @@ export const pomodoro = {
 
         if (caller === "system") {
             // End session normally.
-            utils.log("Pomodoro", `${caller} is ending the pomodoro session.`);
+            if (user.debug === true) {
+                console.log("[pomodoro.endSession]: " + `${caller} is ending the pomodoro session.`);
+            };
             pomodoro.reset("system");
         };
 
         // Reset the pomodoro timer.
-        utils.log("Pomodoro", `Ending ${pomLog.totalTime} minute pomodoro session.`);
+        if (user.debug === true) {
+            console.log("[pomodoro.endSession]: " + `Ending ${pomLog.totalTime} minute pomodoro session.`);
+        };
     },
     reset (caller = "user") {
         /**
@@ -169,7 +183,9 @@ export const pomodoro = {
             caller = "user";
         };
         if (!pomodoro.isActive) {
-            utils.log("Pomodoro", "No timer is currently active.");
+            if (user.debug === true) {
+                console.log("[pomodoro.reset]: No timer is currently active");
+            };
         } else {
             // If the requester is the user, confirm that they want to reset.
             if (caller === "user") {
@@ -177,16 +193,22 @@ export const pomodoro = {
                 const confirmReset = confirm("Are you sure you want to reset the pomodoro timer?");
                 if (confirmReset) {
                     // If so, end the session early.
-                    utils.log("Pomodoro", `${caller} confirmed reset.`);
+                    if (user.debug === true) {
+                        console.log("[pomodoro.reset]: " + `${caller} confirmed reset.`);
+                    };
                     pomodoro.endSession("user");
                 } else {
                     // If not, cancel the reset.
-                    utils.log("Pomodoro", "User canceled reset.");
+                    if (user.debug === true) {
+                        console.log("[pomodoro.reset]: " + `${caller} canceled reset.`);
+                    };
                     return;
                 };
             };
             // Reset the pomodoro timer.
-            utils.log("Pomodoro", "Resetting timer.");
+            if (user.debug === true) {
+                console.log("[pomodoro.reset]: Resetting timer.");
+            };
             clearInterval(pomodoro.timer);
             pomodoro.timer = null;
             pomodoro.minutes = pomodoro.defaultPomLength;
@@ -208,7 +230,9 @@ export const pomodoro = {
         if (!pomodoro.isPaused) {
             if (pomodoro.seconds === 0 && pomodoro.minutes === 0) {
                 clearInterval(pomodoro.timer);
-                utils.log("Pomodoro", "Timer has ended.");
+                if (user.debug === true) {
+                    console.log("[pomodoro.update]: Timer has ended.");
+                };
                 if (!pomodoro.isBreak) {
                     // Log the time spent on the pomodoro.
                     pomodoro.timeSpent.focusTime += pomodoro.timerLength;
@@ -262,7 +286,6 @@ export const pomodoro = {
         if (timerCircle) {
             timerCircle.style.strokeDashoffset = circleOffset;
         };
-        // TODO: Change the color of the circle, depending on the timer state.
     },
     cheat() {
         /**
@@ -274,12 +297,12 @@ export const pomodoro = {
             // Advance the pomodoro timer.
             pomodoro.minutes = 0;
             pomodoro.seconds = 1;
-            utils.log("Pomodoro - Cheat", "Skipping to the end of the timer.");
+            console.log("[pomodoro.cheat]: Skipping to the end of the timer.");
 
             // Update the UI to reflect the change immediately.
             pomodoro.updateUI();
         } else {
-            utils.log("Pomodoro - Cheat", "No timer is currently active.");
+            console.log("[pomodoro.cheat]: No timer is currently active.");
         };
     }
 };

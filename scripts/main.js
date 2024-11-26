@@ -1,12 +1,15 @@
 /*---------------------------------- IMPORT ----------------------------------*/
-import { utils } from "./utils.js";
 import { user } from "./user.js";
+import { utils } from "./utils.js";
 import { toast } from "./toast.js";
-import { calendar } from "./calendar.js";
-import { journal } from "./journal.js";
 import { tasks } from "./tasks.js";
+import { journal } from "./journal.js";
+import { calendar } from "./calendar.js";
 import { pomodoro } from "./pomodoro.js";
 
+// TODO: Add a cheat for setting the current date.
+// TODO: Add settings for the user.
+// TODO: Add github-like activity display for statistics.
 
 /*---------------------------------- ONLOAD ----------------------------------*/
 window.onload = function() {
@@ -14,49 +17,42 @@ window.onload = function() {
      * Onload function that runs when the page is loaded.
      */
     /*---------------------------- INITIALIZATION ----------------------------*/
-    // Load testing cheats.
+    /*// Load testing cheats.
     window.pomodoro = pomodoro;
     window.user = user;
-    window.toast = toast;
+    window.toast = toast;*/
 
     // Load user data from local storage.
     user.load();
+    //user.debug = true; // Enable debug mode.
+    user.debug = false; // Disable debug mode.
 
 
     /* --------------------------- USER INTERFACE ----------------------------*/
+    // Add event listener for the sidebar menu toggle button.
+    const menuToggle = document.getElementById("menu-toggle");
+    menuToggle.addEventListener("click", toast.toggle);
+
     // Load toast messages from local storage.
     toast.load();
-
-    // Add event listener for the toast menu toggle button.
-    const logToggle = document.getElementById("log-toggle");
-    logToggle.addEventListener("click", toast.toggleLog);
 
     // Update the toast timestamps once every minute.
     setInterval(toast.updateTimestamps, 60000);
 
-    // Testing area.
-    /*utils.toast("This is a test warning message.", "warning");
-    utils.toast("This is a test error message.", "error");
-    utils.toast("This is a test success message.", "success");
-    utils.toast("Welcome back!"); */
-
 
     /*------------------------------- CALENDAR -------------------------------*/
-    /*
     // Render the calendar, and initialize its events.
-    calendar.renderCalendar(calendar.thisMonth, calendar.thisYear);
-    let calPrev = document.getElementById("cal-prev");
-    let calNext = document.getElementById("cal-next");
-    calPrev.addEventListener("click", calendar.previous);
-    calNext.addEventListener("click", calendar.next);
-    */
     const today = new Date();
-    calendar.render.fullCalendar(today.getFullYear(), today.getMonth());
+    calendar.render.table();
+    // CONSIDER: [ALT + SHIFT] to go to the next day with an event.
+    // CONSIDER: [LEFT ARROW | A] to go to the previous month.
+    // CONSIDER: [RIGHT ARROW | D] to go to the next month.
 
 
     /*-------------------------------- TASKS ---------------------------------*/
     // Load the tasks from local storage.
     tasks.load();
+    tasks.render.list();
 
     // Add event listener for the add task button.
     const taskButton = document.getElementById("add-task");
@@ -84,7 +80,7 @@ window.onload = function() {
         const button = document.getElementById(buttonId);
         if (button) {
             button.addEventListener("click", pomActions[buttonId]);
-        }
+        };
     });
 
 
@@ -99,6 +95,8 @@ window.onload = function() {
         const button = document.getElementById(buttonId);
         if (button) {
             button.addEventListener("click", settingsActions[buttonId]);
-        }
+        };
     });
+
+    // Finished loading.
 };

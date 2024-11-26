@@ -16,13 +16,12 @@ export const toast = {
      * 
      * @returns {object} ui - The toast object. 
      * 
-     * CONSIDER: If there are 25 toasts, delete the oldest toast.
      * TODO: Expand the toast log to a menu, with a toast log in it.
      * TODO: Add another tab for the companion log.
      * TODO: Add icons to toast.
      * CONSIDER: Open toast-log if user clicks on active toast.
      */
-    toastLogOpen: false,
+    isOpen: false,
     add(message, title = "info") {
         /**
          * Create a new toast message.
@@ -31,21 +30,23 @@ export const toast = {
          * @param {string} title - The title of the toast.
          * @param {string} title - "info" - "success" - "warning" - "error"
          */
-        const toast = {
+        const data = {
             id: user.nextToastId,
             title: title,
             message: message,
             time: Date.now()
         };
-        user.toasts.push(toast); // Add toast to user object.
+        user.toasts.push(data); // Add toast to user object.
         user.nextToastId++; // Increment next toast ID.
         user.save(); // Save changes to user object.
 
         // Render toast.
-        if (!this.toastLogOpen) {
-            this.render(toast, 1);
+        if (!toast.isOpen) {
+            toast.render(data, 1);
+            console.log("[toast.add]: Toast added to log, render popup.");
         } else {
-            this.render(toast);
+            toast.render(data);
+            console.log("[toast.add]: Toast added to log directly.");
         };
     },
     load() {
@@ -55,8 +56,8 @@ export const toast = {
          */
         // Check if user has any toasts.
         if (user.toasts && user.toasts.length > 0) {
-            user.toasts.forEach(toast => {
-                this.render(toast);
+            user.toasts.forEach(data => {
+                toast.render(data);
             });
         };
     },
@@ -86,10 +87,10 @@ export const toast = {
             <span class="sr-only">Toast generated: </span>
             <time datetime="${datetime}" aria-label="${timeLabel}">${utils.formatRelativeTime(time)}</time>
         </p>`;
-        wrapper.appendChild(utils.button("delete", "toast", data.id));
+        //wrapper.appendChild(utils.button("delete", "toast", data.id));
 
         // Check if toast log is open, if not, add "show-temp" class.
-        if (!this.toastLogOpen && isNew) {
+        if (!toast.isOpen && isNew) {
             wrapper.classList.add("show-temp");
 
             // Remove "show-temp" class after 5 seconds.
@@ -98,10 +99,10 @@ export const toast = {
         };
 
         // Add toast to list.
-        document.querySelector("#log-list").prepend(wrapper);
+        document.querySelector("#toast-list").prepend(wrapper);
 
         // Add event listener to delete button.
-        document.getElementById(`delete-toast-${data.id}`).addEventListener("click", () => this.delete(data.id));
+        //document.getElementById(`delete-toast-${data.id}`).addEventListener("click", () => toast.delete(data.id));
     },
     delete(id) {
         /**
@@ -131,7 +132,7 @@ export const toast = {
          * will then call the formatRelativeTime() function using that timestamp
          * to update the relative time in the toast.
          */
-        //if (toast.toastLogOpen) { // TODO: Add "or, if a toast is visible."
+        //if (toast.isOpen) { // TODO: Add "or, if a toast is visible."
             const toasts = document.querySelectorAll(".toast");
             toasts.forEach(toast => {
                 let timeElement = toast.querySelector("time");
@@ -140,24 +141,24 @@ export const toast = {
             });
         //};
     },
-    toggleLog() {
+    toggle () {
         /**
-         * Open the toast log list.
+         * Open the toast log menu.
          */
-        let logTitle = document.getElementById("log-title");
-        let logList = document.getElementById("log-list");
-        if (!toast.toastLogOpen) {
+        const logTitle = document.getElementById("log-title");
+        const list = document.getElementById("toast-list");
+        if (!toast.isOpen) {
             // Open toast log.
-            utils.log("UI", "Opening toast log.");
-            toast.toastLogOpen = true;
+            console.log("[toast.toggle]: Opening toast log.");
+            toast.isOpen = true;
             logTitle.classList.remove("sr-only");
-            logList.classList.remove("log-closed");
+            list.classList.remove("closed-menu");
         } else {
             // Close toast log.
-            utils.log("UI", "Closing toast log.");
-            toast.toastLogOpen = false;
+            console.log("[toast.toggle]: Closing toast log.");
+            toast.isOpen = false;
             logTitle.classList.add("sr-only");
-            logList.classList.add("log-closed");
+            list.classList.add("closed-menu");
         };
     }
 };

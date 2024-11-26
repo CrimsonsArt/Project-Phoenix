@@ -4,85 +4,29 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="author" content="CrimsonsArt">
-        <meta name="description" content="A daily planner to help notice and manage ADHD burnout.">
+        <meta name="description" content="A daily planner for ADHD organization.">
         <title>Project Phoenix</title>
         <link rel="stylesheet" href="style/style.css">
     </head>
-
     <body>
-        <header>
-            <a href="#main" class="sr-only">Skip to main content</a>
-            <nav>
+        <header id="banner">
+            <a href="#main" class="sr-only skip">Skip to main content</a>
+            <nav id="nav-main" aria-label="Main navigation">
                 <ul>
                     <li><h1><a href="index.html">Project Phoenix</a></h1></li>
-                    <li><button id="log-toggle" type="button" title="Open toast log" aria-label="Open toast log"><span class="bi bi-list" aria-hidden="true"></span></button></li>
+                    <li><button id="menu-toggle" type="button" title="Open menu" aria-label="Open menu"><span class="bi bi-list" aria-hidden="true"></span></button></li>
                 </ul>
             </nav>
         </header>
-
         <main>
-            <section id="calendar" class="container">
-                <h2>Calendar</h2>
-                <table id="cal-table">
-                    <caption id="cal-title">
-                        <span id="cal-title-month" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"></span>
-                        <span id="cal-title-year" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"></span>
-                        <!-- Dropdowns are displayed here. -->
-                        <ul id="month-dropdown" class="dropdown-menu dropdown-closed">
-                            <!-- Months are displayed here. -->
-                            <li data-month="0">January</li>
-                            <li data-month="1">February</li>
-                            <li data-month="2">March</li>
-                            <li data-month="3">April</li>
-                            <li data-month="4">May</li>
-                            <li data-month="5">June</li>
-                            <li data-month="6">July</li>
-                            <li data-month="7">August</li>
-                            <li data-month="8">September</li>
-                            <li data-month="9">October</li>
-                            <li data-month="10">November</li>
-                            <li data-month="11">December</li>
-                        </ul>
-                        <ul id="year-dropdown" class="dropdown-menu dropdown-closed">
-                            <!-- Years are displayed here. -->
-                        </ul>
-                    </caption>
-                    <thead id="cal-head">
-                        <tr id="weekdays">
-                            <th>Monday</th>
-                            <th>Tuesday</th>
-                            <th>Wednesday</th>
-                            <th>Thursday</th>
-                            <th>Friday</th>
-                            <th>Saturday</th>
-                            <th>Sunday</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cal-body">
-                    </tbody>
-                </table>
+            <section id="calendar-container" class="container">
+                <h2 class="sr-only">Calendar</h2>
             </section>
 
-            <section id="journal">
-                <h2>Journal</h2>
-            </section>
-
-            <section id="tasks">
-                <h2>Tasks</h2>
-                <section id="todo" class="container">
-                    <h3>Todo list</h3>
-                    <form id="task-form" action="">
-                        <label for="todo-task">New task: </label>
-                        <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
-                        <button id="add-task" type="submit" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
-                    </form>
-                    <ul id="todo-list" class="task-list">
-                        <!-- Tasks are displayed here. -->
-                    </ul>
-                </section>
-
-                <section id="pomodoro" class="container">
-                    <h3>Pomodoro timer</h3>
+            <section id="tasks" class="container">
+                <h2 class="sr-only">Tasks</h2>
+                <section id="pomodoro">
+                    <h3>Focus timer</h3>
                     <div id="pom-display">
                         <svg id="pom-svg">
                             <circle id="pom-circle" cx="100" cy="100" r="90"></circle>
@@ -92,48 +36,110 @@
                             <span id="pom-message"></span>
                         </p>
                     </div>
-                    <div id="pomodoro-controller">
+                    <div id="pomodoro-controller" class="controller">
                         <button id="pom-start" type="button" title="Start timer" aria-label="Start timer"><span id="pomodoro-activity-icon" class="bi bi-play-fill" aria-hidden="true"></span></button>
                         <button id="pom-stop" type="button" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
                     </div>
                 </section>
-            <!--
+                <section id="todo">
+                    <h3>Todo list</h3>
+                    <form id="task-form">
+                        <fieldset>
+                            <legend>New task</legend>
+                            <div class="form-field">
+                                <label for="todo-task">New task:</label>
+                                <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="todo-due">Due date:</label>
+                                <input type="date" id="todo-due">
+                            </div>
+                            <button id="add-task" type="submit" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
+                        </fieldset>
+                    </form>
+                    <ul id="todo-list" class="task-list">
+                    </ul>
+                </section>
             </section>
 
-            <section id="helper">
+            <!--<section id="companion">
                 <h2 class="sr-only">Helper</h2>
-                <div id="phoenix"></div>
+                <div id="dialouge">
+                    <p>Test!</p>
+                </div>
+                <div id="friend"><p>:]</p></div>
             </section>-->
 
-            <section id="settings" class="container">
+            <section id="user" class="container">
                 <h2>Settings</h2>
-                <section id="import-export">
-                    <h3 class="sr-only">Import/Export user data</h3>
-                    <input type="file" name="data-import" id="data-import" accept=".json">
-                    <!-- TODO: Add label. -->
-                    <button id="data-import" type="button" title="Import save from file" aria-label="Import user data"><span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
-                    <button id="data-export" type="button" title="Export save as file" aria-label="Export user data"><span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
+                <!--<section id="profile">
+                    <h3>Profile</h3>
+                    
+                    <p>Name: <span id="user-name">CrimsonsArt</span></p>
+                    <p>Birthday: <span id="user-birthdate">February 10th</span></p>
+                    <img src="" alt="User profile image">
                 </section>
-                <section>
-                    <h3 class="sr-only">Delete user data</h3>
-                    <button id="data-delete" type="button" title="Delete user data" aria-label="Delete user data">Delete user data</button>
-                </section>
+                <section id="statistics">
+                    <h3>Statistics</h3>
+                    <p>Start date: <span id="user-start-date">November 7th, 2024</span></p>
+                    <p>Journal entries: <span id="user-entries">0</span></p>
+                    <p>Average mood: <span id="user-mood">Neutral</span></p>
+                    <p>Total tasks: <span id="user-tasks">0</span></p>
+                    <p>Completed tasks: <span id="user-completed">0</span></p>
+                    <p>Pomodoros: <span id="user-pomodoros">0</span></p>
+                    <p>Total pomodoro time: <span id="user-pomodoro-time">00:00</span></p>
+                </section>-->
+                <!--<section id="settings">
+                    <h3>Settings</h3>-->
+                    <form id="settings-form">
+                        <!--<fieldset>
+                            <legend>General settings</legend>
+                            <div class="form-field">
+                                <label for="user-name-input">Name: </label>
+                                <input type="text" id="user-name-input" placeholder="Name" autocomplete="off">
+                            </div>
+                            <div class="form-field">
+                                <label for="date-of-birth">Date of birth: </label>
+                                <input type="date" id="date-of-birth">
+                            </div>
+                        </fieldset>-->
+                        <fieldset>
+                            <legend>Import/Export</legend>
+                            <div class="form-field">
+                                <label for="data-import-file">Import data: </label>
+                                <input id="import-file" type="file" name="import" accept=".json">
+                                <button id="data-import" type="button" title="Import save from file" aria-label="Import user data">Import <span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
+                            </div>
+                            <div class="form-field">
+                                <label for="data-export">Export data: </label>
+                                <button id="data-export" type="button" title="Export save as file" aria-label="Export user data">Export <span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>Delete</legend>
+                            <div class="form-field">
+                                <label for="data-delete">Delete data: </label>
+                                <button id="data-delete" type="button" title="Delete user data" aria-label="Delete user data">Delete user data</button>
+                            </div>
+                        </fieldset>
+                    </form>
+                <!--</section>-->
             </section>
-
-            <section id="log" class="container">
-                <h2 id="log-title" class="sr-only">Toast log</h2>
-                <ul id="log-list" class="log-closed">
-                    <!-- Toasts are displayed here. -->
-                </ul>
+            <section id="menu">
+                <section id="toast-log">
+                    <h2 id="log-title" class="sr-only">Toast log</h2>
+                    <ul id="toast-list" class="closed">
+                    </ul>
+                </section>
             </section>
         </main>
 
         <footer>
             <section>
-                <p>Made by <a href="https://github.com/CrimsonsArt" target="_blank">CrimsonsArt</a></p>
+                <h2>Made by <a href="https://github.com/CrimsonsArt" target="_blank">CrimsonsArt</a></h2>
             </section>
             <section>
-                <p>Version: <span id="version">0.0.7</span></p>
+                <h2>Version: <span id="version">0.2.2</span></h2>
             </section>
         </footer>
 

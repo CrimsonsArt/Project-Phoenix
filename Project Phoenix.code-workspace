@@ -116,11 +116,16 @@
 		"todo-tree.general.showActivityBarBadge": true,
 		"todo-tree.tree.showCountsInTree": true,
 		"cSpell.words": [
+			"Autoethnography",
 			"datetime",
 			"fieldsets",
+			"gridcell",
+			"minigame",
 			"pomodoro",
-			"pomodoros"
+			"pomodoros",
+			"Unlockables"
 		],
-		"todo-tree.tree.scanMode": "workspace only"
+		"todo-tree.tree.scanMode": "workspace only",
+		"liveServer.settings.port": 5501
 	}
 }

@@ -2,6 +2,7 @@
 import { utils } from "./utils.js";
 import { user } from "./user.js";
 import { toast } from "./toast.js";
+//import { toast } from "./toast.js";
 
 /*--------------------------- TO-DO LIST FUNCTIONS ---------------------------*/
 export const tasks = {
@@ -19,40 +20,40 @@ export const tasks = {
      * 
      * @returns {object} - The functions for the to-do list.
      * 
-     * TODO: Allow users to sort tasks.
-     * TODO: Allow users to tag tasks.
-     * TODO: Allow users to estimate the amount of pomodoros required to complete a task.
-     * TODO: Add a way to filter tasks by date, tags and estimated pomodoros.
-     * TODO: Let user pin tasks to the top of the list.
      * TODO: Allow users to set due dates for tasks.
      * TODO: Allow users to create task hierarchies.
+     * TODO: Add confirmation dialog for completing tasks, and then archive them.
      */
     add() {
         /**
          * Add a new task to the to-do list.
          */
         const taskInput = document.getElementById("todo-task");
+        const taskDue = document.getElementById("todo-due");
         if (taskInput.value != "") { // Check if task input is not empty.
             const task = { // Create task object.
                 id: user.nextTaskId,
                 date: Date.now(),
+                dueDate: null,
                 text: taskInput.value,
+                pomodoroEstimate: null,
                 dependencies: [],
                 dependents: [],
                 completed: false,
-                completedDate: null,
-                archived: false,
-                archivedDate: null
+                completedDate: null
             };
-            toast.add("Added task successfully.", "success"); // Success toast.
+            if (taskDue.value != "") {
+                task.dueDate = taskDue.value;
+            };
             user.tasks.push(task); // Add task to user.tasks array.
             user.nextTaskId++; // Increment ID.
             user.save(); // Save changes to user object.
+            document.getElementById("todo-list").prepend(tasks.render.task(task.id));
             taskInput.value = ""; // Clear the task input.
+            toast.add("Task added successfully.", "success");
 
-            tasks.render(task);
         } else { // If task input is empty.
-            toast.add("Task title can't be empty.", "error"); // Error toast.
+            //toast.add("Task title can't be empty.", "error"); // Error toast.
         };
     },
     load() {
@@ -62,104 +63,133 @@ export const tasks = {
         // Check if user has any tasks.
         if (user.tasks && user.tasks.length > 0) {
             user.tasks.forEach(task => {
-                this.render(task);
+                tasks.render.task(task);
             });
         };
     },
-    render(data, request = null) {
+    render: {
         /**
-         * Render the to-do list.
-         * 
-         * @param {object} data - The task object.
-         * 
-         * CONSIDER: Click on task text to edit?
+         * Renders elements of the to-do list.
          */
-        if (!data) return; // If no data is provided, return.
+        list() {
+            /**
+             * Renders the to-do list.
+             */
+            const wrapper = document.getElementById("todo-list");
+            user.tasks.forEach(task => {
+                wrapper.prepend(tasks.render.task(task.id));
+            });
+        },
+        task(id) {
+            /**
+             * Renders a task in the to-do list.
+             * 
+             * @param {number} id - The ID of the task to render.
+             */
+            // Get the task data.
+            const task = user.tasks.find(task => task.id === id);
+            if (!task) return; // Return if the task doesn't exist.
 
-        // Create list item.
-        const wrapper = document.createElement("li");
+            // Create the wrapper.
+            const wrapper = document.createElement("li");
+            wrapper.id = `task-${task.id}`;
+            wrapper.classList.add("task");
 
-        // Add text to the list item.
-        const text = document.createElement("p");
-        text.innerHTML = data.text.charAt(0).toUpperCase() + data.text.slice(1);
-        wrapper.appendChild(text);
+            // Create the text element.
+            const text = document.createElement("p");
+            text.classList.add("task-text");
+            text.id = `task-text-${task.id}`;
+            text.textContent = task.text;
+            wrapper.appendChild(text);
 
-        // Add label for checkbox.
-        const label = document.createElement("label");
-        label.classList.add("sr-only");
-        label.htmlFor = `task-${data.id}-check`;
-        label.innerHTML = data.completed ? "Mark task as incomplete" : "Mark task as completed";
-        wrapper.appendChild(label);
-
-        // Add checkbox.
-        const checkbox = document.createElement("input");
-        checkbox.classList.add("todo-check");
-        checkbox.type = "checkbox";
-        checkbox.id = `task-${data.id}-check`;
-        checkbox.name = `task-${data.id}-check`;
-        checkbox.checked = data.completed;
-        wrapper.appendChild(checkbox).addEventListener("change", () => this.complete(data.id));
-
-        // TODO: Add timestamp.
-
-        // Check if data has been archived.
-        if (data.archived) {
-            // Grab the archive list.
-            let archiveList = document.getElementById("task-archive");
-            if (!archiveList) { // Create archive list if it doesn't exist.
-                archiveList = document.createElement("ol");
-                archiveList.id = "task-archive";
-                archiveList.classList.add("task-list");
-
-                // Add header to archive list.
-                const heading = document.createElement("h3");
-                heading.textContent = "Archived Tasks";
-
-                // Add archive list and heading to DOM.
-                const listSection = document.getElementById("todo");
-                listSection.appendChild(archiveList);
-                listSection.insertBefore(heading, archiveList);
+            // Add due date, if any.
+            if (task.dueDate) {
+                const due = document.createElement("time");
+                due.classList.add("task-due");
+                due.id = `task-due-${task.id}`;
+                due.textContent = task.dueDate;
+                due.dateTime = task.dueDate;
+                wrapper.appendChild(due);
             };
-            // Add ID and class to list item.
-            wrapper.id = `task-archived-${data.id}`;
-            wrapper.classList.add("task", "archived");
 
-            // Make checkbox un-clickable.
-            label.innerHTML = "This task has been archived.";
-            checkbox.disabled = true;
-        } else {
-            // Add ID and class to list item.
-            wrapper.id = `task-${data.id}`;
-            wrapper.classList.add("task", data.completed ? "complete" : "incomplete");
-
-            // Check if task is completed.
-            if (data.completed) { // Add archive button.
-                wrapper.appendChild(utils.button("archive", "task", data.id))
-                    .addEventListener("click", () => this.archive(data.id));
-            } else { // Add edit button.
-                wrapper.appendChild(utils.button("edit", "task", data.id))
-                    .addEventListener("click", () => this.edit(data.id));
+            // Create the checkbox.
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.classList.add("check");
+            checkbox.id = `check-${task.id}`;
+            if (task.completed) {
+                checkbox.checked = true;
             };
-        };
+            wrapper.appendChild(checkbox).addEventListener("change", () => tasks.complete(task.id));
 
-        // Add delete button.
-        wrapper.appendChild(utils.button("delete", data.archived ? "archived task" : "task", data.id)).addEventListener("click", () => this.delete(data.id));
+            // Create the timestamp.
+            const timestamp = document.createElement("time");
+            timestamp.classList.add("task-time");
+            timestamp.id = `task-time-${task.id}`;
+            timestamp.textContent = utils.formatRelativeTime(new Date(task.date), true);
+            wrapper.appendChild(timestamp);
 
-        // TODO: Make task draggable for hierarchy placement.
-        // wrapper.draggable = true;
+            // Create the controls.
+            const controls = document.createElement("div");
+            controls.classList.add("task-controls");
+            controls.id = `task-controls-${task.id}`;
+            wrapper.appendChild(controls);
 
-        // Check if request is "object".
-        if (request === "object") {
-            return wrapper; // Return as object.
-        } else { // Add to DOM.
-            if (data.archived) {
-                // Add task to the top of the archive list.
-                document.querySelector("#task-archive").prepend(wrapper);
-            } else {
-                // Add task to the top of the todo list.
-                document.querySelector("#todo-list").prepend(wrapper);
-            };
-        };
+            // Create the delete button.
+            const delBtn = document.createElement("button");
+            delBtn.classList.add("task-delete");
+            delBtn.id = `task-delete-${task.id}`;
+            delBtn.textContent = "Delete";
+            controls.appendChild(delBtn);
+            delBtn.addEventListener("click", () => tasks.delete(task.id));
+            // TODO: Move this to the dropdown menu.
+
+            // Create the dropdown wrapper.
+            const dropWrapper = document.createElement("div");
+            dropWrapper.classList.add("task-dropdown");
+            dropWrapper.id = `task-dropdown-${task.id}`;
+            controls.appendChild(dropWrapper);
+
+            // Create the menu button.
+            const menu = document.createElement("button");
+            menu.classList.add("task-menu");
+            menu.id = `task-menu-${task.id}`;
+            menu.ariaLabel = "Open task menu.";
+            const menuIcon = document.createElement("span");
+            menuIcon.ariaHidden = true;
+            menuIcon.classList.add("bi", "bi-chevron-down");
+            menuIcon.id = `task-menu-icon-${task.id}`;
+            menu.appendChild(menuIcon);
+            dropWrapper.appendChild(menu);
+            menu.addEventListener("click", () => tasks.openMenu(task.id));
+
+            // Create the options wrapper.
+            const options = document.createElement("div");
+            options.classList.add("task-dropdown-content", "closed");
+            options.id = `task-dropdown-content-${task.id}`;
+            dropWrapper.appendChild(options);
+
+            // Create the edit button.
+            const edit = document.createElement("button");
+            edit.classList.add("task-edit");
+            edit.id = `task-edit-${task.id}`;
+            edit.textContent = "Edit";
+            options.appendChild(edit);
+            edit.addEventListener("click", () => tasks.edit(task.id));
+
+            // Create the dependency button.
+            const dependency = document.createElement("button");
+            dependency.classList.add("task-dependency");
+            dependency.id = `task-dependency-${task.id}`;
+            dependency.textContent = "Add dependency";
+            options.appendChild(dependency);
+            // TODO: Add event listener to dependency button.
+
+            // TODO: Add a "set as current goal" button.
+
+            // Return the HTML object.
+            return wrapper;
+        }
     },
     delete(id) {
         /**
@@ -177,8 +207,29 @@ export const tasks = {
         };
 
         // Log to console, and save changes.
-        utils.log("Task", `Deleting task with ID: ${id}`);
+        if (user.debug === true) {
+            console.log("[tasks.delete]: ", `Deleting task with ID: ${id}`);
+        };
         user.save();
+        toast.add("Task deleted successfully.", "success");
+    },
+    openMenu(id) {
+        /**
+         * Open the task menu.
+         */
+        const dropdown = document.getElementById(`task-dropdown-content-${id}`);
+        const menu = document.getElementById(`task-menu-${id}`);
+        const icon = document.getElementById(`task-menu-icon-${id}`);
+        dropdown.classList.toggle("closed");
+        if (dropdown.classList.contains("closed")) {
+            menu.ariaLabel = "Open task menu";
+            menu.ariaExpanded = false;
+            icon.classList.toggle("bi-chevron-up");
+        } else {
+            menu.ariaLabel = "Close task menu";
+            menu.ariaExpanded = true;
+            icon.classList.toggle("bi-chevron-up");
+        };
     },
     edit(id) {
         /**
@@ -200,6 +251,7 @@ export const tasks = {
         // Turn the task paragraph into an edit form.
         const editForm = document.createElement("form");
         editForm.id = `editing-task-wrapper-${id}`;
+        editForm.classList.add("edit-task-wrapper");
 
         // Create the label and input elements.
         const editLabel = document.createElement("label");
@@ -207,8 +259,8 @@ export const tasks = {
 
         // Remove the original elements.
         wrapper.querySelector("p").remove();
-        document.getElementById(`edit-task-${id}`).remove();
-        document.getElementById(`delete-task-${id}`).remove();
+        //document.getElementById(`edit-task-${id}`).remove();
+        //document.getElementById(`delete-task-${id}`).remove();
 
         // Set the label attributes.
         editLabel.htmlFor = `editing-task-${id}`;
@@ -220,33 +272,31 @@ export const tasks = {
         editInput.id = `editing-task-${id}`;
         editInput.value = originalTitle;
         editInput.autocomplete = "off";
-        editInput.class = "edit-task";
+        editInput.classList.add("edit-task");
         editInput.type = "text";
 
         // Create the save and cancel buttons, and add event listeners.
-        wrapper.appendChild(utils.button("save", "task", id)).addEventListener("click", () => this.save(id));
-        wrapper.appendChild(utils.button("cancel", "task", id)).addEventListener("click", () => this.cancel(id));
+        wrapper.appendChild(utils.button("save", "task", id)).addEventListener("click", () => tasks.save(id));
+        wrapper.appendChild(utils.button("cancel", "task", id)).addEventListener("click", () => tasks.cancelEdit(id));
 
         // Append the label and input elements to the edit form.
         editForm.appendChild(editLabel);
         editForm.appendChild(editInput).addEventListener("keydown", (event) => {
             // BUG: Fix, still saves on button and enter press.
-            if (utils.meetsRequirements("task-form")) { // Check if the form is valid.
-                if (event.key === "Enter") {
-                    event.preventDefault(); // Prevent the form from submitting.
-                    this.save(id);
-                } else if (event.key === "Escape") {
-                    this.cancel(id);
-                };
-            } else {
-                utils.log("Task", "Form requirements not met.");
+            if (event.key === "Enter") {
+                event.preventDefault(); // Prevent the form from submitting.
+                this.save(id);
+            } else if (event.key === "Escape") {
+                this.cancel(id);
             };
         });
         wrapper.prepend(editForm); // Add the edit form to the task wrapper.
-        utils.log("Task", `Editing task with ID: ${id}`); // Log to console.
+        if (user.debug === true) {
+            console.log("[tasks.edit]: ", `Editing task with ID: ${id}`);
+        };
         editInput.focus(); // Focus on the input element.
     },
-    cancel(id) {
+    cancelEdit(id) {
         /**
          * Cancel an edit in the to-do list.
          * 
@@ -254,8 +304,9 @@ export const tasks = {
          */
         const wrapper = document.getElementById(`task-${id}`); // Grab the task wrapper.
         if (wrapper) { // Check if the task wrapper exists.
-            const original = this.render(user.tasks.find(task => task.id === id), "object"); // Grab the original task as an object.
-            wrapper.replaceWith(original);
+            const list = document.getElementById("todo-list");
+            list.innerHTML = ""; // Clear the list.
+            tasks.render.list();
         };
     },
     save(id) {
@@ -263,14 +314,14 @@ export const tasks = {
          * Update a task in the to-do list.
          * 
          * @param {number} id - The ID of the task to update.
-         * 
-         * CONSIDER: Success toast.
          */
         // Find the task in the user.tasks object.
         const newText = document.getElementById(`editing-task-${id}`);
         const taskIndex = user.tasks.findIndex(task => task.id === id);
         if (taskIndex === -1) {
-            utils.log("Task", `Could not find task with ID: ${id}`);
+            if (user.debug === true) {
+                console.log("[tasks.save]: ", `Could not find task with ID: ${id}`);
+            };
             return; // Return if the task doesn't exist.
         };
 
@@ -282,10 +333,14 @@ export const tasks = {
         // Reload the task.
         const wrapper = document.getElementById(`task-${id}`);
         if (wrapper) {
-            const reloadedWrapper = this.render(user.tasks[taskIndex], "object");
+            /*const reloadedWrapper = this.render(user.tasks[taskIndex], "object");
             wrapper.replaceWith(reloadedWrapper);
-            utils.log("Task", `Updated task with ID: ${id}`);
+            utils.log("Task", `Updated task with ID: ${id}`);*/
+            const list = document.getElementById("todo-list");
+            list.innerHTML = ""; // Clear the list.
+            tasks.render.list();
         };
+        toast.add("Task updated successfully.", "success");
     },
     complete(id) {
         /**
@@ -306,47 +361,41 @@ export const tasks = {
         // Reload the task.
         const wrapper = document.getElementById(`task-${id}`);
         if (wrapper) {
-            const reloadedWrapper = this.render(task, "object");
+            const reloadedWrapper = tasks.render.task(task.id, "object");
             wrapper.replaceWith(reloadedWrapper);
             if (task.completed) {
-                utils.log("Task", `Completed task with ID: ${id}`);
+                if (user.debug === true) {
+                    console.log("[tasks.complete]: " + `Completed task with ID: ${id}`);
+                };
                 toast.add("Task complete, good job!", "success");
+                //toast.add("Task complete, good job!", "success");
             } else {
-                utils.log("Task", `Marked task incomplete with ID: ${id}`);
+                if (user.debug === true) {
+                    console.log("[tasks.complete]: " + `Marked task incomplete with ID: ${id}`);
+                };
             };
         };
     },
-    archive(id) {
+    hierarchy: {
         /**
-         * Archive a completed task.
-         * 
-         * Should only be called when a task is completed. It is also intended
-         * that once a task has been archived, it cannot be undone, only deleted
-         * from the archive by the user. This is to prevent the user from going
-         * back and fourth between archiving and un-archiving a task.
-         * 
-         * @param {number} id - The ID of the task to archive.
+         * Functions for task hierarchies.
+         * TODO: On click, open hierarchy box.
+         * TODO: If box is open, let user set hierarchy inside it.
+         * TODO: Drag and drop to add hierarchy.
+         * TODO: If task has dependents, display them below it.
+         * TODO: Add progress bar for task with dependents.
+         * TODO: Make task draggable for hierarchy placement.
          */
-        // Find the task in the user.tasks object.
-        const taskIndex = user.tasks.findIndex(task => task.id === id);
-        if (taskIndex === -1) {
-            utils.log("Task", `Could not find task with ID: ${id}`);
-            return; // Return if the task doesn't exist.
-        };
+        open(id) {
+            /**
+             * Opens the hierarchy modal.
+             */
+            /*const wrapper = document.createElement("div");
+            wrapper.classList.add("hierarchy-wrapper");
+            wrapper.id = `hierarchy-${id}`;*/
 
-        // Check if the task is completed.
-        if (user.tasks[taskIndex].completed) {
-            // Mark the task as archived, and save the changes.
-            user.tasks[taskIndex].archived = true;
-            user.save();
-
-            // Render the task in the archive, and remove it from the to-do list.
-            this.render(user.tasks[taskIndex]);
-            document.getElementById(`task-${id}`).remove();
-
-            // Log to console and toast.
-            utils.log("Task", `Archived task with ID: ${id}`);
-            toast.add("Task archived", "success");
-        };
+            console.log("clicked hierarchy");
+            //document.getElementById("todo").prepend(utils.modal("Hierarchy", "Selects for dependents."));
+        }
     }
 };
