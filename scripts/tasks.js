@@ -20,7 +20,6 @@ export const tasks = {
      * 
      * @returns {object} - The functions for the to-do list.
      * 
-     * TODO: Allow users to set due dates for tasks.
      * TODO: Allow users to create task hierarchies.
      * TODO: Add confirmation dialog for completing tasks, and then archive them.
      */
@@ -50,6 +49,7 @@ export const tasks = {
             user.save(); // Save changes to user object.
             document.getElementById("todo-list").prepend(tasks.render.task(task.id));
             taskInput.value = ""; // Clear the task input.
+            taskDue.value = ""; // Clear the due date input.
             toast.add("Task added successfully.", "success");
 
         } else { // If task input is empty.
@@ -140,9 +140,10 @@ export const tasks = {
             delBtn.classList.add("task-delete");
             delBtn.id = `task-delete-${task.id}`;
             delBtn.textContent = "Delete";
+            delBtn.type = "button";
             controls.appendChild(delBtn);
             delBtn.addEventListener("click", () => tasks.delete(task.id));
-            // TODO: Move this to the dropdown menu.
+            // CONSIDER: Move this to the dropdown menu.
 
             // Create the dropdown wrapper.
             const dropWrapper = document.createElement("div");
@@ -155,6 +156,8 @@ export const tasks = {
             menu.classList.add("task-menu");
             menu.id = `task-menu-${task.id}`;
             menu.ariaLabel = "Open task menu.";
+            menu.ariaExpanded = false;
+            menu.type = "button";
             const menuIcon = document.createElement("span");
             menuIcon.ariaHidden = true;
             menuIcon.classList.add("bi", "bi-chevron-down");
@@ -174,6 +177,7 @@ export const tasks = {
             edit.classList.add("task-edit");
             edit.id = `task-edit-${task.id}`;
             edit.textContent = "Edit";
+            edit.type = "button";
             options.appendChild(edit);
             edit.addEventListener("click", () => tasks.edit(task.id));
 
@@ -182,10 +186,17 @@ export const tasks = {
             dependency.classList.add("task-dependency");
             dependency.id = `task-dependency-${task.id}`;
             dependency.textContent = "Add dependency";
+            dependency.type = "button";
             options.appendChild(dependency);
             // TODO: Add event listener to dependency button.
 
             // TODO: Add a "set as current goal" button.
+            const goal = document.createElement("button");
+            goal.classList.add("task-goal");
+            goal.id = `task-goal-${task.id}`;
+            goal.textContent = "Set as goal";
+            goal.type = "button";
+            options.appendChild(goal);
 
             // Return the HTML object.
             return wrapper;
