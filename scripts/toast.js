@@ -74,12 +74,12 @@ export const toast = {
          * CONSIDER: Add source or something in the toast title (e.g. "Import - Success")?
          */
         const wrapper = document.createElement("li");
-        let title = data.title.charAt(0).toUpperCase() + data.title.slice(1);
+        const title = data.title.charAt(0).toUpperCase() + data.title.slice(1);
 
         // Set up timestamp.
-        let time = new Date(data.time);
-        let datetime = time.toISOString();
-        let timeLabel = `${time.toLocaleString("default", { month: "long" })} ${time.getDate()}, ${time.getFullYear()} at ${time.getHours().toString().padStart(2, "0")}:${time.getMinutes().toString().padStart(2, "0")}`;
+        const time = new Date(data.time);
+        const datetime = time.toISOString();
+        const timeLabel = `${time.toLocaleString("default", { month: "long" })} ${time.getDate()}, ${time.getFullYear()} at ${time.getHours().toString().padStart(2, "0")}:${time.getMinutes().toString().padStart(2, "0")}`;
 
         // Add data to toast.
         wrapper.classList.add("toast", data.title);
@@ -90,14 +90,22 @@ export const toast = {
             <span class="sr-only">Toast generated: </span>
             <time datetime="${datetime}" aria-label="${timeLabel}">${utils.formatRelativeTime(time)}</time>
         </p>`;
-        //wrapper.appendChild(utils.button("delete", "toast", data.id));
+
+        // Create the delete button. // TODO: Add icon.
+        const delBtn = document.createElement("button");
+        delBtn.classList.add("toast-delete");
+        delBtn.id = `toast-delete-${data.id}`;
+        delBtn.textContent = "Delete";
+        delBtn.ariaLabel = "Delete toast";
+        delBtn.type = "button";
+        wrapper.appendChild(delBtn);
 
         // Check if toast log is open, if not, add "show-temp" class.
         if (!toast.isOpen && isNew) {
             wrapper.classList.add("show-temp");
 
             // Remove "show-temp" class after 5 seconds.
-            // TODO: Turn this into a setting, changeable by user.
+            // TODO: Turn time into a setting, changeable by user.
             setTimeout(() => wrapper.classList.remove("show-temp"), 5000);
         };
 
@@ -105,7 +113,7 @@ export const toast = {
         document.querySelector("#toast-list").prepend(wrapper);
 
         // Add event listener to delete button.
-        //document.getElementById(`delete-toast-${data.id}`).addEventListener("click", () => toast.delete(data.id));
+        document.getElementById(`toast-delete-${data.id}`).addEventListener("click", () => toast.delete(data.id));
 
         if (user.debug === true) {
             console.log(`[toast.render]: Toast rendered with ID: ${data.id}`);
@@ -127,7 +135,9 @@ export const toast = {
         };
 
         // Log to console, and save changes.
-        utils.log("Toast", `Deleting toast with ID: ${id}`);
+        if (user.debug === true) {
+            console.log(`[toast.delete]: Deleting toast with ID: ${id}`);
+        };
         user.save();
     },
     updateTimestamps() {

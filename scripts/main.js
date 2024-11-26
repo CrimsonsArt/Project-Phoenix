@@ -22,17 +22,45 @@ window.onload = function() {
     window.user = user;
     window.toast = toast;*/
 
+
     // Load user data from local storage.
     user.load();
+
+    if (user.debug === true) {
+        console.log("[onload]: Loading...");
+    }
+
+    const reloading = sessionStorage.getItem("reloading-import");
+    if (reloading) {
+        sessionStorage.removeItem("reloading-import");
+
+        // Show a success toast.
+        toast.add("Imported and saved user data successfully.", "success");
+        if (user.debug === true) {
+            console.log("[onload]: User data imported and saved successfully.");
+        };
+    } else {
+        if (user.debug === true) {
+            console.log("[onLoad]: No user data imported.");
+        };
+    };
+
+    const resetting = sessionStorage.getItem("reloading-format");
+    if (resetting) {
+        sessionStorage.removeItem("reloading-format");
+
+        // Show a success toast.
+        toast.add("Deleted user data successfully.", "success");
+        if (user.debug === true) {
+            console.log("[onload]: User data deleted successfully.");
+        };
+    };
 
 
     /* --------------------------- USER INTERFACE ----------------------------*/
     // Add event listener for the sidebar menu toggle button.
     const menuToggle = document.getElementById("menu-toggle");
     menuToggle.addEventListener("click", toast.toggle);
-
-    // Load toast messages from local storage.
-    toast.load();
 
     // Update the toast timestamps once every minute.
     setInterval(toast.updateTimestamps, 60000);

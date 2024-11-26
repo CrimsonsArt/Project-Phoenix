@@ -57,10 +57,16 @@ export const user = {
 
             // Update user object with saved data.
             Object.assign(this, parsedUser);
+
+            // Load the toasts.
+            toast.load();
+
+            // Log the message.
             if (user.debug === true) {
                 console.log("[user.load]: User data successfully loaded from local storage.");
             };
         } else {
+            // TODO: Start intro sequence.
             if (user.debug === true) {
                 console.log("[user.load]: No user data found in local storage.");
             };
@@ -116,17 +122,19 @@ export const user = {
                     // Save the imported data to local storage.
                     user.save();
 
-                    // Show a success toast.
-                    //toast.add("Imported and saved user data successfully.", "success");
-
                     // Clear the settings form.
                     document.getElementById("settings-form").reset();
 
+                    // Pass reload information to session storage.
+                    sessionStorage.setItem("reloading-import", "true");
+
                     // Re-render the page.
                     location.reload();
+
                 } catch (error) {
                     // Show error toast.
-                    //toast.add("Failed to import user data. Please ensure it is a valid JSON file and try again.", "error");
+                    toast.add("Failed to import user data. Please ensure it is a valid JSON file and try again. If the issue persists, please report this on GitHub.", "error");
+                    return;
                 };
             };
             // Read the file as text.
@@ -155,13 +163,10 @@ export const user = {
         // Clear the local storage.
         localStorage.removeItem("user");
 
+        // Pass reload information to session storage.
+        sessionStorage.setItem("reloading-format", "true");
+
         // Reload the page.
         location.reload();
-
-        // Toast success message and log the message.
-        //toast.add("Deleted user data successfully.", "success");
-        if (user.debug === true) {
-            console.log("[user.format]: Deleted user data successfully.");
-        };
     }
 };

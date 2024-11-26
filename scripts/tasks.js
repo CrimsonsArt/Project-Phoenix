@@ -135,12 +135,13 @@ export const tasks = {
             controls.id = `task-controls-${task.id}`;
             wrapper.appendChild(controls);
 
-            // Create the delete button.
+            // Create the delete button. // TODO: Add icon.
             const delBtn = document.createElement("button");
             delBtn.classList.add("task-delete");
             delBtn.id = `task-delete-${task.id}`;
             delBtn.textContent = "Delete";
             delBtn.type = "button";
+            delBtn.ariaLabel = "Delete task";
             controls.appendChild(delBtn);
             delBtn.addEventListener("click", () => tasks.delete(task.id));
             // CONSIDER: Move this to the dropdown menu.
