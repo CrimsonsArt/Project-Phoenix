@@ -93,22 +93,87 @@ footer {
 
 /* HEADER & NAVIGATION */
 #banner {
+    align-items: center;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 1;
+    width: 100%;
+}
+nav {
+    margin: 0;
+    width: 100%;
 }
 nav ul {
     align-items: center;
     background-color: var(--primary-color);
     display: flex;
-    flex-flow: row nowrap;
+    justify-content: space-between;
     list-style: none;
     margin: 0;
     padding: 0;
-    top: 0;
     width: 100%;
 }
+nav ul li {
+    margin: 0;
+    padding: 0;
+}
 
+
+/* TOASTS */
+#menu {
+    background-color: var(--primary-color);
+    max-height: calc(100vh - 50px);
+    max-width: 40%;
+    min-width: 25%;
+    overflow: scroll;
+    position: fixed;
+    right: 0;
+    top: 50px;
+}
+#menu-toggle {
+    border: none;
+    font-size: 1.5em;
+    height: 100%;
+    min-height: 50px;
+    min-width: 50px;
+    width: 100%;
+}
+#toast-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+#toast-list.closed-menu .toast {
+    display: none;
+}
+#toast-list.closed-menu .toast.show-temp {
+    display: block;
+}
+.toast {
+    margin: 0;
+    padding: 2% 5%;
+}
+.toast-title {
+    font-size: 1.2em;
+}
+.toast-message {
+    margin: 0;
+}
+.info {
+    border: 1px solid var(--secondary-color);
+}
+.success {
+    border: 1px solid green;
+}
+.warning {
+    border: 1px solid yellow;
+}
+.error {
+    border: 1px solid red;
+}
 
 /* CALENDAR */
 #calendar-container {

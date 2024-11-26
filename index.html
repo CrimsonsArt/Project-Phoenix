@@ -14,17 +14,9 @@
             <nav id="nav-main" aria-label="Main navigation">
                 <ul>
                     <li><h1><a href="index.html">Project Phoenix</a></h1></li>
-                    <li><button id="toast-menu-toggle" type="button" title="Open toast log" aria-label="Open toast log"><span class="bi bi-list" aria-hidden="true"></span></button></li>
+                    <li><button id="menu-toggle" type="button" title="Open menu" aria-label="Open menu"><span class="bi bi-list" aria-hidden="true"></span></button></li>
                 </ul>
             </nav>
-            <aside id="toast-menu" class="closed">
-                <section id="toast-log">
-                    <h2>Toast log</h2>
-                    <ul id="toast-list">
-                        Toasts are displayed here.
-                    </ul>
-                </section>
-            </aside>
         </header>
         <main>
             <section id="calendar-container" class="container">
@@ -132,6 +124,13 @@
                         </fieldset>
                     </form>
                 <!--</section>-->
+            </section>
+            <section id="menu">
+                <section id="toast-log">
+                    <h2 id="log-title" class="sr-only">Toast log</h2>
+                    <ul id="toast-list" class="closed">
+                    </ul>
+                </section>
             </section>
         </main>
 

@@ -8,6 +8,8 @@ import { calendar } from "./calendar.js";
 import { pomodoro } from "./pomodoro.js";
 
 // TODO: Add a cheat for setting the current date.
+// TODO: Add settings for the user.
+// TODO: Add github-like activity display for statistics.
 
 /*---------------------------------- ONLOAD ----------------------------------*/
 window.onload = function() {
@@ -28,20 +30,14 @@ window.onload = function() {
 
     /* --------------------------- USER INTERFACE ----------------------------*/
     // Add event listener for the sidebar menu toggle button.
-    const menuToggle = document.getElementById("toast-menu-toggle");
+    const menuToggle = document.getElementById("menu-toggle");
     menuToggle.addEventListener("click", toast.toggle);
 
     // Load toast messages from local storage.
     toast.load();
 
     // Update the toast timestamps once every minute.
-    //setInterval(toast.updateTimestamps, 60000);
-
-    // Testing area.
-    /*utils.toast("This is a test warning message.", "warning");
-    utils.toast("This is a test error message.", "error");
-    utils.toast("This is a test success message.", "success");
-    utils.toast("Welcome back!"); */
+    setInterval(toast.updateTimestamps, 60000);
 
 
     /*------------------------------- CALENDAR -------------------------------*/
@@ -84,7 +80,7 @@ window.onload = function() {
         const button = document.getElementById(buttonId);
         if (button) {
             button.addEventListener("click", pomActions[buttonId]);
-        }
+        };
     });
 
 
@@ -99,6 +95,8 @@ window.onload = function() {
         const button = document.getElementById(buttonId);
         if (button) {
             button.addEventListener("click", settingsActions[buttonId]);
-        }
+        };
     });
+
+    // Finished loading.
 };

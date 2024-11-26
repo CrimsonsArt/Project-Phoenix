@@ -125,7 +125,7 @@
 			"pomodoros",
 			"Unlockables"
 		],
-		"todo-tree.tree.scanMode": "open files",
+		"todo-tree.tree.scanMode": "workspace only",
 		"liveServer.settings.port": 5501
 	}
 }

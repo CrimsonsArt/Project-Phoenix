@@ -1,5 +1,6 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 import { utils } from "./utils.js";
+import { toast } from "./toast.js";
 import { calendar } from "./calendar.js";
 import { pomodoro } from "./pomodoro.js";
 
@@ -21,9 +22,6 @@ export const user = {
      * @function showTasks - See all of the user's tasks in the console.
      * 
      * @returns {object} user - The user's data.
-     * 
-     * TODO: Add settings for the user.
-     * TODO: Add github-like activity display.
      */
     name: "",
     debug: false,
@@ -84,18 +82,17 @@ export const user = {
         // Create a temporary link element.
         const tempLink = document.createElement("a");
         tempLink.href = url;
-        tempLink.download = `Project-Phoenix-.json`; // FIXME: Add a timestamp to the filename.
+        tempLink.download = `Project-Phoenix-.json`;
         if (user.debug === true) {
             console.log("[user.export]: Exporting user data...");
         };
 
+        // Toast success message.
+        toast.add("Exported user data successfully.", "success");
+
         // Click the link to download the file, and remove it from the DOM.
         tempLink.click();
         URL.revokeObjectURL(url);
-
-        // Toast success message.
-        // TODO: Make it so that the last toast is included.
-        //toast.add("Exported user data successfully.", "success");
     },
     import () {
         /**
@@ -166,27 +163,5 @@ export const user = {
         if (user.debug === true) {
             console.log("[user.format]: Deleted user data successfully.");
         };
-    },
-    show: {
-        events () {
-            /**
-             * Show all of the user's events in the console.
-             * 
-             * TODO: Update.
-             */
-            console.log("[user.show.events]: Showing all of the user's events in the console...");
-            user.events.forEach((event, index) => {
-                console.log(`[user.show.event]: ${index + 1} - ${event.title}, Date: ${event.date}, Time: ${event.time}, Description: ${event.description}`);
-            });
-        },
-        tasks () {
-            /**
-             * Show all of the user's tasks in the console.
-             */
-            console.log("[user.show.tasks]: Showing all of the user's tasks in the console...");
-            user.tasks.forEach((task) => {
-                console.log(`[user.show.tasks]: ${task.id} - ${task.text} - ${task.completed ? "Complete" : "Incomplete"} - ${task.archived ? "Archived" : "Not archived"}`);
-            });
-        }
     }
 };

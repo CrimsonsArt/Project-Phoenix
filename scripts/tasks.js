@@ -1,6 +1,7 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 import { utils } from "./utils.js";
 import { user } from "./user.js";
+import { toast } from "./toast.js";
 //import { toast } from "./toast.js";
 
 /*--------------------------- TO-DO LIST FUNCTIONS ---------------------------*/
@@ -28,6 +29,7 @@ export const tasks = {
          * Add a new task to the to-do list.
          */
         const taskInput = document.getElementById("todo-task");
+        const taskDue = document.getElementById("todo-due");
         if (taskInput.value != "") { // Check if task input is not empty.
             const task = { // Create task object.
                 id: user.nextTaskId,
@@ -40,12 +42,15 @@ export const tasks = {
                 completed: false,
                 completedDate: null
             };
-            //toast.add("Added task successfully.", "success"); // Success toast.
+            if (taskDue.value != "") {
+                task.dueDate = taskDue.value;
+            };
             user.tasks.push(task); // Add task to user.tasks array.
             user.nextTaskId++; // Increment ID.
             user.save(); // Save changes to user object.
-            taskInput.value = ""; // Clear the task input.
             document.getElementById("todo-list").prepend(tasks.render.task(task.id));
+            taskInput.value = ""; // Clear the task input.
+            toast.add("Task added successfully.", "success");
 
         } else { // If task input is empty.
             //toast.add("Task title can't be empty.", "error"); // Error toast.
@@ -97,7 +102,15 @@ export const tasks = {
             text.textContent = task.text;
             wrapper.appendChild(text);
 
-            // TODO: Add due date, if any.
+            // Add due date, if any.
+            if (task.dueDate) {
+                const due = document.createElement("time");
+                due.classList.add("task-due");
+                due.id = `task-due-${task.id}`;
+                due.textContent = task.dueDate;
+                due.dateTime = task.dueDate;
+                wrapper.appendChild(due);
+            };
 
             // Create the checkbox.
             const checkbox = document.createElement("input");
@@ -126,7 +139,7 @@ export const tasks = {
             const delBtn = document.createElement("button");
             delBtn.classList.add("task-delete");
             delBtn.id = `task-delete-${task.id}`;
-            delBtn.textContent = "Remove";
+            delBtn.textContent = "Delete";
             controls.appendChild(delBtn);
             delBtn.addEventListener("click", () => tasks.delete(task.id));
             // TODO: Move this to the dropdown menu.
@@ -142,7 +155,11 @@ export const tasks = {
             menu.classList.add("task-menu");
             menu.id = `task-menu-${task.id}`;
             menu.ariaLabel = "Open task menu.";
-            menu.appendChild(utils.icon("chevron-down"));
+            const menuIcon = document.createElement("span");
+            menuIcon.ariaHidden = true;
+            menuIcon.classList.add("bi", "bi-chevron-down");
+            menuIcon.id = `task-menu-icon-${task.id}`;
+            menu.appendChild(menuIcon);
             dropWrapper.appendChild(menu);
             menu.addEventListener("click", () => tasks.openMenu(task.id));
 
@@ -194,13 +211,25 @@ export const tasks = {
             console.log("[tasks.delete]: ", `Deleting task with ID: ${id}`);
         };
         user.save();
+        toast.add("Task deleted successfully.", "success");
     },
     openMenu(id) {
         /**
          * Open the task menu.
          */
         const dropdown = document.getElementById(`task-dropdown-content-${id}`);
+        const menu = document.getElementById(`task-menu-${id}`);
+        const icon = document.getElementById(`task-menu-icon-${id}`);
         dropdown.classList.toggle("closed");
+        if (dropdown.classList.contains("closed")) {
+            menu.ariaLabel = "Open task menu";
+            menu.ariaExpanded = false;
+            icon.classList.toggle("bi-chevron-up");
+        } else {
+            menu.ariaLabel = "Close task menu";
+            menu.ariaExpanded = true;
+            icon.classList.toggle("bi-chevron-up");
+        };
     },
     edit(id) {
         /**
@@ -311,6 +340,7 @@ export const tasks = {
             list.innerHTML = ""; // Clear the list.
             tasks.render.list();
         };
+        toast.add("Task updated successfully.", "success");
     },
     complete(id) {
         /**
@@ -337,6 +367,7 @@ export const tasks = {
                 if (user.debug === true) {
                     console.log("[tasks.complete]: " + `Completed task with ID: ${id}`);
                 };
+                toast.add("Task complete, good job!", "success");
                 //toast.add("Task complete, good job!", "success");
             } else {
                 if (user.debug === true) {

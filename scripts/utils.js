@@ -78,17 +78,6 @@ export const utils = {
             return `${diffInYears} years ago`;
         };
     },
-    icon(i) {
-        /**
-         * Generates a formatted icon.
-         * 
-         * TODO: Remove this function and use the icon directly.
-         */
-        const wrapper = document.createElement("span");
-        wrapper.classList.add("bi", `bi-${i}`);
-        wrapper.setAttribute("aria-hidden", "true");
-        return wrapper;
-    },
     input (name, type, required = null, location = null, extra = null) {
         /**
          * Helper function for creating inputs with a label and wrapper.
@@ -200,5 +189,65 @@ export const utils = {
         } else {
             return wrapper;
         };
+    },
+    modal: {
+        render ({id = "modal", message = "This is a modal dialog.", confirm = "OK", cancel = "Cancel", onConfirm = () => {}, onCancel = () => {}}) {
+            /**
+             * Create a modal dialog.
+             * 
+             * @param {string} id - The ID of the modal dialog.
+             * @param {string} message - The message to display in the dialog.
+             * @param {string} confirm - The text for the confirm button.
+             * @param {string} cancel - The text for the cancel button.
+             * @param {function} onConfirm - The function to run on confirm.
+             * @param {function} onCancel - The function to run on cancel.
+             */
+            // Create modal container
+            const modal = document.createElement("div");
+            modal.id = id || "custom-modal";
+            modal.className = "modal hidden";
+    
+            // Create modal content
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <p>${message}</p>
+                    <div class="modal-actions">
+                        <button id="${id}-confirm">${confirmText}</button>
+                        <button id="${id}-cancel">${cancelText}</button>
+                    </div>
+                </div>
+            `;
+    
+            // Append modal to the body
+            document.body.appendChild(modal);
+    
+            // Add event listeners for buttons
+            const confirmButton = document.querySelector(`#${id}-confirm`);
+            const cancelButton = document.querySelector(`#${id}-cancel`);
+    
+            confirmButton.addEventListener("click", () => {
+                if (onConfirm) onConfirm();
+                closeModal(modal); // Close the modal
+            });
+    
+            cancelButton.addEventListener("click", () => {
+                if (onCancel) onCancel();
+                closeModal(modal); // Close the modal
+            });
+    
+            // Show modal
+            modal.classList.remove("hidden");
+        },
+        close (modal) {
+            /**
+             * Close a modal dialog.
+             * 
+             * @param {object} modal - The modal dialog to close.
+             */
+            modal.classList.add("hidden");
+            setTimeout(() => {
+                modal.remove(); // Remove from DOM after hiding
+            }, 300); // Wait for any potential CSS transition
+        }
     }
 };

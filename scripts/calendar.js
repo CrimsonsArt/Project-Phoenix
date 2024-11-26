@@ -8,6 +8,12 @@ import { journal } from "./journal.js";
 export const calendar = {
     /**
      * Planner functions.
+     * 
+     * @param {array} days - Weekday names for referencing in the calendar.
+     * @param {array} months - Month names for referencing in the calendar.
+     * @param {object} info - Object containing calendar render information.
+     * @param {object} render - Functions for rendering the calendar.
+     * @param {object} control - Functions for controlling the calendar.
      */
     days: [
         "Monday", "Tuesday", "Wednesday", "Thursday",
@@ -26,7 +32,12 @@ export const calendar = {
     },
     render: {
         /**
-         * Functions for rendering the parts of the calendar.
+         * Functions for rendering the calendar.
+         * 
+         * @function header - Renders the calendar header.
+         * @function table - Renders the calendar table.
+         * @function row - Renders a row in the calendar.
+         * @param {object} cell - Functions for rendering calendar day cells.
          */
         header () {
             /**
@@ -227,6 +238,12 @@ export const calendar = {
             };
         },
         cell: {
+            /**
+             * Functions for rendering cells in the calendar.
+             * 
+             * @function simplified - Renders a simplified date cell.
+             * @function expanded - Renders an expanded date cell.
+             */
             simplified (number, row) {
                 /**
                  * Renders a simplified cell in the calendar. Each cell holds a
@@ -348,6 +365,18 @@ export const calendar = {
         }
     },
     control: {
+        /**
+         * Functions for controlling the calendar.
+         * 
+         * @param {object} selected - The currently selected cell.
+         * @function next - The function to go to the next month.
+         * @function previous - The function to go to the previous month.
+         * @function select - The function to select a cell.
+         * @function open - The function to open a cell.
+         * @function close - The function to close a cell.
+         * 
+         * @returns {object} control - The calendar control functions.
+         */
         selected: null,
         next () {
             /**
@@ -395,13 +424,9 @@ export const calendar = {
             openButton.ariaLabel = "Open the detailed view for this day.";
             openButton.title = "Open the detailed view for this day.";
             openButton.textContent = "Open";
+            openButton.id = "open-day-view";
+            openButton.type = "button";
             wrapper.appendChild(openButton).addEventListener("click", () => calendar.control.open(cell));
-
-            // Create the add event button.
-            const addButton = document.createElement("button");
-            addButton.ariaLabel = "Add an event to this day.";
-            addButton.title = "Add an event to this day.";
-            addButton.textContent = "Add event";
         },
         open (cell) {
             /**
@@ -410,7 +435,6 @@ export const calendar = {
              * @param {object} cell - The cell to open.
              * 
              * TODO: Highlight the day header for the selected day.
-             * CONSIDER: Widen cells for the same day in different weeks.
              * CONSIDER: Hide sibling cells, and add a back and forward button.
              */
             // Close the previous day view.
@@ -510,6 +534,8 @@ export const calendar = {
         close (cell) {
             /**
              * Close any opened day in the calendar.
+             * 
+             * @param {object} cell - The cell to close.
              */
             // Remove the day view related classes.
             const cells = document.querySelectorAll(".expanded-day, .expanded-week, .shrunk-day, .shrunk-week, .expanded-column");
