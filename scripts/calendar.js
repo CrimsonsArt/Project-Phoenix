@@ -303,7 +303,9 @@ export const calendar = {
                 row.appendChild(cell);
 
                 // Look for events to display in the cell.
-                events.find(dateNumber.dateTime, cell);
+                if (user.events.length > 0) {
+                    events.find(dateNumber.dateTime, cell);
+                };
 
                 // Increment the cell index.
                 calendar.info.cellIndex++;
