@@ -24,8 +24,6 @@ window.onload = function() {
 
     // Load user data from local storage.
     user.load();
-    //user.debug = true; // Enable debug mode.
-    user.debug = false; // Disable debug mode.
 
 
     /* --------------------------- USER INTERFACE ----------------------------*/

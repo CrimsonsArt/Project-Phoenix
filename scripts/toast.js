@@ -56,6 +56,9 @@ export const toast = {
          */
         // Check if user has any toasts.
         if (user.toasts && user.toasts.length > 0) {
+            if (user.debug === true) {
+                console.log("[toast.load]: Loading toasts from user object.");
+            }
             user.toasts.forEach(data => {
                 toast.render(data);
             });
@@ -103,6 +106,10 @@ export const toast = {
 
         // Add event listener to delete button.
         //document.getElementById(`delete-toast-${data.id}`).addEventListener("click", () => toast.delete(data.id));
+
+        if (user.debug === true) {
+            console.log(`[toast.render]: Toast rendered with ID: ${data.id}`);
+        };
     },
     delete(id) {
         /**
