@@ -571,7 +571,7 @@ export const events = {
             if (!event) return; // Skip if the event is not found.
 
             // If the event is recurring, add it to the calendar multiple times.
-            if (event.recurring.isRecurring) {
+            if (event.recurring && event.recurring.isRecurring) {
                 const { time, number } = event.recurring;
                 const eventDate = new Date(event.date.start);
                 const cellDate = new Date(cell.dataset.date);
