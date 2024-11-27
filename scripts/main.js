@@ -26,7 +26,7 @@ window.onload = function() {
 
     // Load user data from local storage.
     user.load();
-    user.debug = true;
+    //user.debug = true;
 
     if (user.debug === true) {
         console.log("[onload]: Loading...");
@@ -100,6 +100,7 @@ window.onload = function() {
     // TODO: Add same hover effect for the companion as the toasts.
 
     // Check the time of day and greet the user accordingly.
+    // TODO: Add up early message.
     const time = new Date().getHours();
     if (time >= 5 && time < 12) {
         companion.dialog.open("Good morning!");
