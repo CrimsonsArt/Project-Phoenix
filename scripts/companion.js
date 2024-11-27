@@ -11,10 +11,8 @@ export const companion = {
      * 
      * TODO: Have helper give reminders.
      * TODO: Have helper give advice.
-     * TODO: Have helper tell the user to take breaks.
+     * TODO: Have helper remind the user to take breaks.
      * TODO: Praise the user for completing tasks.
-     * TODO: Remind the user to go to bed.
-     * TODO: Ensure that the companion won't cover the footer.
      * TODO: Add a button to minimize the companion.
      */
     dialog: {
