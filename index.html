@@ -7,8 +7,11 @@
         <meta name="description" content="A daily planner for ADHD organization.">
         <title>Project Phoenix</title>
         <link rel="stylesheet" href="style/style.css">
+        <!--<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">-->
     </head>
     <body>
+        <!-- Dummy script for preventing "Flash of unstyled content"-->
+        <script>0</script>
         <header id="banner">
             <a href="#main" class="sr-only skip">Skip to main content</a>
             <nav id="nav-main" aria-label="Main navigation">
@@ -61,14 +64,6 @@
                     </ul>
                 </section>
             </section>
-
-            <!--<section id="companion">
-                <h2 class="sr-only">Helper</h2>
-                <div id="dialouge">
-                    <p>Test!</p>
-                </div>
-                <div id="friend"><p>:]</p></div>
-            </section>-->
 
             <section id="user" class="container">
                 <h2>Settings</h2>
@@ -125,13 +120,20 @@
                     </form>
                 <!--</section>-->
             </section>
-            <section id="menu">
+
+            <aside id="companion" aria-label="Interactive Assistant">
+                <h2 id="companion-heading" class="sr-only">Assistant companion</h2>
+                <!--TODO: Remove wing when not "talking".-->
+                <img id="companion-svg" src="/img/phoenix.svg" alt="Your phoenix assistant" tabindex="0">
+            </aside>
+
+            <aside id="menu">
                 <section id="toast-log">
                     <h2 id="log-title" class="sr-only">Toast log</h2>
                     <ul id="toast-list" class="closed-menu">
                     </ul>
                 </section>
-            </section>
+            </aside>
         </main>
 
         <footer>

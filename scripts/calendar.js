@@ -285,6 +285,13 @@ export const calendar = {
                     });
                     cell.classList.add("day");
 
+                    // Check if the day is today.
+                    if (calendar.info.year === today.getFullYear()
+                    && calendar.info.month === today.getMonth()
+                    && day === today.getDate()) {
+                        cell.classList.add("today");
+                    };
+
                 // Render the start of next month, if needed.
                 } else {
                     day = day - calendar.info.totalDays;
@@ -305,6 +312,14 @@ export const calendar = {
                 // Look for events to display in the cell.
                 if (user.events.length > 0) {
                     events.find(dateNumber.dateTime, cell);
+                };
+
+                // Look for journals for the day.
+                if (user.journals.length > 0) {
+                    const entry = journal.find(dateNumber.dateTime);
+                    if (entry) {
+                        cell.classList.add("journal-entry");
+                    }
                 };
 
                 // Increment the cell index.

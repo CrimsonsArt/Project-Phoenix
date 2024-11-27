@@ -78,6 +78,20 @@ export const utils = {
             return `${diffInYears} years ago`;
         };
     },
+    wrapInput (label, input) {
+        /**
+         * Adds a wrapper around input and label elements.
+         * 
+         * @param {object} label - The label to be wrapped.
+         * @param {object} input - The input to be wrapped.
+         */
+        // Create the wrapper.
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("form-field");
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+        return wrapper;
+    },
     input (name, type, required = null, location = null, extra = null) {
         /**
          * Helper function for creating inputs with a label and wrapper.

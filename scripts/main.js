@@ -6,6 +6,7 @@ import { tasks } from "./tasks.js";
 import { journal } from "./journal.js";
 import { calendar } from "./calendar.js";
 import { pomodoro } from "./pomodoro.js";
+import { companion } from "./companion.js";
 
 // TODO: Add a cheat for setting the current date.
 // TODO: Add settings for the user.
@@ -25,6 +26,7 @@ window.onload = function() {
 
     // Load user data from local storage.
     user.load();
+    user.debug = true;
 
     if (user.debug === true) {
         console.log("[onload]: Loading...");
@@ -64,6 +66,21 @@ window.onload = function() {
 
     // Update the toast timestamps once every minute.
     setInterval(toast.updateTimestamps, 60000);
+
+
+    /*------------------------------ COMPANION -------------------------------*/
+    // Add event listener for the companion.
+    const companionSVG = document.getElementById("companion-svg");
+    companionSVG.addEventListener("click", () => {
+        companion.dialog.open();
+    });
+
+    // TODO: Check if the user is new or not.
+    // TODO: Add same hover effect for the companion as the toasts.
+    companion.dialog.open("Welcome back!");
+    setTimeout (() => {
+        companion.dialog.close();
+    }, 5000); // 5 seconds = 5000 milliseconds.
 
 
     /*------------------------------- CALENDAR -------------------------------*/
