@@ -222,7 +222,7 @@ export const utils = {
             // Create modal container
             const modal = document.createElement("div");
             modal.id = id || "custom-modal";
-            modal.className = "modal hidden";
+            modal.className = "modal closed";
     
             // Create modal content
             modal.innerHTML = `
@@ -253,7 +253,7 @@ export const utils = {
             });
     
             // Show modal
-            modal.classList.remove("hidden");
+            modal.classList.remove("closed");
         },
         close (modal) {
             /**

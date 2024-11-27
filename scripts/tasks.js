@@ -287,9 +287,9 @@ export const tasks = {
         editInput.classList.add("edit-task");
         editInput.type = "text";
 
-        // Create the save and cancel buttons, and add event listeners.
-        wrapper.appendChild(utils.button("save", "task", id)).addEventListener("click", () => tasks.save(id));
-        wrapper.appendChild(utils.button("cancel", "task", id)).addEventListener("click", () => tasks.cancelEdit(id));
+        // TODO: Create the save and cancel buttons, and add event listeners.
+        /*wrapper.appendChild(utils.button("save", "task", id)).addEventListener("click", () => tasks.save(id));
+        wrapper.appendChild(utils.button("cancel", "task", id)).addEventListener("click", () => tasks.cancelEdit(id));*/
 
         // Append the label and input elements to the edit form.
         editForm.appendChild(editLabel);
