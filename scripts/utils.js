@@ -78,16 +78,18 @@ export const utils = {
             return `${diffInYears} years ago`;
         };
     },
-    wrapInput (label, input) {
+    wrapInput (label, input, id = null) {
         /**
          * Adds a wrapper around input and label elements.
          * 
          * @param {object} label - The label to be wrapped.
          * @param {object} input - The input to be wrapped.
+         * @param {string} id - The ID of the wrapper.
          */
         // Create the wrapper.
         const wrapper = document.createElement("div");
         wrapper.classList.add("form-field");
+        if (id) wrapper.id = id;
         wrapper.appendChild(label);
         wrapper.appendChild(input);
         return wrapper;
@@ -102,10 +104,10 @@ export const utils = {
          * @param {object} location - The location to append to.
          * @param {object} extra - Extra data for the input.
          */
-        // Create the wrapper.
+        /*// Create the wrapper.
         const wrapper = document.createElement("div");
         wrapper.id = `${name}-wrapper`;
-        wrapper.classList.add("form-field");
+        wrapper.classList.add("form-field");*/
     
         // If the input is invalid, log an error.
         if (!name || typeof name !== "string") {
@@ -141,7 +143,6 @@ export const utils = {
         label.id = `${name}-label`;
         label.htmlFor = name;
         label.textContent = text + ":";
-        wrapper.appendChild(label);
     
         // Create the input.
         let input = document.createElement("input");
@@ -195,8 +196,10 @@ export const utils = {
                 console.log(`[utils.input]: Adding date ${extra} to input ${name}`);
             };
         };
-        wrapper.appendChild(input);
-    
+
+        // Wrap the input and label in a div.
+        const wrapper = utils.wrapInput(label, input, `${name}-wrapper`);
+
         // Append the wrapper to the location, or return it.
         if (location != null) {
             location.appendChild(wrapper);

@@ -16,8 +16,6 @@ export const toast = {
      * 
      * @returns {object} ui - The toast object. 
      * 
-     * TODO: Expand the toast log to a menu, with a toast log in it.
-     * TODO: Add another tab for the companion log.
      * TODO: Add icons to toast.
      * CONSIDER: Open toast-log if user clicks on active toast.
      */

@@ -482,7 +482,6 @@ export const calendar = {
 
                 // Re-add compact events, if any.
                 const [year, month, day] = calendar.control.selected.dataset.date.split("-");
-                //events.lookup(day, month, year, calendar.control.selected);
             };
 
             let cellToOpen = cell;

@@ -451,7 +451,6 @@ export const events = {
 
             // Add the day of the week for the event.
             if (data.date.start) {
-                // BUG: This is not working as expected.
                 data.recurring.weekday = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.weekday;
             };
 

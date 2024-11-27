@@ -1,5 +1,7 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 
+import { user } from "./user.js";
+
 /*----------------------------- HELPER FUNCTIONS -----------------------------*/
 export const companion = {
     /**
@@ -11,8 +13,9 @@ export const companion = {
      * TODO: Have helper give advice.
      * TODO: Have helper tell the user to take breaks.
      * TODO: Praise the user for completing tasks.
-     * TODO: Greet the user at the start of the day.
      * TODO: Remind the user to go to bed.
+     * TODO: Ensure that the companion won't cover the footer.
+     * TODO: Add a button to minimize the companion.
      */
     dialog: {
         open (text) {
@@ -30,8 +33,11 @@ export const companion = {
                 return;
             };
 
+            if (user.debug === true) {
+                console.log("Opening dialog.");
+            };
+
             // Add text content.
-            console.log("Opening dialog.");
             const dialog = document.createElement("div");
             dialog.id = "dialog";
             const dialogContent = document.createElement("p");
@@ -91,9 +97,11 @@ export const companion = {
              * Close the dialog box.
              */
             if (document.getElementById("dialog")) {
+                if (user.debug === true) {
+                    console.log("Closing dialog.");
+                };
                 document.getElementById("dialog").remove();
             };
-            console.log("Dialog closed.");
         }
     }
 };

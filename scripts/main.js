@@ -75,9 +75,43 @@ window.onload = function() {
         companion.dialog.open();
     });
 
-    // TODO: Check if the user is new or not.
+    // Add event listener to stop the companion from covering the footer.
+    document.addEventListener("scroll", () => {
+        const footer = document.querySelector("footer");
+        const companion = document.getElementById("companion");
+
+        // Get the bounding rectangle for the footer.
+        const footerRect = footer.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+
+        // Check if the footer is visible in the viewport.
+        if (footerRect.top < windowHeight) {
+            // Footer is visible, so position the companion above the footer.
+            companion.style.position = "fixed";
+            companion.style.bottom = `${windowHeight - footerRect.top}px`;
+        } else {
+            // Footer is not visible; reset the companion to fixed position.
+            companion.style.position = "fixed";
+            companion.style.bottom = "0";
+        }
+    });
+
+    // TODO: Check if the user is new or not, and add a welcome message for new users.
     // TODO: Add same hover effect for the companion as the toasts.
-    companion.dialog.open("Welcome back!");
+
+    // Check the time of day and greet the user accordingly.
+    const time = new Date().getHours();
+    if (time >= 5 && time < 12) {
+        companion.dialog.open("Good morning!");
+    } else if (time >= 12 && time < 17) {
+        companion.dialog.open("Good afternoon!");
+    } else if (time >= 17 && time < 21) {
+        companion.dialog.open("Good evening!");
+    } else {
+        companion.dialog.open("You're up late! Is there anything I can help with?");
+    };
+
+    // Close the dialog after 5 seconds.
     setTimeout (() => {
         companion.dialog.close();
     }, 5000); // 5 seconds = 5000 milliseconds.
