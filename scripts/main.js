@@ -11,6 +11,7 @@ import { companion } from "./companion.js";
 // TODO: Add a cheat for setting the current date.
 // TODO: Add settings for the user.
 // TODO: Add github-like activity display for statistics.
+// TODO: Remove any label elements from buttons.
 
 /*---------------------------------- ONLOAD ----------------------------------*/
 window.onload = function() {
@@ -136,6 +137,12 @@ window.onload = function() {
     const taskButton = document.getElementById("add-task");
     if (taskButton) {
         taskButton.addEventListener("click", tasks.add);
+    };
+
+    // Add event listener for the add dependency button.
+    const dependencyButton = document.getElementById("add-subtask");
+    if (dependencyButton) {
+        dependencyButton.addEventListener("click", () => tasks.hierarchy.add());
     };
 
     // Add event listener for pressing enter in the task input, to add the task.

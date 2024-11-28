@@ -207,6 +207,29 @@ export const utils = {
             return wrapper;
         };
     },
+    button (text = null, label = null, icon = null) {
+        /**
+         * Create a button element. Used to keep buttons consistent.
+         * 
+         * @param {string} text - The text for the button.
+         * @param {string} label - The aria label for the button.
+         * @param {string} icon - The icon for the button.
+         * 
+         * @returns {object} - The button element.
+         */
+        const button = document.createElement("button");
+        button.classList.add("btn");
+        button.type = "button";
+        if (text) button.textContent = text.charAt(0).toUpperCase() + text.slice(1);
+        if (label) button.ariaLabel = label;
+        if (icon) {
+            const span = document.createElement("span");
+            span.classList.add("icon", "bi", `bi-${icon}`);
+            span.ariaHidden = true;
+            button.appendChild(span);
+        };
+        return button;
+    },
     modal: {
         render ({id = "modal", message = "This is a modal dialog.", confirm = "OK", cancel = "Cancel", onConfirm = () => {}, onCancel = () => {}}) {
             /**

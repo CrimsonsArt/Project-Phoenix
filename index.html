@@ -52,7 +52,7 @@
                 <section id="todo">
                     <h3>Todo list</h3>
                     <form id="task-form">
-                        <fieldset>
+                        <fieldset id="task-field">
                             <legend>New task</legend>
                             <div class="form-field">
                                 <label for="todo-task">New task:</label>
@@ -62,8 +62,11 @@
                                 <label for="todo-due">Due date:</label>
                                 <input type="date" id="todo-due">
                             </div>
-                            <button id="add-task" type="submit" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
+                            <button id="add-subtask" type="button" title="Add as a subtask for another task" aria-label="Add as a subtask for another task">Add as subtask</button>
                         </fieldset>
+                        <div class="controls">
+                            <button id="add-task" type="submit" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
+                        </div>
                     </form>
                     <ul id="todo-list" class="task-list">
                     </ul>

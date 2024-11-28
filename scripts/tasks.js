@@ -23,7 +23,7 @@ export const tasks = {
      * TODO: Allow users to create task hierarchies.
      * TODO: Add confirmation dialog for completing tasks, and then archive them.
      */
-    add() {
+    add () {
         /**
          * Add a new task to the to-do list.
          */
@@ -36,14 +36,33 @@ export const tasks = {
                 dueDate: null,
                 text: taskInput.value,
                 pomodoroEstimate: null,
-                dependencies: [],
-                dependents: [],
+                parentID: null,
+                childIDs: [],
                 completed: false,
                 completedDate: null
             };
             if (taskDue.value != "") {
                 task.dueDate = taskDue.value;
             };
+
+            const subtask = document.getElementById("task-add-subtask");
+            if (subtask && subtask.value !== "") {
+                // Add the task as a subtask of the selected task.
+                const parentTaskID = Number(subtask.value);
+                task.parentID = parentTaskID;
+
+                // Get the index of the parent task.
+                const parentIndex = user.tasks.findIndex(task => task.id === parentTaskID);
+                if (parentIndex > -1) {
+                    user.tasks[parentIndex].childIDs.push(user.nextTaskId);
+                    if (user.debug === true) {
+                        console.log(`[tasks.add]: Added task with ID: ${user.nextTaskId} as a subtask of task with ID: ${parentTaskID}`);
+                    };
+                };
+            };
+
+            // Log to console, and save changes.
+            console.log(`Adding task: ${task}`);
             user.tasks.push(task); // Add task to user.tasks array.
             user.nextTaskId++; // Increment ID.
             user.save(); // Save changes to user object.
@@ -53,10 +72,10 @@ export const tasks = {
             toast.add("Task added successfully.", "success");
 
         } else { // If task input is empty.
-            //toast.add("Task title can't be empty.", "error"); // Error toast.
+            toast.add("Task title can't be empty.", "error"); // Error toast.
         };
     },
-    load() {
+    load () {
         /**
          * Loads the task list items, and renders them.
          */
@@ -71,20 +90,74 @@ export const tasks = {
         /**
          * Renders elements of the to-do list.
          */
-        list() {
+        list () {
             /**
              * Renders the to-do list.
+             * 
+             * TODO: If task has subtasks, display them below it.
              */
             const wrapper = document.getElementById("todo-list");
-            user.tasks.forEach(task => {
-                wrapper.prepend(tasks.render.task(task.id));
+
+            // Get tasks with no parents.
+            const rootTasks = user.tasks.filter(task => task.parentID === null);
+            rootTasks.forEach(task => {
+                // Render the root task
+                const parentTask = tasks.render.task(task.id);
+                wrapper.appendChild(parentTask);
+            
+                // Render subtasks recursively
+                function renderSubtasks(task, parentElement) {
+                    if (task.childIDs.length > 0) {
+                        const subtaskList = document.createElement("ul");
+                        subtaskList.classList.add("has-subtasks");
+                        parentElement.appendChild(subtaskList);
+            
+                        task.childIDs.forEach(subtaskID => {
+                            // Find the subtask
+                            const subtask = user.tasks.find(task => task.id === subtaskID);
+            
+                            if (subtask) {
+                                // Render the subtask
+                                const subtaskElement = tasks.render.task(subtask.id);
+                                subtaskList.appendChild(subtaskElement);
+            
+                                // Recursively render any subtasks of this subtask
+                                renderSubtasks(subtask, subtaskElement);
+                            };
+                        });
+                    };
+                };
+            
+                // Start rendering subtasks for the root task
+                renderSubtasks(task, parentTask);
             });
+            /*rootTasks.forEach(task => {
+                // Render the task.
+                const parentTask = tasks.render.task(task.id)
+                wrapper.appendChild(parentTask);
+
+                // Check if task has subtasks.
+                console.log(task.childIDs.length);
+                if (task.childIDs.length > 0) {
+                    const subtaskList = document.createElement("ul");
+                    subtaskList.classList.add("has-subtasks");
+                    parentTask.appendChild(subtaskList);
+                    task.childIDs.forEach(subtaskID => {
+                        const subtask = user.tasks.filter(task => task.id === subtaskID);
+                        if (subtask && subtask.length > 0) {
+                            subtaskList.appendChild(tasks.render.task(subtask[0].id));
+                        };
+                    });
+                };
+            });*/
         },
-        task(id) {
+        task (id) {
             /**
              * Renders a task in the to-do list.
              * 
              * @param {number} id - The ID of the task to render.
+             * 
+             * TODO: Add progress bar for task with subtasks.
              */
             // Get the task data.
             const task = user.tasks.find(task => task.id === id);
@@ -135,16 +208,9 @@ export const tasks = {
             controls.id = `task-controls-${task.id}`;
             wrapper.appendChild(controls);
 
-            // Create the delete button. // TODO: Add icon.
-            const delBtn = document.createElement("button");
-            delBtn.classList.add("task-delete");
-            delBtn.id = `task-delete-${task.id}`;
-            delBtn.textContent = "Delete";
-            delBtn.type = "button";
-            delBtn.ariaLabel = "Delete task";
-            controls.appendChild(delBtn);
-            delBtn.addEventListener("click", () => tasks.delete(task.id));
-            // CONSIDER: Move this to the dropdown menu.
+            // CONSIDER: Move this to the dropdown menu.*/
+            const delBtn = utils.button("delete", "Delete task", "trash");
+            controls.appendChild(delBtn).addEventListener("click", () => tasks.delete(task.id));
 
             // Create the dropdown wrapper.
             const dropWrapper = document.createElement("div");
@@ -182,16 +248,8 @@ export const tasks = {
             options.appendChild(edit);
             edit.addEventListener("click", () => tasks.edit(task.id));
 
-            // Create the dependency button.
-            const dependency = document.createElement("button");
-            dependency.classList.add("task-dependency");
-            dependency.id = `task-dependency-${task.id}`;
-            dependency.textContent = "Add dependency";
-            dependency.type = "button";
-            options.appendChild(dependency);
-            // TODO: Add event listener to dependency button.
-
             // TODO: Add a "set as current goal" button.
+
             const goal = document.createElement("button");
             goal.classList.add("task-goal");
             goal.id = `task-goal-${task.id}`;
@@ -203,7 +261,7 @@ export const tasks = {
             return wrapper;
         }
     },
-    delete(id) {
+    delete (id) {
         /**
          * Delete a task from the to-do list.
          * 
@@ -225,7 +283,7 @@ export const tasks = {
         user.save();
         toast.add("Task deleted successfully.", "success");
     },
-    openMenu(id) {
+    openMenu (id) {
         /**
          * Open the task menu.
          */
@@ -243,118 +301,205 @@ export const tasks = {
             icon.classList.toggle("bi-chevron-up");
         };
     },
-    edit(id) {
+    edit (id) {
         /**
          * Edit a task in the to-do list.
          * 
          * @param {number} id - The ID of the task to edit.
          */
         // Find the task in the user.tasks object.
-        const wrapper = document.getElementById(`task-${id}`);
-
-        // Check if the task exists.
-        if (!wrapper) {
-            return; // Return if the task doesn't exist.
-        };
-
-        // Save the original task title.
-        const originalTitle = wrapper.querySelector("p").textContent;
-
-        // Turn the task paragraph into an edit form.
-        const editForm = document.createElement("form");
-        editForm.id = `editing-task-wrapper-${id}`;
-        editForm.classList.add("edit-task-wrapper");
-
-        // Create the label and input elements.
-        const editLabel = document.createElement("label");
-        const editInput = document.createElement("input");
-
-        // Remove the original elements.
-        wrapper.querySelector("p").remove();
-        //document.getElementById(`edit-task-${id}`).remove();
-        //document.getElementById(`delete-task-${id}`).remove();
-
-        // Set the label attributes.
-        editLabel.htmlFor = `editing-task-${id}`;
-        editLabel.innerHTML = "Edit task: ";
-        editLabel.classList.add("sr-only");
-
-        // Set the input attributes.
-        editInput.placeholder = originalTitle;
-        editInput.id = `editing-task-${id}`;
-        editInput.value = originalTitle;
-        editInput.autocomplete = "off";
-        editInput.classList.add("edit-task");
-        editInput.type = "text";
-
-        // TODO: Create the save and cancel buttons, and add event listeners.
-        /*wrapper.appendChild(utils.button("save", "task", id)).addEventListener("click", () => tasks.save(id));
-        wrapper.appendChild(utils.button("cancel", "task", id)).addEventListener("click", () => tasks.cancelEdit(id));*/
-
-        // Append the label and input elements to the edit form.
-        editForm.appendChild(editLabel);
-        editForm.appendChild(editInput).addEventListener("keydown", (event) => {
-            // BUG: Fix, still saves on button and enter press.
-            if (event.key === "Enter") {
-                event.preventDefault(); // Prevent the form from submitting.
-                this.save(id);
-            } else if (event.key === "Escape") {
-                this.cancel(id);
+        const task = user.tasks.find(task => task.id === id);
+        if (task && document.getElementById(`task-${id}`)) {
+            if (user.debug === true) {
+                console.log(`[tasks.edit]: Editing task: ${task.text}`);
             };
-        });
-        wrapper.prepend(editForm); // Add the edit form to the task wrapper.
-        if (user.debug === true) {
-            console.log("[tasks.edit]: ", `Editing task with ID: ${id}`);
+
+            // Get the task wrapper, and clear it.
+            const wrapper = document.getElementById(`task-${id}`);
+            wrapper.innerHTML = "";
+
+            // Create the edit form.
+            const editForm = document.createElement("form");
+            editForm.id = `editing-task-${id}`;
+            editForm.classList.add("edit-task-wrapper");
+
+            // Create the text input.
+            const editInput = document.createElement("input");
+            editInput.id = `task-editing-text-${id}`;
+            editInput.placeholder = task.text;
+            editInput.value = task.text;
+            editInput.type = "text";
+            editInput.spellcheck = true;
+            editInput.autocomplete = "off";
+            editInput.classList.add("task-edit-text");
+
+            // Create the label for the input.
+            const editLabel = document.createElement("label");
+            editLabel.htmlFor = `task-editing-text-${id}`;
+            editLabel.textContent = "Edit task: ";
+            //editLabel.classList.add("sr-only");
+
+            // Wrap the input and label.
+            const editWrap = utils.wrapInput(editLabel, editInput);
+
+            // Append the wrapped input to the form.
+            editForm.appendChild(editWrap);
+
+            // Add the due date input.
+            const dueInput = document.createElement("input");
+            dueInput.type = "date";
+            dueInput.id = `task-editing-due-${id}`;
+            dueInput.classList.add("edit-task-due");
+
+            // Create the label for the due date input.
+            const dueLabel = document.createElement("label");
+            dueLabel.htmlFor = `task-editing-due-${id}`;
+            dueLabel.textContent = "Due date: ";
+            //dueLabel.classList.add("sr-only");
+
+            // Add the due date to the input, if it exists.
+            if (task.dueDate) {
+                dueInput.value = task.dueDate;
+            };
+
+            // Wrap the due date input and label.
+            const dueWrap = utils.wrapInput(dueLabel, dueInput);
+
+            // Add subtask selector.
+            const subtaskWrap = tasks.hierarchy.add("return", id);
+            const subtaskSelect = subtaskWrap.querySelector('select');
+
+            // Set the selected option to the parent task.
+            if (task.parentID !== null && subtaskSelect) {
+                console.log("Setting parent task as selected option.");
+                Array.from(subtaskSelect.options).forEach(option => {
+                    if (Number(option.value) === task.parentID) {
+                        option.selected = true;
+                        console.log("Selected option: ", option);
+                    };
+                });
+            };
+
+            // TODO: Add pomodoro estimate input.
+            // TODO: Add primary goal input.
+
+            // Add the save and cancel buttons.
+            const controls = document.createElement("div");
+            controls.classList.add("controls");
+            const saveBtn = utils.button("save", "Save changes to task", "floppy");
+            const cancelBtn = utils.button("cancel", "Cancel editing task");
+            controls.appendChild(saveBtn).addEventListener("click", () => tasks.save(id));
+            controls.appendChild(cancelBtn).addEventListener("click", () => tasks.cancel(id));
+
+            // Append the inputs and controls to the form.
+            editForm.appendChild(editWrap);
+            editForm.appendChild(dueWrap);
+            editForm.appendChild(subtaskWrap);
+            editForm.appendChild(controls);
+
+            // Replace the task with the edit form.
+            wrapper.appendChild(editForm);
+            editForm.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    event.preventDefault(); // Prevent the form from submitting.
+                    tasks.save(id);
+                } else if (event.key === "Escape") {
+                    tasks.cancel(id);
+                };
+            });
+
+            // Focus on the text input element.
+            editInput.focus();
+
+
+        // Error handling.
+        } else {
+            if (user.debug === true) {
+                console.log(`[tasks.edit]: ERROR - Could not find task with ID: ${id}. If this issue persists, please report it on GitHub.`);
+            };
         };
-        editInput.focus(); // Focus on the input element.
     },
-    cancelEdit(id) {
+    cancel (id) {
         /**
          * Cancel an edit in the to-do list.
          * 
          * @param {number} id - The ID of the task to cancel.
          */
-        const wrapper = document.getElementById(`task-${id}`); // Grab the task wrapper.
-        if (wrapper) { // Check if the task wrapper exists.
+        // Grab the task wrapper.
+        const wrapper = document.getElementById(`editing-task-${id}`);
+
+        // Check if the task wrapper exists.
+        if (wrapper) {
             const list = document.getElementById("todo-list");
-            list.innerHTML = ""; // Clear the list.
+
+            // Clear the list, and re-render it.
+            list.innerHTML = "";
             tasks.render.list();
+
+            // Log to console.
+            if (user.debug === true) {
+                console.log(`[tasks.cancel]: Cancelled editing task with ID: ${id}`);
+            };
         };
     },
-    save(id) {
+    save (id) {
         /**
          * Update a task in the to-do list.
          * 
          * @param {number} id - The ID of the task to update.
          */
-        // Find the task in the user.tasks object.
-        const newText = document.getElementById(`editing-task-${id}`);
+        // Find the task and its index in the user.tasks object.
+        //const task = user.tasks.find(task => task.id === id);
         const taskIndex = user.tasks.findIndex(task => task.id === id);
-        if (taskIndex === -1) {
-            if (user.debug === true) {
-                console.log("[tasks.save]: ", `Could not find task with ID: ${id}`);
+        if (taskIndex > -1) {
+
+            // Get the new task text.
+            const newText = document.getElementById(`task-editing-text-${id}`);
+            if (newText) user.tasks[taskIndex].text = newText.value;
+            
+            // Get the new due date.
+            const newDue = document.getElementById(`task-editing-due-${id}`);
+            if (newDue) user.tasks[taskIndex].dueDate = newDue.value;
+
+            // Update dependencies.
+            const newSubtask = document.getElementById(`task-add-subtask-${id}`);
+            if (newSubtask) {
+                const parentTaskID = Number(newSubtask.value);
+                user.tasks[taskIndex].parentID = parentTaskID;
+
+                // Get the index of the parent task.
+                const parentIndex = user.tasks.findIndex(task => task.id === parentTaskID);
+                if (parentIndex > -1) {
+                    user.tasks[parentIndex].childIDs.push(id);
+                    if (user.debug === true) {
+                        console.log(`[tasks.save]: Added task with ID: ${id} as a subtask of task with ID: ${parentTaskID}`);
+                    };
+                };
             };
-            return; // Return if the task doesn't exist.
-        };
 
-        // Update the task in the user.tasks object, and save the changes.
-        user.tasks[taskIndex].text = newText.value;
-        user.tasks[taskIndex].updated = Date.now();
-        user.save();
+            // TODO: Update pomodoro estimate.
+            // TODO: Update primary goal.
 
-        // Reload the task.
-        const wrapper = document.getElementById(`task-${id}`);
-        if (wrapper) {
-            /*const reloadedWrapper = this.render(user.tasks[taskIndex], "object");
-            wrapper.replaceWith(reloadedWrapper);
-            utils.log("Task", `Updated task with ID: ${id}`);*/
-            const list = document.getElementById("todo-list");
-            list.innerHTML = ""; // Clear the list.
-            tasks.render.list();
+            // Save the changes, and re-render the task.
+            user.tasks[taskIndex].updated = Date.now();
+            user.save();
+            const newTask = tasks.render.task(id);
+            const wrapper = document.getElementById(`task-${id}`);
+            wrapper.replaceWith(newTask);
+
+            // Log to console.
+            if (user.debug === true) {
+                console.log(`[tasks.save]: Saved changes to task with ID: ${id}`);
+            };
+
+        // Error handling.
+        } else {
+            if (user.debug === true) {
+                console.log(`[tasks.save]: ERROR - Could not find task with ID: ${id}. If this issue persists, please report it on GitHub.`);
+            };
         };
-        toast.add("Task updated successfully.", "success");
     },
-    complete(id) {
+    complete (id) {
         /**
          * Mark a task as completed in the to-do list.
          * 
@@ -391,23 +536,66 @@ export const tasks = {
     hierarchy: {
         /**
          * Functions for task hierarchies.
-         * TODO: On click, open hierarchy box.
-         * TODO: If box is open, let user set hierarchy inside it.
-         * TODO: Drag and drop to add hierarchy.
-         * TODO: If task has dependents, display them below it.
-         * TODO: Add progress bar for task with dependents.
-         * TODO: Make task draggable for hierarchy placement.
          */
-        open(id) {
+        add (target = null, id = null) {
             /**
-             * Opens the hierarchy modal.
+             * Lets the user select a task as a dependency.
+             * 
+             * @param {object} target - The target element to append the dependency selector to.
+             * @param {number} id - The ID of the task to add a dependency to.
              */
-            /*const wrapper = document.createElement("div");
-            wrapper.classList.add("hierarchy-wrapper");
-            wrapper.id = `hierarchy-${id}`;*/
+            console.log("Adding dependency selector.");
+            // Create the select element.
+            const select = document.createElement("select");
+            select.classList.add("task-add-subtask");
+            select.name = "task-add-subtask";
 
-            console.log("clicked hierarchy");
-            //document.getElementById("todo").prepend(utils.modal("Hierarchy", "Selects for dependents."));
+            // Create the default option.
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "Select a task";
+            defaultOption.selected = true;
+            select.appendChild(defaultOption);
+
+            // Add the tasks as options.
+            if (user.tasks && user.tasks.length > 0) {
+                user.tasks.forEach(task => {
+                    if (task.id !== id) {
+                        const option = document.createElement("option");
+                        option.value = task.id;
+                        option.textContent = task.text;
+                        select.appendChild(option);
+                    };
+                });
+            };
+
+            // Create the label element.
+            const label = document.createElement("label");
+            label.textContent = "This task is a subtask of: ";
+
+            // Add id if entered.
+            if (id) {
+                select.id = `task-add-subtask-${id}`;
+                label.htmlFor = `task-add-subtask-${id}`;
+            } else {
+                select.id = "task-add-subtask";
+                label.htmlFor = "task-add-subtask";
+            };
+
+            // Wrap the select and label.
+            const wrapper = utils.wrapInput(label, select);
+
+            // Append the wrapper to the target element.
+            if (target === "return") {
+                return wrapper;
+            } else {
+                // Remove the "add as subtask" button.
+                const button = document.getElementById("add-subtask");
+                if (button) {
+                    button.remove();
+                };
+                document.getElementById("task-field").appendChild(wrapper);
+            };
         }
     }
 };
