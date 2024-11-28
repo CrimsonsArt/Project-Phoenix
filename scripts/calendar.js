@@ -450,9 +450,6 @@ export const calendar = {
              * Opens a selected day in the calendar.
              * 
              * @param {object} cell - The cell to open.
-             * 
-             * TODO: Highlight the day header for the selected day.
-             * CONSIDER: Hide sibling cells, and add a back and forward button.
              */
             // Close the previous day view.
             if (calendar.control.selected) {
@@ -479,16 +476,15 @@ export const calendar = {
 
                     document.getElementById("day-view").remove();
                 };
-
                 // Re-add compact events, if any.
                 const [year, month, day] = calendar.control.selected.dataset.date.split("-");
             };
 
+            // Set the cell to open.
             let cellToOpen = cell;
 
             // If the day is in a different month, go to that month first.
             const month = parseInt(cellToOpen.dataset.date.split("-")[1], 10) - 1;
-
             if (month !== calendar.info.month) {
                 // Grab the data-date attribute from the cell.
                 const moveToDate = cellToOpen.dataset.date;

@@ -4,14 +4,14 @@ import { utils } from "./utils.js";
 import { toast } from "./toast.js";
 import { tasks } from "./tasks.js";
 import { journal } from "./journal.js";
-import { calendar } from "./calendar.js";
+import { calendar } from "./calendar.js"; // File is clean and ready for use.
 import { pomodoro } from "./pomodoro.js";
 import { companion } from "./companion.js";
 
 // TODO: Add a cheat for setting the current date.
 // TODO: Add settings for the user.
-// TODO: Add github-like activity display for statistics.
 // TODO: Remove any label elements from buttons.
+// CONSIDER: Add github-like activity display for statistics.
 
 /*---------------------------------- ONLOAD ----------------------------------*/
 window.onload = function() {
@@ -130,7 +130,6 @@ window.onload = function() {
 
     /*-------------------------------- TASKS ---------------------------------*/
     // Load the tasks from local storage.
-    tasks.load();
     tasks.render.list();
 
     // Add event listener for the add task button.
@@ -140,7 +139,7 @@ window.onload = function() {
     };
 
     // Add event listener for the add dependency button.
-    const dependencyButton = document.getElementById("add-subtask");
+    const dependencyButton = document.getElementById("add-hierarchy");
     if (dependencyButton) {
         dependencyButton.addEventListener("click", () => tasks.hierarchy.add());
     };
