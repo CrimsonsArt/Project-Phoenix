@@ -5,6 +5,17 @@ import { user } from "./user.js";
 
 /*--------------------------------- JOURNAL ----------------------------------*/
 export const journal = {
+    /**
+     * Adds functions for the daily journal.
+     * 
+     * @function new - Create a new journal entry.
+     * @function add - Add a journal entry.
+     * @function find - Find a journal entry by date.
+     * @function render - Render the journal.
+     * @function edit - Edit a journal entry.
+     * 
+     * @returns {object} journal - The journal object.
+     */
     new () {
         /**
          * Creates a new journal entry.
@@ -24,6 +35,8 @@ export const journal = {
     add (edit) {
         /**
          * Create a new journal entry.
+         * 
+         * @param {object} edit - The journal entry to edit.
          */
         let entry = journal.new();
         const form = document.getElementById("journal-form");
@@ -63,6 +76,8 @@ export const journal = {
     find (date) {
         /**
          * Find a journal entry by date.
+         * 
+         * @param {string} date - The date to find the journal entry for.
          */
         if (date && user.journals.length > 0) {
             return user.journals.find(entry => entry.date === date);
@@ -71,6 +86,8 @@ export const journal = {
     render (date) {
         /**
          * Renders a daily journal.
+         * 
+         * @param {string} date - The date to render the journal for.
          * 
          * TODO: Improve the layout of the journal.
          */
@@ -85,7 +102,6 @@ export const journal = {
         wrapper.appendChild(title);
 
         // Check for existing journal entries.
-        //console.log(date);
         const entry = user.journals.find(entry => entry.date === date);
         if (entry) {
             // Create the journal entries.
@@ -146,6 +162,8 @@ export const journal = {
     edit (entry) {
         /**
          * Edit a journal entry.
+         * 
+         * @param {object} entry - The journal entry to edit.
          */
         const wrapper = document.getElementById("journal");
 

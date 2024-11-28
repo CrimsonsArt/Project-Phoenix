@@ -318,11 +318,8 @@ export const calendar = {
                 // Look for task deadlines for the day.
                 if (user.tasks.length > 0) {
                     const tasksToAdd = user.tasks.filter(task => task.dueDate === dateNumber.dateTime);
-                    //console.log("Tasks are found in the user object."+ `\n\t${dateNumber.dateTime}` + `\n\tTasks: ${tasksToAdd}`);
                     if (tasksToAdd.length > 0) {
-                        console.log("Found tasks for the day.");
                         tasksToAdd.forEach(taskToAdd =>  {
-                            console.log("Adding task to the day.");
                             cell.appendChild(tasks.render.compact(taskToAdd));
                         });
                     };

@@ -1,6 +1,5 @@
-import { utils } from "./utils.js";
-import { user } from "./user.js";
 import { companion } from "./companion.js";
+import { user } from "./user.js";
 
 /*---------------------------- POMODORO FUNCTIONS ----------------------------*/
 export const pomodoro = {
@@ -14,9 +13,7 @@ export const pomodoro = {
      * @function reset      - Resets the pomodoro timer.
      * @function update     - Updates the pomodoro timer display.
      * @function updateUI   - Updates the pomodoro timer UI.
-     * 
-     * TODO: Let user select pomodoro length (15 or 25), by clicking the time display and selecting the time from a dropdown.
-     * TODO: Darken the rest of the screen when timer is active.
+     * @function cheat      - Skips to the end of the pomodoro timer.
      */
     timer: null,
     minutes: 25,
@@ -32,8 +29,7 @@ export const pomodoro = {
         focusTime: 0,
         breakTime: 0
     },
-
-    start() {
+    start () {
         /**
          * Starts the pomodoro timer.
          */
@@ -46,6 +42,7 @@ export const pomodoro = {
             if (user.debug === true) {
                 console.log("[pomodoro.start]: Starting timer.");
             };
+            companion.dialog.open("Time to focus! Good luck!");
 
         // Else, act as resume.
         } else if (pomodoro.isPaused) {
@@ -54,6 +51,7 @@ export const pomodoro = {
             if (user.debug === true) {
                 console.log("[pomodoro.start]: Resuming timer.");
             };
+            companion.dialog.open("Resuming the pomodoro timer, let's get back to work!");
 
         // Else, act as pause.
         } else {
@@ -62,9 +60,10 @@ export const pomodoro = {
             if (user.debug === true) {
                 console.log("[pomodoro.start]: Pausing timer.");
             };
+            companion.dialog.open("Pausing the pomodoro timer, I'll be here when you're ready!");
         };
     },
-    startBreak(duration = 5) {
+    startBreak (duration = 5) {
         /**
          * Starts a 5 minute break.
          */
@@ -84,9 +83,10 @@ export const pomodoro = {
             if (user.debug === true) {
                 console.log("[pomodoro.startBreak]: Starting break.");
             };
+            companion.dialog.open("Time for a break! Stretch your legs and relax.");
         };
     },
-    async advance() {
+    async advance () {
         /**
          * Lets the user choose to continue or end the pomodoro. By choosing to
          * continue, it tracks how many pomodoros have been completed, and makes
@@ -110,6 +110,7 @@ export const pomodoro = {
                 console.log("[pomodoro.advance]: " + `Starting round ${pomodoro.rounds + 1}`);
             };
             pomodoro.start();
+            companion.dialog.open("Starting another pomodoro round! Good luck!");
         } else {
             if (user.debug === true) {
                 console.log("[pomodoro.advance]: Ending pomodoro session.");
@@ -117,9 +118,11 @@ export const pomodoro = {
             pomodoro.endSession();
         };
     },
-    endSession(caller = "system") {
+    endSession (caller = "system") {
         /**
          * Finishes the pomodoro session.
+         * 
+         * @param {string} caller - The caller of the function.
          */
         const pomLog = {
             id: user.nextPomId,
@@ -151,7 +154,7 @@ export const pomodoro = {
                 console.log("[pomodoro.endSession]: " + `${caller} is ending the pomodoro session.`);
             };
             pomodoro.reset("system");
-            // TODO: Have the companion congratulate the user on completing the pomodoro.
+            companion.dialog.open("Good job on completing the pomodoro session!");
         };
 
         // Reset the pomodoro timer.
@@ -162,6 +165,8 @@ export const pomodoro = {
     async reset (caller = "user") {
         /**
          * Resets the pomodoro timer.
+         * 
+         * @param {string} caller - The caller of the function.
          */
         // If the caller is an event, set the caller to the user.
         if (caller instanceof Event) {
@@ -245,7 +250,7 @@ export const pomodoro = {
             pomodoro.updateUI();
         };
     },
-    updateUI() {
+    updateUI () {
         /**
          * Updates the pomodoro timer display.
          */
@@ -271,7 +276,7 @@ export const pomodoro = {
             timerCircle.style.strokeDashoffset = circleOffset;
         };
     },
-    cheat() {
+    cheat () {
         /**
          * A function that skips to the end of the pomodoro. This is used for
          * testing, and is not meant to be used by users. The function is
@@ -290,7 +295,6 @@ export const pomodoro = {
         };
     }
 };
-
 
 /*------------------------ POMODORO UTILITY FUNCTIONS ------------------------*/
 function updateButton(state = "play") {

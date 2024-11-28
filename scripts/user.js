@@ -1,9 +1,6 @@
 /*---------------------------------- IMPORT ----------------------------------*/
-import { utils } from "./utils.js";
-import { toast } from "./toast.js";
-import { calendar } from "./calendar.js";
-import { pomodoro } from "./pomodoro.js";
 import { companion } from "./companion.js";
+import { toast } from "./toast.js";
 
 /*-------------------------- USER DATA & FUNCTIONS ---------------------------*/
 export const user = {
@@ -11,16 +8,24 @@ export const user = {
      * User data.
      * 
      * @param {string} name - The user's name.
+     * @param {boolean} debug - Debug mode.
      * @param {array} events - The user's events.
+     * @param {number} nextEventId - The next event ID.
+     * @param {array} journals - The user's journal entries.
+     * @param {number} nextJournalId - The next journal ID.
      * @param {array} tasks - The user's to-do list.
+     * @param {object} focusTask - The user's current focus task.
+     * @param {number} nextTaskId - The next task ID.
      * @param {array} pomodoros - The user's pomodoro log.
+     * @param {number} nextPomId - The next pomodoro ID.
+     * @param {array} toasts - The user's toast log.
+     * @param {number} nextToastId - The next toast ID.
      * 
      * @function save - Save user object to local storage.
      * @function load - Load user object from local storage.
      * @function export - Export user data to a JSON file.
      * @function import - Import user data from a JSON file.
-     * @function showEvents - See all of the user's events in the console.
-     * @function showTasks - See all of the user's tasks in the console.
+     * @function format - Format user data.
      * 
      * @returns {object} user - The user's data.
      */
@@ -37,7 +42,6 @@ export const user = {
     nextPomId: 1,
     toasts: [],
     nextToastId: 1,
-
     save () {
         /**
          * Save user data to local storage.
@@ -147,10 +151,10 @@ export const user = {
          */
         const confirmFormat = await companion.dialog.ask("Formatting the data will permanently remove your existing content. Are you sure you want to proceed?");
             if (!confirmFormat) {
-                console.log("[tasks.delete]: User cancelled data formatting.");
+                if (user.debug === true) console.log("[tasks.delete]: User cancelled data formatting.");
                 return; // If the user cancels, return.
             } else {
-                console.log("[tasks.delete]: User confirmed data formatting.");
+                if (user.debug === true) console.log("[tasks.delete]: User confirmed data formatting.");
             };
 
         // Clear the user arrays.

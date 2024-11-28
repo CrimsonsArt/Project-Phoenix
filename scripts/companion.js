@@ -7,7 +7,7 @@ export const companion = {
     /**
      * Adds functions for the emotional support creature.
      * 
-     * @function summon - Summon the creature.
+     * @object dialog - Functions for the companion dialog box.
      * 
      * TODO: Have helper give reminders.
      * TODO: Have helper give advice.
@@ -16,6 +16,14 @@ export const companion = {
      * TODO: Have the companion give the user a tutorial.
      */
     dialog: {
+        /**
+         * Controls the companion dialog box.
+         * 
+         * @function open - Open the dialog box.
+         * @function say - Set the dialog content.
+         * @function ask - Ask the user a yes/no question.
+         * @function close - Close the dialog box. 
+         */
         open (text) {
             /**
              * Open the companion dialog box when clicking the companion.
@@ -63,6 +71,8 @@ export const companion = {
         say (text) {
             /**
              * Set companion dialog content.
+             * 
+             * @param {string} text - The text to display in the dialog.
              */
             // Get the companion wrapper.
             const wrapper = document.getElementById("companion");
@@ -97,6 +107,8 @@ export const companion = {
         ask (question) {
             /**
              * Ask the user a yes/no question.
+             * 
+             * @param {string} question - The question to ask the user.
              */
             return new Promise((resolve) => {
                 // Get the companion wrapper.

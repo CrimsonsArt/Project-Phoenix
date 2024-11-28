@@ -1,12 +1,12 @@
 /*---------------------------------- IMPORT ----------------------------------*/
-import { user } from "./user.js";
+import { user } from "./user.js"; // File is clean and ready for use.
 import { utils } from "./utils.js"; // File is clean and ready for use.
 import { toast } from "./toast.js";
 import { tasks } from "./tasks.js";
 import { events } from "./events.js"; // File is clean and ready for use.
 import { journal } from "./journal.js";
 import { calendar } from "./calendar.js"; // File is clean and ready for use.
-import { pomodoro } from "./pomodoro.js";
+import { pomodoro } from "./pomodoro.js"; // File is clean and ready for use.
 import { companion } from "./companion.js";
 
 // TODO: Add a cheat for setting the current date.
