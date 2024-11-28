@@ -1,6 +1,7 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 import { user } from "./user.js";
 import { utils } from "./utils.js";
+import { tasks } from "./tasks.js";
 import { events } from "./events.js";
 import { journal } from "./journal.js";
 
@@ -312,6 +313,19 @@ export const calendar = {
                 // Look for events to display in the cell.
                 if (user.events.length > 0) {
                     events.find(dateNumber.dateTime, cell);
+                };
+
+                // Look for task deadlines for the day.
+                if (user.tasks.length > 0) {
+                    const tasksToAdd = user.tasks.filter(task => task.dueDate === dateNumber.dateTime);
+                    //console.log("Tasks are found in the user object."+ `\n\t${dateNumber.dateTime}` + `\n\tTasks: ${tasksToAdd}`);
+                    if (tasksToAdd.length > 0) {
+                        console.log("Found tasks for the day.");
+                        tasksToAdd.forEach(taskToAdd =>  {
+                            console.log("Adding task to the day.");
+                            cell.appendChild(tasks.render.compact(taskToAdd));
+                        });
+                    };
                 };
 
                 // Look for journals for the day.

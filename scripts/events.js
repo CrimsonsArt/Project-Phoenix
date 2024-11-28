@@ -42,7 +42,7 @@ export const events = {
             // Set the properties of the wrapper.
             wrapper.classList.add("compact-event");
             wrapper.id = `compact-event-${data.id}`;
-            wrapper.role = "button";
+            //wrapper.role = "button";
             wrapper.tabindex = 0;
 
             // Set the properties of the event title span.

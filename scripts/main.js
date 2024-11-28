@@ -11,8 +11,6 @@ import { companion } from "./companion.js";
 
 // TODO: Add a cheat for setting the current date.
 // TODO: Add settings for the user.
-// TODO: Remove any label elements from buttons.
-// CONSIDER: Add github-like activity display for statistics.
 
 /*---------------------------------- ONLOAD ----------------------------------*/
 window.onload = function() {
@@ -20,15 +18,8 @@ window.onload = function() {
      * Onload function that runs when the page is loaded.
      */
     /*---------------------------- INITIALIZATION ----------------------------*/
-    /*// Load testing cheats.
-    window.pomodoro = pomodoro;
-    window.user = user;
-    window.toast = toast;*/
-
-
     // Load user data from local storage.
     user.load();
-    //user.debug = true;
 
     if (user.debug === true) {
         console.log("[onload]: Loading...");
@@ -60,7 +51,6 @@ window.onload = function() {
         };
     };
 
-
     /* --------------------------- USER INTERFACE ----------------------------*/
     // Add event listener for the sidebar menu toggle button.
     const menuToggle = document.getElementById("menu-toggle");
@@ -68,7 +58,6 @@ window.onload = function() {
 
     // Update the toast timestamps once every minute.
     setInterval(toast.updateTimestamps, 60000);
-
 
     /*------------------------------ COMPANION -------------------------------*/
     // Add event listener for the companion.
@@ -119,15 +108,10 @@ window.onload = function() {
         companion.dialog.close();
     }, 5000); // 5 seconds = 5000 milliseconds.
 
-
     /*------------------------------- CALENDAR -------------------------------*/
     // Render the calendar, and initialize its events.
     const today = new Date();
     calendar.render.table();
-    // CONSIDER: [ALT + SHIFT] to go to the next day with an event.
-    // CONSIDER: [LEFT ARROW | A] to go to the previous month.
-    // CONSIDER: [RIGHT ARROW | D] to go to the next month.
-
 
     /*-------------------------------- TASKS ---------------------------------*/
     // Load the tasks from local storage.
@@ -154,7 +138,6 @@ window.onload = function() {
         };
     });
 
-
     /*------------------------------- POMODORO -------------------------------*/
     // Add event listeners for the start and stop pomodoro buttons.
     const pomActions = {
@@ -167,7 +150,6 @@ window.onload = function() {
             button.addEventListener("click", pomActions[buttonId]);
         };
     });
-
 
     /*------------------------------- SETTINGS -------------------------------*/
     // Add event listeners for the settings buttons.
@@ -182,6 +164,4 @@ window.onload = function() {
             button.addEventListener("click", settingsActions[buttonId]);
         };
     });
-
-    // Finished loading.
 };

@@ -154,7 +154,7 @@ nav ul li {
 #toast-list.closed-menu .toast.show-temp {
     display: block;
 }
-.toast {
+.toast { /*TODO: Add icons to toasts.*/
     margin: 0;
     padding: 2% 5%;
 }
@@ -219,6 +219,9 @@ nav ul li {
 .event {
     border: 2px solid green;
 }
+.deadline {
+    border: 2px solid magenta;
+}
 .journal-entry {
     border: 2px solid blue;
 }
@@ -236,13 +239,17 @@ nav ul li {
 }
 
 /* CALENDAR - EVENTS */
-.compact-event:not(.more-events) {
+.compact-event:not(.more-events), .compact-task {
     background-color: var(--primary-color);
     border-radius: 5%;
     font-size: 1em;
     margin: 1%;
     overflow: hidden;
     text-wrap: nowrap;
+}
+.compact-task {
+    background-color: orange;
+    color: black;
 }
 
 /* CALENDAR - ADD EVENT FORM */

@@ -12,15 +12,12 @@ export const toast = {
      * @function render - Render toast messages.
      * @function delete - Remove a toast message.
      * @function updateTimestamps - Update the toast timestamps.
-     * @function toggleLog - Toggle the toast log.
+     * @function toggle - Toggle the toast log visibility.
      * 
-     * @returns {object} ui - The toast object. 
-     * 
-     * TODO: Add icons to toast.
-     * CONSIDER: Open toast-log if user clicks on active toast.
+     * @returns {object} ui - The toast object.
      */
     isOpen: false,
-    add(message, title = "info") {
+    add (message, title = "info") {
         /**
          * Create a new toast message.
          * 
@@ -47,7 +44,7 @@ export const toast = {
             console.log("[toast.add]: Toast added to log directly.");
         };
     },
-    load() {
+    load () {
         /**
          * Loads the toast list items, so they can be displayed instantly when
          * the toast log is opened.
@@ -62,14 +59,15 @@ export const toast = {
             });
         };
     },
-    render(data, isNew = false) {
+    render (data, isNew = false) {
         /**
          * Renders the toast list items in the toast log.
          * 
-         * TODO: Add hover over timestamp to display exact time.
+         * @param {object} data - The toast data to render.
+         * @param {boolean} isNew - If the toast is new or not.
+         * 
          * TODO: Allow hovering over toast to pause the removal of the toast.
          * TODO: Ensure that alike toasts are grouped together, if they happen after each other.
-         * CONSIDER: Add source or something in the toast title (e.g. "Import - Success")?
          */
         const wrapper = document.createElement("li");
         const title = data.title.charAt(0).toUpperCase() + data.title.slice(1);
@@ -89,13 +87,9 @@ export const toast = {
             <time datetime="${datetime}" aria-label="${timeLabel}">${utils.formatRelativeTime(time)}</time>
         </p>`;
 
-        // Create the delete button. // TODO: Add icon.
-        const delBtn = document.createElement("button");
-        delBtn.classList.add("toast-delete");
+        // Create the delete button.
+        const delBtn = utils.button("delete", "Delete toast", "trash");
         delBtn.id = `toast-delete-${data.id}`;
-        delBtn.textContent = "Delete";
-        delBtn.ariaLabel = "Delete toast";
-        delBtn.type = "button";
         wrapper.appendChild(delBtn);
 
         // Check if toast log is open, if not, add "show-temp" class.
@@ -103,7 +97,6 @@ export const toast = {
             wrapper.classList.add("show-temp");
 
             // Remove "show-temp" class after 5 seconds.
-            // TODO: Turn time into a setting, changeable by user.
             setTimeout(() => wrapper.classList.remove("show-temp"), 5000);
         };
 
@@ -117,7 +110,7 @@ export const toast = {
             console.log(`[toast.render]: Toast rendered with ID: ${data.id}`);
         };
     },
-    delete(id) {
+    delete (id) {
         /**
          * Remove a toast message.
          * 
@@ -138,7 +131,7 @@ export const toast = {
         };
         user.save();
     },
-    updateTimestamps() {
+    updateTimestamps () {
         /**
          * Updates the timestamps in the toast log, if the toast log is open.
          * 
@@ -147,14 +140,12 @@ export const toast = {
          * will then call the formatRelativeTime() function using that timestamp
          * to update the relative time in the toast.
          */
-        //if (toast.isOpen) { // TODO: Add "or, if a toast is visible."
-            const toasts = document.querySelectorAll(".toast");
-            toasts.forEach(toast => {
-                let timeElement = toast.querySelector("time");
-                let timestamp = timeElement.getAttribute("datetime");
-                timeElement.textContent = utils.formatRelativeTime(new Date(timestamp));
-            });
-        //};
+        const toasts = document.querySelectorAll(".toast");
+        toasts.forEach(toast => {
+            let timeElement = toast.querySelector("time");
+            let timestamp = timeElement.getAttribute("datetime");
+            timeElement.textContent = utils.formatRelativeTime(new Date(timestamp));
+        });
     },
     toggle () {
         /**

@@ -275,6 +275,29 @@ export const tasks = {
 
             // Return the HTML object.
             return wrapper;
+        },
+        compact (data) {
+            /**
+             * Render a compact task display in the calendar.
+             * 
+             * @param {Object} data - The task data object.
+             */
+            // Create the elements for the compact task display.
+            const wrapper = document.createElement("div");
+            const span = document.createElement("span");
+
+            // Set the properties of the wrapper.
+            wrapper.classList.add("compact-task");
+            wrapper.id = `compact-task-${data.id}`;
+            wrapper.tabindex = 0;
+
+            // Set the properties of the task title span.
+            span.classList.add("compact-task-title");
+            span.textContent = data.text;
+
+            // Add the elements to the wrapper, and return it.
+            wrapper.appendChild(span);
+            return wrapper;
         }
     },
     async delete (id) {
