@@ -93,35 +93,33 @@ export const tasks = {
         list () {
             /**
              * Renders the to-do list.
-             * 
-             * TODO: If task has subtasks, display them below it.
              */
-            const wrapper = document.getElementById("todo-list");
-
             // Get tasks with no parents.
             const rootTasks = user.tasks.filter(task => task.parentID === null);
+            const wrapper = document.getElementById("todo-list");
+
+            // Render the root tasks.
             rootTasks.forEach(task => {
-                // Render the root task
                 const parentTask = tasks.render.task(task.id);
                 wrapper.appendChild(parentTask);
-            
-                // Render subtasks recursively
+
+                // Render subtasks recursively.
                 function renderSubtasks(task, parentElement) {
                     if (task.childIDs.length > 0) {
                         const subtaskList = document.createElement("ul");
                         subtaskList.classList.add("has-subtasks");
                         parentElement.appendChild(subtaskList);
-            
+
+                        // Find the subtask.
                         task.childIDs.forEach(subtaskID => {
-                            // Find the subtask
                             const subtask = user.tasks.find(task => task.id === subtaskID);
-            
+
+                            // Render the subtask.
                             if (subtask) {
-                                // Render the subtask
                                 const subtaskElement = tasks.render.task(subtask.id);
                                 subtaskList.appendChild(subtaskElement);
-            
-                                // Recursively render any subtasks of this subtask
+
+                                // Recursively render any subtasks of this subtask.
                                 renderSubtasks(subtask, subtaskElement);
                             };
                         });
@@ -131,33 +129,12 @@ export const tasks = {
                 // Start rendering subtasks for the root task
                 renderSubtasks(task, parentTask);
             });
-            /*rootTasks.forEach(task => {
-                // Render the task.
-                const parentTask = tasks.render.task(task.id)
-                wrapper.appendChild(parentTask);
-
-                // Check if task has subtasks.
-                console.log(task.childIDs.length);
-                if (task.childIDs.length > 0) {
-                    const subtaskList = document.createElement("ul");
-                    subtaskList.classList.add("has-subtasks");
-                    parentTask.appendChild(subtaskList);
-                    task.childIDs.forEach(subtaskID => {
-                        const subtask = user.tasks.filter(task => task.id === subtaskID);
-                        if (subtask && subtask.length > 0) {
-                            subtaskList.appendChild(tasks.render.task(subtask[0].id));
-                        };
-                    });
-                };
-            });*/
         },
         task (id) {
             /**
              * Renders a task in the to-do list.
              * 
              * @param {number} id - The ID of the task to render.
-             * 
-             * TODO: Add progress bar for task with subtasks.
              */
             // Get the task data.
             const task = user.tasks.find(task => task.id === id);
@@ -185,6 +162,32 @@ export const tasks = {
                 wrapper.appendChild(due);
             };
 
+            // Create the progress bar, if the task has subtasks.
+            if (task.childIDs.length > 0) {
+                // Calculate progress
+                const totalSubtasks = task.childIDs.length;
+                const completedSubtasks = task.childIDs.filter(childId => {
+                    const childTask = user.tasks.find(t => t.id === childId);
+                    return childTask && childTask.completed;
+                }).length;
+
+                // Create the progress bar
+                const progressBar = document.createElement("progress");
+                progressBar.max = totalSubtasks;
+                progressBar.value = completedSubtasks;
+                progressBar.id = `task-progress-${task.id}`;
+                progressBar.classList.add("progress-bar");
+
+                // Add text label for progress percentage
+                const progressLabel = document.createElement("span");
+                progressLabel.classList.add("progress-label");
+                progressLabel.textContent = `${Math.round((completedSubtasks / totalSubtasks) * 100)}% completed`;
+
+                // Append progress bar to wrapper
+                const progressBarWrapper = utils.wrapInput(progressBar, progressLabel);
+                wrapper.appendChild(progressBarWrapper);
+            };
+
             // Create the checkbox.
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
@@ -192,6 +195,18 @@ export const tasks = {
             checkbox.id = `check-${task.id}`;
             if (task.completed) {
                 checkbox.checked = true;
+            };
+            if (task.childIDs.length > 0) {
+                const hasIncompleteChildren = task.childIDs.some(childId => {
+                    const childTask = user.tasks.find(t => t.id === childId);
+                    return childTask && !childTask.completed;
+                });
+
+                // Disable the checkbox if any child is incomplete
+                if (hasIncompleteChildren) {
+                    checkbox.disabled = true;
+                    checkbox.title = "Complete all subtasks first"; // Tooltip for user feedback
+                }
             };
             wrapper.appendChild(checkbox).addEventListener("change", () => tasks.complete(task.id));
 
@@ -380,7 +395,6 @@ export const tasks = {
                 });
             };
 
-            // TODO: Add pomodoro estimate input.
             // TODO: Add primary goal input.
 
             // Add the save and cancel buttons.
@@ -477,7 +491,6 @@ export const tasks = {
                 };
             };
 
-            // TODO: Update pomodoro estimate.
             // TODO: Update primary goal.
 
             // Save the changes, and re-render the task.
@@ -504,12 +517,26 @@ export const tasks = {
          * Mark a task as completed in the to-do list.
          * 
          * @param {number} id - The ID of the task to mark as completed.
-         * 
-         * TODO: Check if task can be completed, and if prerequisite tasks are completed.
          */
         // Find the task in the user.tasks object.
         const task = user.tasks.find(task => task.id === id);
         if (!task) return; // If the task doesn't exist, return.
+
+        // Check if the task has subtasks.
+        if (task.childIDs.length > 0) {
+            // Verify if all child tasks are completed
+            const allChildrenCompleted = task.childIDs.every(childId => {
+                const childTask = user.tasks.find(t => t.id === childId);
+                return childTask && childTask.completed;
+            });
+
+            if (!allChildrenCompleted) {
+                console.warn("Cannot complete this task until all subtasks are completed.");
+                return false; // Prevent marking the parent as complete
+            };
+        };
+
+        // TODO: Update the parent's progress bar if it has one.
 
         // Toggle the completed status of the task, and save the changes.
         task.completed = !task.completed;
@@ -524,8 +551,8 @@ export const tasks = {
                 if (user.debug === true) {
                     console.log("[tasks.complete]: " + `Completed task with ID: ${id}`);
                 };
-                toast.add("Task complete, good job!", "success");
                 //toast.add("Task complete, good job!", "success");
+                // TODO: Have the companion congratulate the user.
             } else {
                 if (user.debug === true) {
                     console.log("[tasks.complete]: " + `Marked task incomplete with ID: ${id}`);
