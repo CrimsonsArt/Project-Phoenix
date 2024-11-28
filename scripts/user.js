@@ -3,6 +3,7 @@ import { utils } from "./utils.js";
 import { toast } from "./toast.js";
 import { calendar } from "./calendar.js";
 import { pomodoro } from "./pomodoro.js";
+import { companion } from "./companion.js";
 
 /*-------------------------- USER DATA & FUNCTIONS ---------------------------*/
 export const user = {
@@ -66,7 +67,6 @@ export const user = {
                 console.log("[user.load]: User data successfully loaded from local storage.");
             };
         } else {
-            // TODO: Start intro sequence.
             if (user.debug === true) {
                 console.log("[user.load]: No user data found in local storage.");
             };
@@ -141,12 +141,18 @@ export const user = {
             reader.readAsText(file);
         };
     },
-    format () {
+    async format () {
         /**
          * Delete user data from local storage.
-         * 
-         * TODO: Add a confirmation prompt.
          */
+        const confirmFormat = await companion.dialog.ask("Formatting the data will permanently remove your existing content. Are you sure you want to proceed?");
+            if (!confirmFormat) {
+                console.log("[tasks.delete]: User cancelled data formatting.");
+                return; // If the user cancels, return.
+            } else {
+                console.log("[tasks.delete]: User confirmed data formatting.");
+            };
+
         // Clear the user arrays.
         user.name = "";
         user.events = [];

@@ -7,14 +7,17 @@ export const utils = {
      * 
      * @function createISODate - Creates an ISO date string from calendar info.
      * @function formatRelativeTime - Formats a timestamp as a relative time.
-     * @function icon - Generates an icon HTML string.
+     * @function wrapInput - Adds a wrapper around input and label elements.
      * @function input - Creates an input with a label and wrapper.
+     * @function button - Creates a button element.
      * 
      * @returns {object} - The utility object.
      */
     createISODate (info) {
         /**
          * Create an ISO date string from the calendar info.
+         * 
+         * @param {object} info - The calendar info object.
          */
         // Set the year, month, and day.
         const year = info.year;
@@ -104,64 +107,59 @@ export const utils = {
          * @param {object} location - The location to append to.
          * @param {object} extra - Extra data for the input.
          */
-        /*// Create the wrapper.
-        const wrapper = document.createElement("div");
-        wrapper.id = `${name}-wrapper`;
-        wrapper.classList.add("form-field");*/
-    
         // If the input is invalid, log an error.
         if (!name || typeof name !== "string") {
             return "[utils.input]: ERROR - Input name is not formatted correctly. Please report this issue on GitHub.";
         };
-    
+
         // Replace dashes with spaces, and split the text.
         const rawText = name.replace(/-/g, " ").split(" ").filter(word => word.trim() !== "");
     
         // Remove the first two words from the text.
         const labelText = rawText.slice(2);
-    
+
         // Check if the first word is a number, and remove it for the label.
         if (labelText.length > 0 && !isNaN(labelText[0])) {
             labelText.shift();
         };
-    
+
         // Capitalize the first letter of the first word.
         if (labelText.length > 0) {
             labelText[0] = labelText[0][0].toUpperCase() + labelText[0].slice(1);
-    
+
         // If no text is found, log an error.
         } else {
             console.log("[utils.input]: ERROR - No text found for an input label. Please report this issue on GitHub.");
             return "Untitled";
         };
-    
+
         // Join the text back together.
         const text = labelText.join(" ");
-    
+
         // Create the label.
         const label = document.createElement("label");
         label.id = `${name}-label`;
         label.htmlFor = name;
         label.textContent = text + ":";
-    
+
         // Create the input.
         let input = document.createElement("input");
-    
+
         // If the input is a textarea, create one.
         if (type === "textarea") {
             input = document.createElement("textarea");
-    
+
         // If the input is a button, create one.
         } else if (type === "button") {
             input = document.createElement("button");
             label.classList.add("sr-only");
             input.textContent = text;
             input.type = "button";
-    
+
             // Check if the button is a submit button.
             if (name.includes("submit")) {
                 input.type = "submit";
-    
+
                 // Check if the button is for adding or editing an event.
                 if (name.includes("new-event")) {
                     input.textContent = "Add event";
@@ -169,26 +167,26 @@ export const utils = {
                     input.textContent = "Update event";
                 };
             };
-    
+
         // Otherwise, create a normal input.
         } else {
             input = document.createElement("input");
             input.type = type;
         };
         input.id = name;
-    
+
         // If the input is required, set the required attribute.
         if (required === true) {
             input.required = true;
         };
-    
+
         // If the input is a checkbox, and the text is "All day", check it.
         if (type === "checkbox" && text === "All day") {
             if (location != null) {
                 input.checked = true;
             };
         };
-    
+
         // Add extra data to the input.
         if (type === "date" && extra) {
             input.value = extra;
@@ -221,7 +219,10 @@ export const utils = {
         button.classList.add("btn");
         button.type = "button";
         if (text) button.textContent = text.charAt(0).toUpperCase() + text.slice(1);
-        if (label) button.ariaLabel = label;
+        if (label) {
+            button.ariaLabel = label
+            button.title = label;
+        };
         if (icon) {
             const span = document.createElement("span");
             span.classList.add("icon", "bi", `bi-${icon}`);
@@ -229,65 +230,5 @@ export const utils = {
             button.appendChild(span);
         };
         return button;
-    },
-    modal: {
-        render ({id = "modal", message = "This is a modal dialog.", confirm = "OK", cancel = "Cancel", onConfirm = () => {}, onCancel = () => {}}) {
-            /**
-             * Create a modal dialog.
-             * 
-             * @param {string} id - The ID of the modal dialog.
-             * @param {string} message - The message to display in the dialog.
-             * @param {string} confirm - The text for the confirm button.
-             * @param {string} cancel - The text for the cancel button.
-             * @param {function} onConfirm - The function to run on confirm.
-             * @param {function} onCancel - The function to run on cancel.
-             */
-            // Create modal container
-            const modal = document.createElement("div");
-            modal.id = id || "custom-modal";
-            modal.className = "modal closed";
-    
-            // Create modal content
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <p>${message}</p>
-                    <div class="modal-actions">
-                        <button id="${id}-confirm">${confirmText}</button>
-                        <button id="${id}-cancel">${cancelText}</button>
-                    </div>
-                </div>
-            `;
-    
-            // Append modal to the body
-            document.body.appendChild(modal);
-    
-            // Add event listeners for buttons
-            const confirmButton = document.querySelector(`#${id}-confirm`);
-            const cancelButton = document.querySelector(`#${id}-cancel`);
-    
-            confirmButton.addEventListener("click", () => {
-                if (onConfirm) onConfirm();
-                closeModal(modal); // Close the modal
-            });
-    
-            cancelButton.addEventListener("click", () => {
-                if (onCancel) onCancel();
-                closeModal(modal); // Close the modal
-            });
-    
-            // Show modal
-            modal.classList.remove("closed");
-        },
-        close (modal) {
-            /**
-             * Close a modal dialog.
-             * 
-             * @param {object} modal - The modal dialog to close.
-             */
-            modal.classList.add("hidden");
-            setTimeout(() => {
-                modal.remove(); // Remove from DOM after hiding
-            }, 300); // Wait for any potential CSS transition
-        }
     }
 };

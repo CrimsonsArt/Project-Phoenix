@@ -1,5 +1,6 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 import { utils } from "./utils.js";
+import { toast } from "./toast.js";
 import { user } from "./user.js";
 
 /*--------------------------------- JOURNAL ----------------------------------*/
@@ -88,7 +89,7 @@ export const journal = {
         const entry = user.journals.find(entry => entry.date === date);
         if (entry) {
             // Create the journal entries.
-            console.log("Journal entries found.");
+            if (user.debug === true) console.log("Journal entries found.");
 
             // Create the article container.
             const article = document.createElement("article");
@@ -129,10 +130,7 @@ export const journal = {
             };
 
             // Create the edit button.
-            const edit = document.createElement("button");
-            edit.ariaLabel = "Edit the journal entry.";
-            edit.title = "Edit the journal entry.";
-            edit.textContent = "Edit";
+            const edit = utils.button("edit", "Edit the journal entry", "pencil-square");
             edit.id = "journal-edit";
             article.appendChild(edit).addEventListener("click", () => {
                 document.getElementById("journal-entry").remove();
@@ -141,7 +139,7 @@ export const journal = {
 
         } else {
             // No journal entries found.
-            //console.log("No journal entries found, rendering the form.");
+            if (user.debug === true) console.log("No journal entries found, rendering the form.");
             journal.edit();
         }
     },
@@ -315,10 +313,8 @@ export const journal = {
         });
 
         // Create the save button.
-        const save = document.createElement("button");
-        save.ariaLabel = "Save the journal entry.";
-        save.title = "Save the journal entry.";
-        save.textContent = "Save";
+        //const save = document.createElement("button");
+        const save = utils.button("save", "Save the journal entry", "floppy");
         save.id = "journal-save";
         save.type = "submit";
         form.appendChild(save);

@@ -272,7 +272,7 @@ nav ul li {
     overflow: hidden;
 }
 .shrunk-week, .shrunk-week .cell {
-    height: 35px;
+    height: 5px;
     overflow: hidden;
 }
 .expanded-column {
@@ -355,7 +355,7 @@ nav ul li {
     z-index: 1;
     width: 350px;
 }
-#dialog {
+.dialog {
     background-color: var(--tertiary-color);
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);

@@ -1,14 +1,19 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 import { utils } from "./utils.js";
 import { user } from "./user.js";
-import { calendar } from "./calendar.js";
 
 /*----------------------------- EVENT FUNCTIONS ------------------------------*/
 export const events = {
     /**
      * Events data and functions.
      * 
-     * @object render - Functions for rendering the events.
+     * @param {object} render - Functions for rendering the events.
+     * @function new - Creates a new event object.
+     * @function add - Adds a new event to the events array.
+     * @function cancel - Cancels the creation of a new event.
+     * @function find - Finds events for the currently displayed days.
+     * @function delete - Deletes an event from the events array.
+     * @function edit - Edits an event in the events array.
      * 
      * @returns {object} events - The events object.
      */
@@ -17,7 +22,9 @@ export const events = {
          * Render events.
          * 
          * @function compact - Render a compact event display.
-         * @function expanded - Render an expanded event display.
+         * @function full - Render a full event display.
+         * @function plannerControls - Render the planner controls.
+         * @function planner - Render the daily planner.
          * @function form - Render the event picker form.
          * 
          * @returns {object} events - The events render object.
@@ -31,12 +38,10 @@ export const events = {
             // Create the elements for the compact event display.
             const wrapper = document.createElement("div");
             const span = document.createElement("span");
-            const time = document.createElement("time");
 
             // Set the properties of the wrapper.
             wrapper.classList.add("compact-event");
             wrapper.id = `compact-event-${data.id}`;
-            wrapper.ariaExpanded = false;
             wrapper.role = "button";
             wrapper.tabindex = 0;
 
@@ -44,26 +49,9 @@ export const events = {
             span.classList.add("compact-event-title");
             span.textContent = data.title;
 
-            // Add the elements to the wrapper.
+            // Add the elements to the wrapper, and return it.
             wrapper.appendChild(span);
-            // wrapper.appendChild(time);
-
-            // Add event listener.
-            wrapper.addEventListener("click", () => {
-                events.render.expanded(data);
-            });
-
-            // Return the wrapper.
             return wrapper;
-        },
-        expanded (data) {
-            /**
-             * Renders an expanded event display in a closed day view.
-             * 
-             * @param {Object} data - The event data object.
-             */
-            // CONSIDER: Add expanded event display when clicking compact event.
-            console.log(`Clicked on event ${data.id}`);
         },
         full (data, update = null) {
             /**
@@ -147,14 +135,8 @@ export const events = {
             controls.id = "full-event-controls";
             wrapper.appendChild(controls);
 
-            // TODO: Add button icons.
-
             // Add the edit button.
-            const editButton = document.createElement("button");
-            editButton.type = "button";
-            editButton.ariaLabel = "Edit this event.";
-            editButton.title = "Edit this event.";
-            editButton.textContent = "Edit";
+            const editButton = utils.button("edit", "Edit this event", "pencil-square");
             controls.appendChild(editButton).addEventListener("click", () => events.edit(data.id));
             if (user.debug === true) {
                 console.log(`[events.render.full]: Adding edit button for event ${data.id}`);
@@ -203,11 +185,12 @@ export const events = {
                     document.getElementById("new-event-cancel").addEventListener("click", () => events.cancel("new-event", cell));
                 };
             });
-            // TODO: Add keydown event listener for the cancel button.
         },
         planner (cell) {
             /**
              * Renders a daily planner in the calendar day-view.
+             * 
+             * @param {object} cell - The cell to get the date from.
              */
             // Create the wrapper, and append it to the day view.
             const wrapper = document.createElement("div");
@@ -240,7 +223,6 @@ export const events = {
             events.find(cell.dataset.date, list, "full");
 
             // Render the planner control panel.
-            // CONSIDER: Append this before the list.
             events.render.plannerControls(cell);
         },
         form (id, date = null, parent = null, action = null) {
@@ -299,7 +281,6 @@ export const events = {
                     document.getElementById(`${id}-start-date`).value = date;
                 };
             };
-            // TODO: Add a button for "add end date", that spawns this.
             utils.input(`${id}-end-date`, "date", false, dateFieldset);
 
             // Add the all day and repeat checkboxes.
@@ -379,8 +360,6 @@ export const events = {
          * Creates a new event object to modify.
          * 
          * @returns {object} event - The new event object.
-         * 
-         * CONSIDER: Add a category and status to the event object.
          */
         return {
             id: null, // Unique ID.
@@ -868,15 +847,6 @@ export const events = {
                 events.cancel(`edit-event-${id}`);
             });
         };
-    },
-    import (url) {
-        /**
-         * Imports an iCalendar file from a given url.
-         * 
-         * Link to iCalendar documentation: https://icalendar.org/iCalendar-RFC-5545/4-icalendar-object-examples.html
-         * 
-         * @param {string} url - The URL of the iCal file.
-         */
     }
 };
 

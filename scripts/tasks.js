@@ -2,6 +2,7 @@
 import { utils } from "./utils.js";
 import { user } from "./user.js";
 import { toast } from "./toast.js";
+import { companion } from "./companion.js";
 //import { toast } from "./toast.js";
 
 /*--------------------------- TO-DO LIST FUNCTIONS ---------------------------*/
@@ -10,13 +11,14 @@ export const tasks = {
      * To-do list data and functions.
      * 
      * @function add - Add a new task to the task object.
-     * @function load - Load the task list items, and render them.
-     * @function render - Render the to-do list.
+     * @param {object} render - Functions for rendering tasks.
      * @function delete - Delete a task from the to-do list.
+     * @function openMenu - Open the task menu.
      * @function edit - Edit a task.
      * @function cancel - Cancel an edit.
      * @function save - Save an edited task.
      * @function complete - Mark a task as completed.
+     * @param {object} hierarchy - Functions for task hierarchies.
      * 
      * @returns {object} - The functions for the to-do list.
      */
@@ -77,6 +79,9 @@ export const tasks = {
     render: {
         /**
          * Renders elements of the to-do list.
+         * 
+         * @function list - Renders the to-do list.
+         * @function task - Renders a task in the to-do list.
          */
         list () {
             /**
@@ -247,12 +252,12 @@ export const tasks = {
             options.id = `task-dropdown-content-${task.id}`;
             dropWrapper.appendChild(options);
 
-            // TODO: Add event listener to the "set as current goal" button.
             const goal = document.createElement("button");
             goal.classList.add("task-goal");
             goal.id = `task-goal-${task.id}`;
             goal.textContent = "Set as goal";
             goal.type = "button";
+            // TODO: Add event listener to the "set as prioritized task" button.
             options.appendChild(goal);
 
             // Create the edit button.
@@ -272,19 +277,31 @@ export const tasks = {
             return wrapper;
         }
     },
-    delete (id) {
+    async delete (id) {
         /**
          * Delete a task from the to-do list.
          * 
          * @param {number} id - The ID of the task to delete.
          */
         // Find the task with the given id.
-        user.tasks = user.tasks.filter(task => task.id !== id);
+        const task = user.tasks.find(task => task.id === id);
 
-        // Remove toast from DOM.
-        const task = document.getElementById(`task-${id}`);
-        if (task) {
-            task.remove();
+        // Check if the task has subtasks, and warn the user.
+        if (task.childIDs.length > 0) {
+            console.warn("[tasks.delete]: This task has subtasks. Deleting it will also delete all subtasks.");
+            const confirmDelete = await companion.dialog.ask("This task has subtasks. Deleting it will also delete all its subtasks. Are you sure you want to delete it?");
+            if (!confirmDelete) {
+                console.log("[tasks.delete]: User cancelled task deletion.");
+                return; // If the user cancels, return.
+            } else {
+                console.log("[tasks.delete]: User confirmed task deletion.");
+            };
+        };
+
+        // Remove task from DOM.
+        const taskToRemove = document.getElementById(`task-${id}`);
+        if (taskToRemove) {
+            taskToRemove.remove();
         };
 
         // Log to console, and save changes.
@@ -545,7 +562,8 @@ export const tasks = {
             if (user.debug === true) {
                 console.log("[tasks.complete]: " + `Completed task with ID: ${id}`);
             };
-            // TODO: Have the companion congratulate the user.
+            // Have the companion congratulate the user.
+            companion.dialog.say("Good job on completing the task!");
         } else {
             if (user.debug === true) {
                 console.log("[tasks.complete]: " + `Marked task incomplete with ID: ${id}`);

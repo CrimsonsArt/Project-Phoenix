@@ -1,5 +1,6 @@
 import { utils } from "./utils.js";
 import { user } from "./user.js";
+import { companion } from "./companion.js";
 
 /*---------------------------- POMODORO FUNCTIONS ----------------------------*/
 export const pomodoro = {
@@ -15,10 +16,7 @@ export const pomodoro = {
      * @function updateUI   - Updates the pomodoro timer UI.
      * 
      * TODO: Let user select pomodoro length (15 or 25), by clicking the time display and selecting the time from a dropdown.
-     * TODO: Keep timer running until the user clicks to advance.
-     * TODO: Let user select task to focus on.
-     * CONSIDER: Darken the rest of the screen when timer is active.
-     * CONSIDER: Button for displaying pomodoro history.
+     * TODO: Darken the rest of the screen when timer is active.
      */
     timer: null,
     minutes: 25,
@@ -88,20 +86,18 @@ export const pomodoro = {
             };
         };
     },
-    advance() {
+    async advance() {
         /**
          * Lets the user choose to continue or end the pomodoro. By choosing to
          * continue, it tracks how many pomodoros have been completed, and makes
          * the user take a longer break after 4 pomodoros. By choosing to end
          * the pomodoro, it saves the pomodoro stats to the user.
          */
-
-        // Prompt user to continue or end the pomodoro.
-        // TODO: Use HTML for this.
-        const continuePomodoro = confirm("Do you want to continue with another pomodoro round?");
-
         // Track how many loops the user has done.
         pomodoro.rounds++;
+
+        // Prompt user to continue or end the pomodoro.
+        const continuePomodoro = await companion.dialog.ask("Do you want to continue with another pomodoro round?");
 
         // User decides if they want to continue or stop.
         if (continuePomodoro) {
@@ -137,23 +133,11 @@ export const pomodoro = {
             complete: true
         };
 
-        // If the requester is the user, ask if they completed their task.
-        if (caller === "user") {
-            /*utils.log("Pomodoro", `${caller} is ending the pomodoro session.`);
-            // TODO: Use HTML for this.
-            const isTaskComplete = confirm("Did you complete your task?");
-
-            // If task is not complete, mark as incomplete.
-            if (!isTaskComplete) {
-                pomLog.complete = false;
-            };*/
-
-            // Log seconds spent.
-            if (pomodoro.isBreak) {
-                pomLog.breakSeconds = pomodoro.seconds;
-            } else {
-                pomLog.focusSeconds = pomodoro.seconds;
-            };
+        // Log seconds spent.
+        if (pomodoro.isBreak) {
+            pomLog.breakSeconds = pomodoro.seconds;
+        } else {
+            pomLog.focusSeconds = pomodoro.seconds;
         };
 
         // Save the pomodoro stats to the user.
@@ -167,6 +151,7 @@ export const pomodoro = {
                 console.log("[pomodoro.endSession]: " + `${caller} is ending the pomodoro session.`);
             };
             pomodoro.reset("system");
+            // TODO: Have the companion congratulate the user on completing the pomodoro.
         };
 
         // Reset the pomodoro timer.
@@ -174,7 +159,7 @@ export const pomodoro = {
             console.log("[pomodoro.endSession]: " + `Ending ${pomLog.totalTime} minute pomodoro session.`);
         };
     },
-    reset (caller = "user") {
+    async reset (caller = "user") {
         /**
          * Resets the pomodoro timer.
          */
@@ -189,8 +174,7 @@ export const pomodoro = {
         } else {
             // If the requester is the user, confirm that they want to reset.
             if (caller === "user") {
-                // TODO: Use HTML for this.
-                const confirmReset = confirm("Are you sure you want to reset the pomodoro timer?");
+                const confirmReset = await companion.dialog.ask("Are you sure you want to reset the pomodoro timer?");
                 if (confirmReset) {
                     // If so, end the session early.
                     if (user.debug === true) {

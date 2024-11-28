@@ -12,13 +12,13 @@ export const companion = {
      * TODO: Have helper give reminders.
      * TODO: Have helper give advice.
      * TODO: Have helper remind the user to take breaks.
-     * TODO: Praise the user for completing tasks.
      * TODO: Add a button to minimize the companion.
+     * TODO: Have the companion give the user a tutorial.
      */
     dialog: {
         open (text) {
             /**
-             * Open the companion dialog box.
+             * Open the companion dialog box when clicking the companion.
              * 
              * @param {string} text - The text to display in the dialog.
              */
@@ -37,6 +37,7 @@ export const companion = {
 
             // Add text content.
             const dialog = document.createElement("div");
+            dialog.classList.add("dialog");
             dialog.id = "dialog";
             const dialogContent = document.createElement("p");
             if (text) {
@@ -68,6 +69,7 @@ export const companion = {
 
             // Add text content.
             const dialog = document.createElement("div");
+            dialog.classList.add("dialog");
             dialog.id = "dialog";
             const dialogContent = document.createElement("p");
             if (text) {
@@ -89,6 +91,61 @@ export const companion = {
             // Add the dialog to the companion wrapper.
             wrapper.insertBefore(dialog, wrapper.firstChild);
 
+            // TODO: Add a timeout to close the dialog after a few seconds.
+
+        },
+        ask (question) {
+            /**
+             * Ask the user a yes/no question.
+             */
+            return new Promise((resolve) => {
+                // Get the companion wrapper.
+            const wrapper = document.getElementById("companion");
+
+            // Add text content.
+            const dialog = document.createElement("div");
+            dialog.classList.add("dialog");
+            dialog.id = "dialog-ask";
+            const dialogContent = document.createElement("p");
+            if (question) {
+                dialogContent.textContent = question;
+            } else {
+                dialogContent.textContent = "Hmm... I had a question, but I forgot it.";
+            };
+            dialog.appendChild(dialogContent);
+
+            // Add the response wrapper.
+            const responseWrapper = document.createElement("div");
+            responseWrapper.id = "response-wrapper";
+            dialog.appendChild(responseWrapper);
+
+            // Add a yes button.
+            const dialogYes = document.createElement("button");
+            dialogYes.textContent = "Yes";
+            dialogYes.id = "dialog-yes";
+            dialogYes.ariaLabel = "Yes";
+            dialogYes.title = "Yes";
+            dialogYes.type = "button";
+            responseWrapper.appendChild(dialogYes).onclick = () => {
+                resolve(true)
+                document.getElementById("dialog-ask").remove();
+            };
+
+            // Add a no button.
+            const dialogNo = document.createElement("button");
+            dialogNo.textContent = "No";
+            dialogNo.id = "dialog-no";
+            dialogNo.ariaLabel = "No";
+            dialogNo.title = "No";
+            dialogNo.type = "button";
+            responseWrapper.appendChild(dialogNo).onclick = () => {
+                resolve(false)
+                document.getElementById("dialog-ask").remove();
+            };
+
+            // Add the dialog to the companion wrapper.
+            wrapper.insertBefore(dialog, wrapper.firstChild);
+            });
         },
         close () {
             /**
