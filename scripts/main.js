@@ -71,6 +71,8 @@ window.onload = function() {
         companion.dialog.open();
     });
 
+    // TODO: If the toast log is open, move the companion to the left of it.
+
     // Add event listener to stop the companion from covering the footer.
     document.addEventListener("scroll", () => {
         const footer = document.querySelector("footer");
