@@ -15,8 +15,6 @@
         <link rel="manifest" href="img/favicon/site.webmanifest">
     </head>
     <body>
-        <!-- Dummy script for preventing "Flash of unstyled content"-->
-        <script>0</script>
         <header id="banner">
             <a href="#main" class="sr-only skip">Skip to main content</a>
             <nav id="nav-main" aria-label="Main navigation">
@@ -64,9 +62,7 @@
                             </div>
                             <button id="add-hierarchy" type="button" title="Add the task in a hierarchy with another task" aria-label="Add the task in a hierarchy with another task">Add hierarchy</button>
                         </fieldset>
-                        <div class="controls">
-                            <button id="add-task" type="submit" title="Add task" aria-label="Add task"><span class="bi bi-plus-circle" aria-hidden="true"></span></button>
-                        </div>
+                        <button id="add-task" type="submit" title="Add task" aria-label="Add task">Add task<!-- <span class="bi bi-plus-circle" aria-hidden="true"></span>--></button>
                     </form>
                     <ul id="todo-list" class="task-list">
                     </ul>
@@ -122,7 +118,7 @@
                             <legend>Delete</legend>
                             <div class="form-field">
                                 <label for="data-delete">Delete data: </label>
-                                <button id="data-delete" type="button" title="Delete user data" aria-label="Delete user data">Delete user data</button>
+                                <button id="data-delete" class="btn delete" type="button" title="Delete user data" aria-label="Delete user data">Delete user data</button>
                             </div>
                         </fieldset>
                     </form>

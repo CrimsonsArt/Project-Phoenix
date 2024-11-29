@@ -178,5 +178,16 @@ export const user = {
 
         // Reload the page.
         location.reload();
+    },
+    debugMode () {
+        /**
+         * Toggle debug mode.
+         */
+        user.debug = !user.debug;
+        if (user.debug === true) {
+            console.log("[user.debug]: Debug mode enabled.");
+        } else {
+            console.log("[user.debug]: Debug mode disabled.");
+        };
     }
 };

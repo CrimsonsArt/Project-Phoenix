@@ -51,7 +51,6 @@ a:visited {
     color: var(--main-font-color); /* TODO: Change color. */
 }
 
-
 /* CORE STYLE */
 html, body {
     margin: 0;
@@ -84,12 +83,17 @@ footer {
 .container {
     height: 100%;
     margin: 1% 0;
-    width: 95%;
+    max-width: 1250px;
+    width: 90%;
 }
-.closed {
-    display: none;
+.btn {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
 }
-
+.btn .icon {
+    order: -1;
+}
 
 /* HEADER & NAVIGATION */
 #banner {
@@ -120,7 +124,6 @@ nav ul li {
     margin: 0;
     padding: 0;
 }
-
 
 /* TOASTS */
 #menu {
@@ -178,6 +181,12 @@ nav ul li {
 }
 
 /* CALENDAR */
+#calendar-nav-month, #calendar-nav-year {
+    border: none;
+    font-size: 1.5em;
+}
+#calendar-nav-month {}
+#calendar-nav-year {}
 #calendar-container {
     border: var(--borders);
 }
@@ -188,7 +197,6 @@ nav ul li {
 }
 .row {
     align-content: stretch;
-    border: var(--borders);
     display: flex;
     flex-flow: row nowrap;
     justify-content: center;
@@ -199,14 +207,20 @@ nav ul li {
     display: table-cell;
     flex: 1 1 0;
     min-height: 70px;
-    /*overflow: hidden;  TODO: TESTING ONLY! */
     text-align: center;
     width: 0;
 }
 .day-header {
     background-color: var(--tertiary-color);
     color: var(--primary-color);
+    font-size: 1.2em;
     font-weight: bold;
+}
+.day {
+    aspect-ratio: 1 / 1;
+}
+.day-number {
+    font-size: 1.2em;
 }
 .faded {
     color: var(--faded-font-color);
@@ -261,18 +275,15 @@ nav ul li {
 
 /* CALENDAR - DAY VIEW */
 .expanded-day {
+    background-color: var(--tertiary-color);
     flex: 100;
-    padding-top: 3%;
+    padding: 3%;
     position: relative;
 }
 .expanded-week, .expanded-week .cell {
     height: 100%;
     min-height: 70vh;
-    /*position: relative;*/
 }
-/*.expanded-week .shrunk-day {
-    position: absolute;
-}*/
 .shrunk-day {
     align-self: stretch;
     flex: 0.5;
@@ -285,11 +296,17 @@ nav ul li {
 .expanded-column {
     flex: 100;
 }
-#day-view { /*TODO: Change on screen size*/
+.expanded-week .shrunk-day {
+    height: 100%;
+}
+#day-view {
     display: flex;
     flex-flow: row nowrap;
     height: 100%;
     justify-content: space-around;
+}
+#day-view h4 {
+    font-size: 1.75em;
 }
 .expanded-day #day-title {
     font-size: 2em;
@@ -303,12 +320,91 @@ nav ul li {
     right: 0;
 }
 #planner, #journal, #journal form {
-    background-color: var(--tertiary-color);
     display: flex;
     flex-flow: column nowrap;
     height: 100%;
     justify-content: center;
     width: 100%;
+}
+#planner-list-wrapper {
+    height: 100%;
+}
+#planner-list {
+    list-style: none;
+}
+.full-event {
+    display: flex;
+    flex-flow: column nowrap;
+}
+.full-event-title {
+    font-size: 1em;
+}
+.full-event-date {}
+.full-event-time {}
+.full-event-description {}
+.full-event-location {}
+.full-event-controls {}
+
+/* Task styling */
+#todo {
+}
+#task-form {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    margin: 1%;
+}
+#todo-list {
+
+}
+.has-subtasks {
+    padding: 0 0 0 2%;
+}
+.task {
+    list-style: none;
+}
+.task-wrapper {
+    align-items: center;
+    border-bottom: 1px solid var(--primary-color);
+    display: flex;
+    flex-flow: row nowrap;
+    padding: 7px 0;
+    position: relative;
+}
+.task-text {
+    padding-right: 7px;
+}
+.task-due {}
+.task-progress {}
+.task-progress-bar {}
+.task-progress-label {}
+.task-check {
+    order: -1;
+}
+.task-time {}
+.task-dropdown {
+    padding-left: 7px;
+}
+.task-menu {}
+.task-dropdown-content {
+    display: flex;
+    flex-flow: column nowrap;
+    max-width: 100px;
+    position: absolute;
+}
+.task-goal {}
+.task-edit {}
+.task-delete {}
+.optionGroup {
+    font-weight: bold;
+    font-style: italic;
+}
+    
+.optionChild {
+    padding-left: 15px;
+}
+.delete {
+    color: darkred;
 }
 
 /* Pomodoro styling */
@@ -352,7 +448,6 @@ nav ul li {
     transform-origin: 100px 100px;
 }
 
-
 /* COMPANION */
 #companion {
     bottom: 0;
@@ -373,6 +468,10 @@ nav ul li {
     height: 100%;
 }
 
+/* OVERRIDES */
+.closed {
+    display: none;
+}
 
 /* ANIMATIONS */
 @keyframes bounce {

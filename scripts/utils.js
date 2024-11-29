@@ -216,7 +216,7 @@ export const utils = {
          * @returns {object} - The button element.
          */
         const button = document.createElement("button");
-        button.classList.add("btn");
+        button.classList.add("btn", text);
         button.type = "button";
         if (text) button.textContent = text.charAt(0).toUpperCase() + text.slice(1);
         if (label) {

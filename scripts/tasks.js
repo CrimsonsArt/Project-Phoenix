@@ -46,6 +46,7 @@ export const tasks = {
 
             const subtask = document.getElementById("task-add-subtask");
             if (subtask && subtask.value !== "") {
+                console.log("Adding subtask to parent task.");
                 // Add the task as a subtask of the selected task.
                 const parentTaskID = Number(subtask.value);
                 task.parentID = parentTaskID;
@@ -53,6 +54,7 @@ export const tasks = {
                 // Get the index of the parent task.
                 const parentIndex = user.tasks.findIndex(task => task.id === parentTaskID);
                 if (parentIndex > -1) {
+                    console.log("Parent task found.");
                     user.tasks[parentIndex].childIDs.push(user.nextTaskId);
                     if (user.debug === true) {
                         console.log(`[tasks.add]: Added task with ID: ${user.nextTaskId} as a subtask of task with ID: ${parentTaskID}`);
@@ -68,7 +70,8 @@ export const tasks = {
             tasks.render.list(); // Re-render the task list.
             taskInput.value = ""; // Clear the task input.
             taskDue.value = ""; // Clear the due date input.
-            subtask.value = ""; // Clear the subtask selector.
+            tasks.hierarchy.add(); // Re-render the subtask selector.
+            if (subtask) subtask.value = ""; // Clear the subtask selector.
             toast.add("Task added successfully.", "success");
 
         // If task input is empty.
@@ -136,9 +139,14 @@ export const tasks = {
             if (!task) return; // Return if the task doesn't exist.
 
             // Create the wrapper.
-            const wrapper = document.createElement("li");
-            wrapper.id = `task-${task.id}`;
-            wrapper.classList.add("task");
+            const listItem = document.createElement("li");
+            listItem.id = `task-${task.id}`;
+            listItem.classList.add("task");
+
+            // Create the wrapper.
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("task-wrapper");
+            listItem.appendChild(wrapper);
 
             // Create the text element.
             const text = document.createElement("p");
@@ -152,7 +160,7 @@ export const tasks = {
                 const due = document.createElement("time");
                 due.classList.add("task-due");
                 due.id = `task-due-${task.id}`;
-                due.textContent = task.dueDate;
+                due.textContent = `Due: ${task.dueDate}`;
                 due.dateTime = task.dueDate;
                 wrapper.appendChild(due);
             };
@@ -160,7 +168,7 @@ export const tasks = {
             // Create the checkbox.
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
-            checkbox.classList.add("check");
+            checkbox.classList.add("task-check");
             checkbox.id = `check-${task.id}`;
             if (task.completed) {
                 checkbox.checked = true;
@@ -198,10 +206,18 @@ export const tasks = {
                 // Optional: Add a text label for progress.
                 const progressLabel = document.createElement("span");
                 progressLabel.classList.add("progress-label");
-                progressLabel.textContent = `${Math.round((completed / total) * 100)}% completed`;
+                progressLabel.textContent = `${Math.round((completed / total) * 100)}%`;
+
+                // Optional: Add a screen reader span for progress.
+                const progressSpan = document.createElement("span");
+                progressSpan.classList.add("sr-only");
+                progressSpan.textContent = " completed";
+                progressLabel.appendChild(progressSpan);
 
                 // Wrap the progress bar and label.
                 const progressWrapper = utils.wrapInput(progressBar, progressLabel);
+                progressWrapper.classList.remove("form-field");
+                progressWrapper.classList.add("task-progress");
                 wrapper.appendChild(progressWrapper);
 
                 // Check if any child tasks are incomplete.
@@ -222,7 +238,7 @@ export const tasks = {
             const timestamp = document.createElement("time");
             timestamp.classList.add("task-time");
             timestamp.id = `task-time-${task.id}`;
-            timestamp.textContent = utils.formatRelativeTime(new Date(task.date), true);
+            timestamp.textContent = "(" + utils.formatRelativeTime(new Date(task.date), true) + ")";
             wrapper.appendChild(timestamp);
 
             // Create the dropdown wrapper.
@@ -271,10 +287,11 @@ export const tasks = {
 
             // Create the delete button.
             const delBtn = utils.button("delete", "Delete task", "trash");
+            delBtn.classList.add("task-delete");
             options.appendChild(delBtn).addEventListener("click", () => tasks.delete(task.id));
 
             // Return the HTML object.
-            return wrapper;
+            return listItem;
         },
         compact (data) {
             /**
@@ -326,6 +343,9 @@ export const tasks = {
         if (taskToRemove) {
             taskToRemove.remove();
         };
+
+        // Remove the task from the user.tasks array.
+        user.tasks = user.tasks.filter(task => task.id !== id);
 
         // Log to console, and save changes.
         if (user.debug === true) {
@@ -418,7 +438,7 @@ export const tasks = {
 
             // Add subtask selector.
             const subtaskWrap = tasks.hierarchy.add("return", id);
-            const subtaskSelect = subtaskWrap.querySelector('select');
+            const subtaskSelect = subtaskWrap.querySelector("select");
 
             // Set the selected option to the parent task.
             if (task.parentID !== null && subtaskSelect) {
@@ -566,7 +586,6 @@ export const tasks = {
                 const childTask = user.tasks.find(t => t.id === childId);
                 return childTask && childTask.completed;
             });
-
             if (!allChildrenCompleted) {
                 console.warn("[tasks.complete]: Cannot complete this task until all subtasks are completed.");
                 return false; // Prevent marking the parent as complete
@@ -604,60 +623,103 @@ export const tasks = {
              * @param {object} target - The target element to append the dependency selector to.
              * @param {number} id - The ID of the task to add a dependency to.
              */
-            const hierarchies = ["child"/*, "parent"*/];
-            hierarchies.forEach(hierarchy => {
-                // Create the task select element.
-                const select = document.createElement("select");
-                select.classList.add("task-hierarchy", `task-${hierarchy}`);
-                select.name = `task-add-${hierarchy}`;
+            console.log(id);
+            // Create the task select element.
+            const select = document.createElement("select");
+            select.classList.add("task-hierarchy", "task-subtask");
+            select.name = `task-add-subtask`;
 
-                // Create the default select option.
-                const defaultOption = document.createElement("option");
-                defaultOption.value = "";
-                defaultOption.textContent = "Select a task";
-                defaultOption.selected = true;
-                select.appendChild(defaultOption);
+            // Create the default select option.
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "Select a task";
+            defaultOption.selected = true;
+            select.appendChild(defaultOption);
 
-                // Add the tasks as options.
-                if (user.tasks && user.tasks.length > 0) {
-                    user.tasks.forEach(task => {
-                        if (task.id !== id) {
-                            const option = document.createElement("option");
-                            option.value = task.id;
-                            option.textContent = task.text;
-                            select.appendChild(option);
-                        };
-                    });
-                };
+            // Add the tasks as options.
+            if (user.tasks && user.tasks.length > 0) {
+                // Sort tasks into hierarchical and non-hierarchical groups.
+                const hierarchicalTasks = user.tasks.filter(task => task.parentID !== null || task.childIDs.length > 0);
+                const nonHierarchicalTasks = user.tasks.filter(task => task.parentID === null && task.childIDs.length === 0);
 
-                // Create the subtask label element.
-                const label = document.createElement("label");
-                label.textContent = `This task is a ${hierarchy} of: `;
+                // Recursive function to render tasks hierarchically.
+                function renderHierarchy(taskId, level = 0) {
+                    const task = user.tasks.find(task => task.id === taskId);
+                    if (!task) return;
 
-                // Add id if entered.
-                if (id) {
-                    select.id = `task-add-${hierarchy}-${id}`;
-                    label.htmlFor = `task-add-${hierarchy}-${id}`;
-                } else {
-                    select.id = `task-add-${hierarchy}`;
-                    label.htmlFor = `task-add-${hierarchy}`;
-                };
+                    // Create and append the option.
+                    const option = document.createElement("option");
+                    option.value = task.id;
 
-                // Wrap the select and label.
-                const wrapper = utils.wrapInput(label, select);
+                    // Indent based on hierarchy level.
+                    option.textContent = `${"—".repeat(level)} ${task.text}`;
+                    option.classList.add(level === 0 ? "optionGroup" : "optionChild");
+                    select.appendChild(option);
 
-                // Append the wrapper to the target element.
-                if (target === "return") {
-                    return wrapper;
-                } else {
-                    // Remove the "add as subtask" button.
-                    const button = document.getElementById("add-hierarchy");
-                    if (button) {
-                        button.remove();
+                    // Disable the option if it's the current task.
+                    if (task.id === id) {
+                        option.disabled = true;
+                        option.textContent += " (Current Task)";
                     };
-                    document.getElementById("task-field").appendChild(wrapper);
+
+                    // Render child tasks recursively.
+                    if (task.childIDs.length > 0) {
+                        task.childIDs.forEach(childID => renderHierarchy(childID, level + 1));
+                    };
                 };
-            });
+
+                // Render hierarchical tasks, starting with root tasks.
+                hierarchicalTasks.forEach(task => {
+                    if (task.parentID === null) {
+                        renderHierarchy(task.id);
+                    };
+                });
+
+                // Render non-hierarchical tasks.
+                nonHierarchicalTasks.forEach(task => {
+                    const option = document.createElement("option");
+                    option.value = task.id;
+                    option.textContent = task.text;
+
+                    // Disable the option if it's the current task.
+                    if (task.id === id) {
+                        option.disabled = true;
+                        option.textContent += " (Current Task)";
+                    };
+
+                    // Append the option to the select element.
+                    select.appendChild(option);
+                });
+            };
+
+            // Create the subtask label element.
+            const label = document.createElement("label");
+            label.textContent = `This task is a subtask of: `;
+
+            // Add id if entered.
+            if (id) {
+                select.id = `task-add-subtask-${id}`;
+                label.htmlFor = `task-add-subtask-${id}`;
+            } else {
+                select.id = `task-add-subtask`;
+                label.htmlFor = `task-add-subtask`;
+            };
+
+            // Wrap the select and label.
+            const wrapper = utils.wrapInput(label, select);
+
+            // Append the wrapper to the target element.
+            if (target === "return") {
+                console.log("Returning the hierarchy wrapper.");
+                return wrapper;
+            } else {
+                // Remove the "add as subtask" button.
+                const button = document.getElementById("add-hierarchy");
+                if (button) {
+                    button.remove();
+                };
+                document.getElementById("task-field").appendChild(wrapper);
+            };
         }
     }
 };

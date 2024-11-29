@@ -17,7 +17,12 @@ window.onload = function() {
     /**
      * Onload function that runs when the page is loaded.
      */
+
     /*---------------------------- INITIALIZATION ----------------------------*/
+    // Load testing cheats.
+    window.pomodoro = pomodoro;
+    window.user = user;
+
     // Load user data from local storage.
     user.load();
 
@@ -91,22 +96,7 @@ window.onload = function() {
     // TODO: Add same hover effect for the companion as the toasts.
 
     // Check the time of day and greet the user accordingly.
-    // TODO: Add up early message.
-    const time = new Date().getHours();
-    if (time >= 5 && time < 12) {
-        companion.dialog.open("Good morning!");
-    } else if (time >= 12 && time < 17) {
-        companion.dialog.open("Good afternoon!");
-    } else if (time >= 17 && time < 21) {
-        companion.dialog.open("Good evening!");
-    } else {
-        companion.dialog.open("You're up late! Is there anything I can help with?");
-    };
-
-    // Close the dialog after 5 seconds.
-    setTimeout (() => {
-        companion.dialog.close();
-    }, 5000); // 5 seconds = 5000 milliseconds.
+    companion.dialog.greet();
 
     /*------------------------------- CALENDAR -------------------------------*/
     // Render the calendar, and initialize its events.

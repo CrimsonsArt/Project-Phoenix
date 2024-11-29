@@ -301,10 +301,11 @@ export const calendar = {
                         month: calendar.info.month === 11 ? 0 : calendar.info.month + 1,
                         day
                     });
-                    cell.classList.add("faded");
+                    cell.classList.add("faded", "day");
                 };
 
                 // Append the cell to the row, and increment the day counter.
+                dateNumber.classList.add("day-number");
                 dateNumber.textContent = day;
                 cell.dataset.date = dateNumber.dateTime;
                 cell.appendChild(dateNumber);

@@ -84,7 +84,7 @@ export const events = {
             // Add the time.
             const timeWrapper = document.createElement("p");
             timeWrapper.classList.add("full-event-time");
-            timeWrapper.textContent = "Time:";
+            timeWrapper.textContent = "Time: ";
             wrapper.appendChild(timeWrapper);
 
             if (data.time.allDay) {
@@ -118,7 +118,7 @@ export const events = {
             if (data.description) {
                 const description = document.createElement("p");
                 description.classList.add("full-event-description");
-                description.textContent = data.description;
+                description.textContent = "Description: " + data.description;
                 wrapper.appendChild(description);
             };
 
@@ -143,11 +143,8 @@ export const events = {
             };
 
             // Add the delete button.
-            const deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.ariaLabel = "Delete this event.";
-            deleteButton.title = "Delete this event.";
-            deleteButton.textContent = "Delete";
+            //const deleteButton = document.createElement("button");
+            const deleteButton = utils.button("delete", "Delete this event", "trash");
             controls.appendChild(deleteButton).addEventListener("click", () => events.delete(data.id));
 
             // If update is specified, replace the element.

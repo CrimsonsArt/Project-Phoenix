@@ -33,12 +33,13 @@ export const companion = {
             // Get the companion wrapper.
             const wrapper = document.getElementById("companion");
 
+            // If the dialog is already open, close it.
             if (document.getElementById("dialog")) {
-                // If the dialog is already open, close it.
                 companion.dialog.close();
                 return;
             };
 
+            // If debug mode is enabled, log the action.
             if (user.debug === true) {
                 console.log("Opening dialog.");
             };
@@ -46,7 +47,7 @@ export const companion = {
             // Add text content.
             const dialog = document.createElement("div");
             dialog.classList.add("dialog");
-            dialog.id = "dialog";
+            dialog.id = "dialog-open";
             const dialogContent = document.createElement("p");
             if (text) {
                 dialogContent.textContent = text;
@@ -63,10 +64,75 @@ export const companion = {
             dialogClose.ariaLabel = "Close the dialog.";
             dialogClose.title = "Close the dialog.";
             dialogClose.type = "button";
-            dialog.appendChild(dialogClose).addEventListener("click", companion.dialog.close);
+            dialog.appendChild(dialogClose).addEventListener("click", () => {
+                companion.dialog.close("dialog-open");
+            });
 
             // Add the dialog to the companion wrapper.
             wrapper.insertBefore(dialog, wrapper.firstChild);
+        },
+        greet () {
+            /**
+             * Greet the user based on the time of day.
+             */
+            // Get the companion wrapper.
+            const wrapper = document.getElementById("companion");
+
+            // Add text content.
+            const dialog = document.createElement("div");
+            dialog.classList.add("dialog");
+            dialog.id = "dialog-greet";
+            const dialogContent = document.createElement("p");
+
+            // Check if the user has a name.
+            let name = "";
+            if (user.name !== "") {
+                name = ` ${user.name}`;
+            };
+
+            // Get the current time.
+            const time = new Date().getHours();
+            if (time >= 3 && time < 5) {
+                dialogContent.textContent = `Good morning${name}! You are up really early!`;
+            } else if (time >= 5 && time < 8) {
+                dialogContent.textContent = `Good morning${name}! Ready to start the day?`;
+            } else if (time >= 8 && time < 10) {
+                dialogContent.textContent = `Good morning${name}! Let’s tackle your goals for today.`;
+            } else if (time >= 10 && time < 12) {
+                dialogContent.textContent = `Good morning${name}! How’s your morning going so far?`;
+            } else if (time >= 12 && time < 14) {
+                dialogContent.textContent = `Good afternoon${name}! Have you had lunch yet?`;
+            } else if (time >= 14 && time < 17) {
+                dialogContent.textContent = `Good afternoon${name}! Let’s keep the momentum going.`;
+            } else if (time >= 17 && time < 19) {
+                dialogContent.textContent = `Good evening${name}! Time to wind down?`;
+            } else if (time >= 19 && time < 21) {
+                dialogContent.textContent = `Good evening${name}! How was your day?`;
+            } else if (time >= 21 && time < 23) {
+                dialogContent.textContent = "It’s getting late! Don’t forget to relax.";
+            } else {
+                dialogContent.textContent = "You’re up late! Is there anything I can help with?";
+            };
+            dialog.appendChild(dialogContent);
+
+            // Add a close button.
+            const dialogClose = document.createElement("button");
+            dialogClose.textContent = "Close";
+            dialogClose.id = "dialog-greet-close";
+            dialogClose.ariaLabel = "Close the dialog.";
+            dialogClose.title = "Close the dialog.";
+            dialogClose.type = "button";
+            dialog.appendChild(dialogClose).addEventListener("click", () => {
+                companion.dialog.close("dialog-greet");
+            });
+
+            // Add the dialog to the companion wrapper.
+            wrapper.insertBefore(dialog, wrapper.firstChild);
+
+            // Close the dialog after 5 seconds.
+            setTimeout (() => {
+                companion.dialog.close("dialog-greet");
+            }, 5000); // 5 seconds = 5000 milliseconds.
         },
         say (text) {
             /**
@@ -80,7 +146,7 @@ export const companion = {
             // Add text content.
             const dialog = document.createElement("div");
             dialog.classList.add("dialog");
-            dialog.id = "dialog";
+            dialog.id = "dialog-say";
             const dialogContent = document.createElement("p");
             if (text) {
                 dialogContent.textContent = text;
@@ -92,17 +158,21 @@ export const companion = {
             // Add a close button.
             const dialogClose = document.createElement("button");
             dialogClose.textContent = "Close";
-            dialogClose.id = "dialog-close";
+            dialogClose.id = "dialog-say-close";
             dialogClose.ariaLabel = "Close the dialog.";
             dialogClose.title = "Close the dialog.";
             dialogClose.type = "button";
-            dialog.appendChild(dialogClose).addEventListener("click", companion.dialog.close);
+            dialog.appendChild(dialogClose).addEventListener("click", () => {
+                companion.dialog.close("dialog-say");
+            });
 
             // Add the dialog to the companion wrapper.
             wrapper.insertBefore(dialog, wrapper.firstChild);
 
-            // TODO: Add a timeout to close the dialog after a few seconds.
-
+            // Close the dialog after 10 seconds.
+            setTimeout (() => {
+                companion.dialog.close("dialog-say");
+            }, 10000); // 10 seconds = 10000 milliseconds.
         },
         ask (question) {
             /**
@@ -159,15 +229,24 @@ export const companion = {
             wrapper.insertBefore(dialog, wrapper.firstChild);
             });
         },
-        close () {
+        close (id = null) {
             /**
              * Close the dialog box.
+             * 
+             * @param {string} id - The ID of the dialog to close.
              */
-            if (document.getElementById("dialog")) {
+            const wrapper = document.getElementById("companion");
+            if (document.getElementById(id) || wrapper.querySelector(".dialog")) {
                 if (user.debug === true) {
-                    console.log("Closing dialog.");
+                    console.log("[companion.dialog.close]: Closing dialog.");
                 };
-                document.getElementById("dialog").remove();
+
+                // Remove the dialog, or the dialog with the specified ID.
+                if (id) {
+                    document.getElementById(id).remove();
+                } else {
+                    wrapper.querySelector(".dialog").remove();
+                };
             };
         }
     }
