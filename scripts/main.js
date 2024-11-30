@@ -20,6 +20,7 @@ window.onload = function() {
     /*---------------------------- INITIALIZATION ----------------------------*/
     // Load testing cheats.
     window.pomodoro = pomodoro;
+    window.toast = toast;
     window.user = user;
 
     // Load user data from local storage.
@@ -69,6 +70,7 @@ window.onload = function() {
 
     /*------------------------------ COMPANION -------------------------------*/
     // Add event listener for the companion.
+    const companionWrapper = document.getElementById("companion");
     const companionSVG = document.getElementById("companion-svg");
     companionSVG.addEventListener("click", () => {
         companion.dialog.open();
@@ -77,25 +79,22 @@ window.onload = function() {
     // Add event listener to stop the companion from covering the footer.
     document.addEventListener("scroll", () => {
         const footer = document.querySelector("footer");
-        const companion = document.getElementById("companion");
 
         // Get the bounding rectangle for the footer.
         const footerRect = footer.getBoundingClientRect();
         const windowHeight = window.innerHeight;
 
-        // Check if the footer is visible in the viewport.
+        // Footer is visible, so position the companion above the footer.
         if (footerRect.top < windowHeight) {
-            // Footer is visible, so position the companion above the footer.
-            companion.style.position = "fixed";
-            companion.style.bottom = `${windowHeight - footerRect.top}px`;
+            companionWrapper.style.bottom = `${windowHeight - footerRect.top}px`;
+
+        // Footer is not visible; reset the companion to fixed position.
         } else {
-            // Footer is not visible; reset the companion to fixed position.
-            companion.style.position = "fixed";
-            companion.style.bottom = "0";
-        }
+            companionWrapper.style.bottom = "0";
+        };
     });
 
-    // TODO: Check if the user is new or not, and add a welcome message for new users.
+    // TODO: Check if the user is new or not, and have the companion give a brief tutorial.
 
     // Check the time of day and greet the user accordingly.
     companion.dialog.greet();

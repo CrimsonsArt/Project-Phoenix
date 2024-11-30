@@ -20,8 +20,8 @@
             <nav id="nav-main" aria-label="Main navigation">
                 <ul>
                     <li><h1><a href="index.html">Project Phoenix</a></h1></li>
-                    <li><button id="menu-toggle" type="button" title="Open the toast log" aria-label="Open the toast log"><span class="bi bi-list" aria-hidden="true"></span></button></li>
                     <li><button id="settings-toggle" type="button" title="Open settings menu" aria-label="Open settings menu"><span class="bi bi-gear" aria-hidden="true"></span></button></li>
+                    <li><button id="menu-toggle" type="button" title="Open the toast log" aria-label="Open the toast log"><span class="bi bi-list" aria-hidden="true"></span></button></li>
                 </ul>
             </nav>
         </header>
@@ -101,17 +101,17 @@
                 <fieldset>
                     <legend>Data settings</legend>
                     <div class="form-field">
-                        <label for="data-import-file">Import data: </label>
-                        <input id="import-file" type="file" name="import" accept=".json">
-                        <button id="data-import" type="button" title="Import save from file" aria-label="Import user data">Import <span class="bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
+                        <label id="import-label" for="data-import-file">Import data: </label>
+                        <input id="import-file" class="btn" type="file" name="import" accept=".json">
+                        <button id="data-import" class="btn" type="button" title="Import save from file" aria-label="Import user data">Import <span class="icon bi bi-box-arrow-in-down" aria-hidden="true"></span></button>
                     </div>
                     <div class="form-field">
                         <label for="data-export">Export data: </label>
-                        <button id="data-export" type="button" title="Export save as file" aria-label="Export user data">Export <span class="bi bi-box-arrow-up" aria-hidden="true"></span></button>
+                        <button id="data-export" class="btn" type="button" title="Export save as file" aria-label="Export user data">Export <span class="icon bi bi-box-arrow-up" aria-hidden="true"></span></button>
                     </div>
                     <div class="form-field">
                         <label for="data-delete">Delete data: </label>
-                        <button id="data-delete" class="btn delete" type="button" title="Delete user data" aria-label="Delete user data">Delete user data</button>
+                        <button id="data-delete" class="btn delete" type="button" title="Delete user data" aria-label="Delete user data">Delete user data<span class="icon bi bi-trash" aria-hidden="true"></span></button>
                     </div>
                 </fieldset>
             </form>

@@ -57,6 +57,11 @@ h2 {
 
 /* BUTTONS */
 .btn {
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}
+.btn:has(.icon) {
     display: flex;
     flex-flow: row nowrap;
 }
@@ -65,6 +70,10 @@ h2 {
 }
 .delete {
     color: darkred;
+}
+.delete:hover, .delete:focus, .delete:active {
+    background-color: darkred;
+    color: white;
 }
 
 /* HEADER */
@@ -122,18 +131,29 @@ footer {
 
 
 /*---------------------------------- TOASTS ----------------------------------*/
-#menu, .menu {
+#menu, #settings {
     background-color: var(--primary-color);
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
     padding-top: 5px;
     max-height: calc(100vh - 50px);
-    max-width: 15%;
+    max-width: 20%;
     min-width: 200px;
     overflow-y: scroll;
     padding: 0 1%;
     position: fixed;
     right: 0;
     top: 50px;
+    transition: right 0.3s ease;
+    z-index: 995;
+}
+#menu:not(#tost-list.closed-menu) {
+    right: 0;
+}
+#menu:has(#toast-list.closed-menu) {
+    right: -300px;
+}
+#menu:has(#toast-list.closed-menu .toast.show-temp) {
+    right: 0;
     z-index: 997;
 }
 #log-title {
@@ -162,6 +182,7 @@ footer {
 }
 .toast-msg {
     margin: 0;
+    text-wrap: stable;
 }
 .toast .timestamp {
     font-size: 0.9em;
@@ -218,18 +239,25 @@ footer {
 #settings-form .form-field label {
     margin-right: 5px;
 }
-#settings-form .form-field button {
-    flex: 1 1 0;
+/*#import-file { // TODO: Style file input.
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    width: 0.1px;
+    z-index: -1;
 }
-#data-delete {
-    border: none;
-    padding: 2px 120px 0 120px;
-    text-align: center;
-}
-#data-delete:hover, #data-delete:focus, #data-delete:active {
-    background-color: darkred;
+#import-file + label {
+    background-color: black;
     color: white;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 1.25em;
+    font-weight: 700;
 }
+#import-file:focus + label, #import-file + label:hover {
+    background-color: red;
+}*/
 
 
 /*--------------------------------- CALENDAR ---------------------------------*/
@@ -290,7 +318,7 @@ footer {
     border-radius: 5%;
     font-size: 1em;
     margin: 1%;
-    text-wrap: pretty;
+    text-wrap: stable;
 }
 .compact-task {
     background-color: #f8a30e;
@@ -366,7 +394,7 @@ footer {
 }
 .task-text {
     grid-area: task;
-    text-wrap: pretty;
+    text-wrap: stable;
     width: 100%;
 }
 .task-due {
@@ -456,7 +484,7 @@ footer {
     bottom: 0;
     position: fixed;
     right: 0;
-    transition: bottom 0.3s ease;
+    transition: bottom 0.3s ease, right 0.3s ease;
     z-index: 999;
     width: 350px;
 }

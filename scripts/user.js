@@ -98,7 +98,7 @@ export const user = {
         };
 
         // Toast success message.
-        toast.add("Exported user data successfully.", "success");
+        toast.add("Exported user-data successfully.", "success");
 
         // Click the link to download the file, and remove it from the DOM.
         tempLink.click();
@@ -137,8 +137,8 @@ export const user = {
 
                 } catch (error) {
                     // Show error toast.
-                    toast.add("Failed to import user data. Please ensure it is a valid JSON file and try again. If the issue persists, please report this on GitHub.", "error");
-                    return;
+                    toast.add("Failed to import user data. Please ensure it is a valid JSON file and try again. Please report this on GitHub if the issue persists.", "error");
+                    return console.error("[user.import]: Failed to import user data. Please report this on GitHub if the issue persists.", error);
                 };
             };
             // Read the file as text.
@@ -149,12 +149,13 @@ export const user = {
         /**
          * Delete user data from local storage.
          */
+        console.warn("[tasks.delete]: User requested data formatting, asking for confirmation.");
         const confirmFormat = await companion.dialog.ask("Formatting the data will permanently remove your existing content. Are you sure you want to proceed?");
             if (!confirmFormat) {
-                if (user.debug === true) console.log("[tasks.delete]: User cancelled data formatting.");
+                console.log("[tasks.delete]: User cancelled data formatting.");
                 return; // If the user cancels, return.
             } else {
-                if (user.debug === true) console.log("[tasks.delete]: User confirmed data formatting.");
+                console.warn("[tasks.delete]: User confirmed data formatting.");
             };
 
         // Clear the user arrays.
@@ -184,10 +185,13 @@ export const user = {
          * Open the settings modal.
          */
         const settings = document.getElementById("settings");
-        if (!settings) return console.warn("[user.openSettings]: Settings element not found. If this issue persists, please report it on GitHub.");
+        if (!settings) {
+            toast.add("Settings element not found. Please report this on GitHub if the issue persists.", "error");
+            return console.error("[user.openSettings]: Settings element not found. Please report this on GitHub if the issue persists.");
+        };
 
         if (settings.style.display === "block" || state === "close") {
-            /*if (user.debug === true)*/ console.log("[user.openSettings]: Closing settings modal.");
+            if (user.debug === true) console.log("[user.openSettings]: Closing settings modal.");
             settings.style.display = "none";
             settings.classList.add("closed");
         } else {

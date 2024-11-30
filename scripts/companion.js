@@ -1,5 +1,5 @@
 /*---------------------------------- IMPORT ----------------------------------*/
-
+import { utils } from "./utils.js";
 import { user } from "./user.js";
 
 /*----------------------------- HELPER FUNCTIONS -----------------------------*/
@@ -13,7 +13,6 @@ export const companion = {
      * TODO: Have helper give advice.
      * TODO: Have helper remind the user to take breaks.
      * TODO: Add a button to minimize the companion.
-     * TODO: Have the companion give the user a tutorial.
      */
     dialog: {
         /**
@@ -60,6 +59,7 @@ export const companion = {
             // Add a close button.
             const dialogClose = document.createElement("button");
             dialogClose.textContent = "Close";
+            dialogClose.classList.add("btn");
             dialogClose.id = "dialog-close";
             dialogClose.ariaLabel = "Close the dialog.";
             dialogClose.title = "Close the dialog.";
@@ -118,6 +118,7 @@ export const companion = {
             // Add a close button.
             const dialogClose = document.createElement("button");
             dialogClose.textContent = "Close";
+            dialogClose.classList.add("btn");
             dialogClose.id = "dialog-close";
             dialogClose.ariaLabel = "Close the dialog.";
             dialogClose.title = "Close the dialog.";
@@ -129,12 +130,15 @@ export const companion = {
             // Add the dialog to the companion wrapper.
             wrapper.insertBefore(dialog, wrapper.firstChild);
 
-            // Close the dialog after 5 seconds.
+            // Calculate the time to close the dialog.
+            const displayTime = utils.calculateDisplayTime(dialogContent.textContent);
+
+            // Close the dialog after the calculated time.
             setTimeout (() => {
                 if (document.getElementById("dialog-greet")) {
                     companion.dialog.close("dialog-greet");
                 };
-            }, 5000); // 5 seconds = 5000 milliseconds.
+            }, displayTime);
         },
         say (text) {
             /**
@@ -160,6 +164,7 @@ export const companion = {
             // Add a close button.
             const dialogClose = document.createElement("button");
             dialogClose.textContent = "Close";
+            dialogClose.classList.add("btn");
             dialogClose.id = "dialog-close";
             dialogClose.ariaLabel = "Close the dialog.";
             dialogClose.title = "Close the dialog.";
@@ -171,10 +176,13 @@ export const companion = {
             // Add the dialog to the companion wrapper.
             wrapper.insertBefore(dialog, wrapper.firstChild);
 
-            // Close the dialog after 10 seconds.
+            // Calculate the time to close the dialog.
+            const displayTime = utils.calculateDisplayTime(dialogContent.textContent);
+
+            // Close the dialog after the calculated time.
             setTimeout (() => {
                 companion.dialog.close("dialog-say");
-            }, 10000); // 10 seconds = 10000 milliseconds.
+            }, displayTime);
         },
         ask (question) {
             /**
@@ -206,6 +214,7 @@ export const companion = {
             // Add a yes button.
             const dialogYes = document.createElement("button");
             dialogYes.textContent = "Yes";
+            dialogYes.classList.add("btn");
             dialogYes.id = "dialog-yes";
             dialogYes.ariaLabel = "Yes";
             dialogYes.title = "Yes";
@@ -218,6 +227,7 @@ export const companion = {
             // Add a no button.
             const dialogNo = document.createElement("button");
             dialogNo.textContent = "No";
+            dialogNo.classList.add("btn");
             dialogNo.id = "dialog-no";
             dialogNo.ariaLabel = "No";
             dialogNo.title = "No";

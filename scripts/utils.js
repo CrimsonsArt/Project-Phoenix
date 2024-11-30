@@ -81,6 +81,22 @@ export const utils = {
             return `${diffInYears} years ago`;
         };
     },
+    calculateDisplayTime (text) {
+        /**
+         * Calculate how long to display a message based on its length.
+         */
+        const baseTime = 5000; // Base display time is 5000 milliseconds.
+        const wordsPerExtraSecond = 10; // Number of words for 1 extra second.
+
+        // Count the number of words in the text.
+        const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+
+        // Calculate the number of extra seconds needed.
+        const extraSeconds = Math.ceil(wordCount / wordsPerExtraSecond) * 1000;
+
+        // Return the total display time.
+        return baseTime + extraSeconds;
+    },
     wrapInput (label, input, id = null) {
         /**
          * Adds a wrapper around input and label elements.
@@ -109,7 +125,8 @@ export const utils = {
          */
         // If the input is invalid, log an error.
         if (!name || typeof name !== "string") {
-            return "[utils.input]: ERROR - Input name is not formatted correctly. Please report this issue on GitHub.";
+            toast.add("Input name is not formatted correctly. Please report this issue on GitHub.", "error");
+            return console.error("[utils.input]: ERROR - Input name is not formatted correctly. Please report this issue on GitHub.");
         };
 
         // Replace dashes with spaces, and split the text.
@@ -129,7 +146,8 @@ export const utils = {
 
         // If no text is found, log an error.
         } else {
-            console.log("[utils.input]: ERROR - No text found for an input label. Please report this issue on GitHub.");
+            toast.add("No text found for an input label. Please report this issue on GitHub.", "error");
+            console.error("[utils.input]: ERROR - No text found for an input label. Please report this issue on GitHub.");
             return "Untitled";
         };
 

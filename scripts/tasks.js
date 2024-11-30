@@ -61,8 +61,6 @@ export const tasks = {
                 };
             };
 
-            // Log to console, and save changes.
-            console.log(`Adding task: ${task}`);
             user.tasks.push(task); // Add task to user.tasks array.
             user.nextTaskId++; // Increment ID.
             user.save(); // Save changes to user object.
@@ -71,11 +69,16 @@ export const tasks = {
             taskDue.value = ""; // Clear the due date input.
             tasks.hierarchy.add(); // Re-render the subtask selector.
             if (subtask) subtask.value = ""; // Clear the subtask selector.
-            toast.add("Task added successfully.", "success");
+            toast.add("New task added successfully.", "success");
+
+            // Log to console, and save changes.
+            if (user.debug === true) {
+                console.log(`Adding task: ${task}`);
+            };
 
         // If task input is empty.
         } else {
-            toast.add("Task title can't be empty.", "error"); // Error toast.
+            toast.add("Task title can't be empty.", "info"); // Info toast.
         };
     },
     render: {
@@ -328,12 +331,14 @@ export const tasks = {
 
         // Check if the task has subtasks, and warn the user.
         if (task.childIDs.length > 0) {
+            toast.add("This task has subtasks. Deleting it will also delete all subtasks.", "warning");
             console.warn("[tasks.delete]: This task has subtasks. Deleting it will also delete all subtasks.");
             const confirmDelete = await companion.dialog.ask("This task has subtasks. Deleting it will also delete all its subtasks. Are you sure you want to delete it?");
             if (!confirmDelete) {
                 console.log("[tasks.delete]: User cancelled task deletion.");
                 return; // If the user cancels, return.
             } else {
+                toast.add("Successfully deleted task " + task.text +" and its subtasks.", "success");
                 console.log("[tasks.delete]: User confirmed task deletion.");
             };
         };
@@ -348,6 +353,7 @@ export const tasks = {
         user.tasks = user.tasks.filter(task => task.id !== id);
 
         // Log to console, and save changes.
+        toast.add("Task and its subtasks has successfully been deleted.", "success");
         if (user.debug === true) {
             console.log("[tasks.delete]: ", `Deleting task with ID: ${id}`);
         };
@@ -522,8 +528,9 @@ export const tasks = {
 
         // Error handling.
         } else {
+            toast.add("Task not found. Please report this on GitHub if the issue persists.", "error");
             if (user.debug === true) {
-                console.log(`[tasks.edit]: ERROR - Could not find task with ID: ${id}. If this issue persists, please report it on GitHub.`);
+                console.error(`[tasks.edit]: ERROR - Could not find task with ID: ${id}. Please report this on GitHub if the issue persists.`);
             };
         };
     },
@@ -605,6 +612,7 @@ export const tasks = {
             const list = document.getElementById("todo-list");
             list.innerHTML = "";
             tasks.render.list();
+            toast.add(`Task: "${newText.value}" has been updated and saved successfully.`, "success");
 
             // Log to console.
             if (user.debug === true) {
@@ -613,9 +621,8 @@ export const tasks = {
 
         // Error handling.
         } else {
-            if (user.debug === true) {
-                console.log(`[tasks.save]: ERROR - Could not find task with ID: ${id}. If this issue persists, please report it on GitHub.`);
-            };
+            toast.add("Task not found. Please report this on GitHub if the issue persists.", "error");
+            console.error(`[tasks.save]: ERROR - Could not find task with ID: ${id}. Please report this on GitHub if the issue persists.`);
         };
     },
     complete (id) {
@@ -636,6 +643,7 @@ export const tasks = {
                 return childTask && childTask.completed;
             });
             if (!allChildrenCompleted) {
+                toast.add("Complete all subtasks first.", "warning");
                 console.warn("[tasks.complete]: Cannot complete this task until all subtasks are completed.");
                 return false; // Prevent marking the parent as complete
             };
@@ -675,8 +683,8 @@ export const tasks = {
              * @param {number} id - The ID of the task to add a dependency to.
              */
             // Remove the existing subtask selector.
-            if (document.getElementById("task-add-subtask")) {
-                document.getElementById("task-add-subtask").remove();
+            if (document.getElementById("add-subtask-wrapper")) {
+                document.getElementById("add-subtask-wrapper").remove();
             };
 
             // Create the task select element.
@@ -763,6 +771,7 @@ export const tasks = {
 
             // Wrap the select and label.
             const wrapper = utils.wrapInput(label, select);
+            wrapper.id = "add-subtask-wrapper";
 
             // Append the wrapper to the target element.
             if (target === "return") {

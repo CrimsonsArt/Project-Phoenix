@@ -1,6 +1,7 @@
 /*---------------------------------- IMPORT ----------------------------------*/
 import { utils } from "./utils.js";
 import { user } from "./user.js";
+import { toast } from "./toast.js";
 
 /*----------------------------- EVENT FUNCTIONS ------------------------------*/
 export const events = {
@@ -477,7 +478,8 @@ export const events = {
 
             // If the event is not found, log an error.
             } else {
-                console.log(`ERROR: Event with the id ${form.parentElement.dataset.id} not found, please report this issue on GitHub.`);
+                toast.add("An error occurred while updating the event, please try again. Please report this on GitHub if the issue persists.", "error");
+                console.error(`ERROR: Event with the id ${form.parentElement.dataset.id} not found, please report this issue on GitHub.`);
             };
 
         // Otherwise, add the event as a new array item.
@@ -911,7 +913,8 @@ function toggleAllDay (id) {
     
     // If the checkbox is not found, log an error.
     } else {
-        console.log("[events toggleAllDay]: ERROR - All day checkbox not found! Please report this issue on GitHub.");
+        toast.add("An error occurred while toggling the all day checkbox, please try again. Please report this on GitHub if the issue persists.", "error");
+        console.error("[events toggleAllDay]: ERROR - All day checkbox not found! Please report this on GitHub if the issue persists.");
     };
 };
 function toggleRepeatEvent (id) {

@@ -17,13 +17,14 @@ export const toast = {
      * @returns {object} ui - The toast object.
      */
     isOpen: false,
-    add (message, title = "info") {
+    add (message, title = "info", silent = false) {
         /**
          * Create a new toast message.
          * 
          * @param {string} message - The message to display.
          * @param {string} title - The title of the toast.
          * @param {string} title - "info" - "success" - "warning" - "error"
+         * @param {boolean} silent - If the toast should be silent or not.
          */
         const data = {
             id: user.nextToastId,
@@ -36,7 +37,7 @@ export const toast = {
         user.save(); // Save changes to user object.
 
         // Render toast.
-        if (!toast.isOpen) {
+        if (!toast.isOpen && !silent) {
             toast.render(data, 1);
             console.log("[toast.add]: Toast added to log, render popup.");
         } else {
@@ -92,12 +93,16 @@ export const toast = {
         delBtn.id = `toast-delete-${data.id}`;
         wrapper.appendChild(delBtn);
 
-        // Check if toast log is open, if not, add "show-temp" class.
+        // Check if toast log is closed.
         if (!toast.isOpen && isNew) {
+            // Add "show-temp" class.
             wrapper.classList.add("show-temp");
 
-            // Remove "show-temp" class after 5 seconds.
-            setTimeout(() => wrapper.classList.remove("show-temp"), 5000);
+            // Calculate the time to display the toast.
+            const displayTime = utils.calculateDisplayTime(data.message);
+
+            // Remove "show-temp" class after the calculated time.
+            setTimeout(() => wrapper.classList.remove("show-temp"), displayTime);
         };
 
         // Add toast to list.
@@ -151,10 +156,10 @@ export const toast = {
         /**
          * Open the toast log menu.
          */
+        const companion = document.getElementById("companion");
         const logTitle = document.getElementById("log-title");
         const list = document.getElementById("toast-list");
         const menu = document.getElementById("menu");
-        const companion = document.getElementById("companion");
         if (!toast.isOpen) {
             if (document.getElementById("settings") && !document.getElementById("settings").classList.contains("closed")) {
                 user.openSettings("close");
@@ -164,7 +169,7 @@ export const toast = {
             toast.isOpen = true;
             logTitle.classList.remove("sr-only");
             list.classList.remove("closed-menu");
-            companion.style.right = menu.offsetWidth + "px";
+            companion.style.right = `${menu.offsetWidth}px`;
         } else {
             // Close toast log.
             if (user.debug === true) console.log("[toast.toggle]: Closing toast log.");
@@ -173,5 +178,13 @@ export const toast = {
             list.classList.add("closed-menu");
             companion.style.right = "0";
         };
+
+        /*// Stop the companion from covering the toast log, when open.
+        const menu = document.getElementById("menu");
+        if (menu.left < companion.right) {
+            companion.style.right = `${menu.offsetWidth}px`;
+        } else {
+            companion.style.right = "0";
+        };*/
     }
 };
