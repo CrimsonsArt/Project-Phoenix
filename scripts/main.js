@@ -2,7 +2,7 @@
 import { user } from "./user.js"; // File is clean and ready for use.
 import { utils } from "./utils.js"; // File is clean and ready for use.
 import { toast } from "./toast.js";
-import { tasks } from "./tasks.js";
+import { tasks } from "./tasks.js"; // File is clean and ready for use.
 import { events } from "./events.js"; // File is clean and ready for use.
 import { journal } from "./journal.js";
 import { calendar } from "./calendar.js"; // File is clean and ready for use.
@@ -10,7 +10,6 @@ import { pomodoro } from "./pomodoro.js"; // File is clean and ready for use.
 import { companion } from "./companion.js";
 
 // TODO: Add a cheat for setting the current date.
-// TODO: Add settings for the user.
 
 /*---------------------------------- ONLOAD ----------------------------------*/
 window.onload = function() {
@@ -61,6 +60,10 @@ window.onload = function() {
     const menuToggle = document.getElementById("menu-toggle");
     menuToggle.addEventListener("click", toast.toggle);
 
+    // Add event listener for the settings button.
+    const settingsButton = document.getElementById("settings-toggle");
+    settingsButton.addEventListener("click", user.openSettings);
+
     // Update the toast timestamps once every minute.
     setInterval(toast.updateTimestamps, 60000);
 
@@ -70,8 +73,6 @@ window.onload = function() {
     companionSVG.addEventListener("click", () => {
         companion.dialog.open();
     });
-
-    // TODO: If the toast log is open, move the companion to the left of it.
 
     // Add event listener to stop the companion from covering the footer.
     document.addEventListener("scroll", () => {
@@ -95,7 +96,6 @@ window.onload = function() {
     });
 
     // TODO: Check if the user is new or not, and add a welcome message for new users.
-    // TODO: Add same hover effect for the companion as the toasts.
 
     // Check the time of day and greet the user accordingly.
     companion.dialog.greet();
@@ -104,6 +104,25 @@ window.onload = function() {
     // Render the calendar, and initialize its events.
     const today = new Date();
     calendar.render.table();
+
+    // Helper function to update the day headings.
+    function updateDayHeadings() {
+        const headings = document.querySelectorAll(".day-header"); // Replace with your actual class or selector for day headings
+        const isSmallScreen = window.matchMedia("(max-width: 800px)").matches;
+        
+        const fullDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const shortDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    
+        headings.forEach((heading, index) => {
+            heading.textContent = isSmallScreen ? shortDays[index] : fullDays[index];
+        });
+    };
+
+    // Initial check on page load
+    updateDayHeadings();
+
+    // Listen for changes in screen size
+    window.addEventListener("resize", updateDayHeadings);
 
     /*-------------------------------- TASKS ---------------------------------*/
     // Load the tasks from local storage.

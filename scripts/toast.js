@@ -88,7 +88,7 @@ export const toast = {
         </p>`;
 
         // Create the delete button.
-        const delBtn = utils.button("delete", "Delete toast", "trash");
+        const delBtn = utils.button("delete", "Delete toast", "trash", false);
         delBtn.id = `toast-delete-${data.id}`;
         wrapper.appendChild(delBtn);
 
@@ -153,18 +153,25 @@ export const toast = {
          */
         const logTitle = document.getElementById("log-title");
         const list = document.getElementById("toast-list");
+        const menu = document.getElementById("menu");
+        const companion = document.getElementById("companion");
         if (!toast.isOpen) {
+            if (document.getElementById("settings") && !document.getElementById("settings").classList.contains("closed")) {
+                user.openSettings("close");
+            };
             // Open toast log.
-            console.log("[toast.toggle]: Opening toast log.");
+            if (user.debug === true) console.log("[toast.toggle]: Opening toast log.");
             toast.isOpen = true;
             logTitle.classList.remove("sr-only");
             list.classList.remove("closed-menu");
+            companion.style.right = menu.offsetWidth + "px";
         } else {
             // Close toast log.
-            console.log("[toast.toggle]: Closing toast log.");
+            if (user.debug === true) console.log("[toast.toggle]: Closing toast log.");
             toast.isOpen = false;
             logTitle.classList.add("sr-only");
             list.classList.add("closed-menu");
+            companion.style.right = "0";
         };
     }
 };

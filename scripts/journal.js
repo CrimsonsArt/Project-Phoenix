@@ -291,8 +291,6 @@ export const journal = {
         const nextWrapper = utils.wrapInput(nextLabel, next);
         checkInFieldset.appendChild(nextWrapper);
 
-
-
         // If an ID is provided, populate the form.
         if (entry) {
             textarea.value = entry.text;
@@ -313,22 +311,22 @@ export const journal = {
             if (entry.next) {
                 next.value = entry.next;
             };
-        };
 
-        // Create the cancel button.
-        const cancel = document.createElement("button");
-        cancel.ariaLabel = "Cancel editing the journal entry.";
-        cancel.title = "Cancel editing the journal entry.";
-        cancel.textContent = "Cancel";
-        cancel.id = "journal-cancel";
-        form.appendChild(cancel).addEventListener("click", function() {
-            document.getElementById("journal").remove();
-            if (entry) {
-                journal.render(entry.date);
-            } else {
-                journal.render();
-            };
-        });
+            // Create the cancel button.
+            const cancel = document.createElement("button");
+            cancel.ariaLabel = "Cancel editing the journal entry.";
+            cancel.title = "Cancel editing the journal entry.";
+            cancel.textContent = "Cancel";
+            cancel.id = "journal-cancel";
+            form.appendChild(cancel).addEventListener("click", function() {
+                document.getElementById("journal").remove();
+                if (entry) {
+                    journal.render(entry.date);
+                } else {
+                    journal.render();
+                };
+            });
+        };
 
         // Create the save button.
         //const save = document.createElement("button");

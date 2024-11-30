@@ -205,7 +205,7 @@ export const utils = {
             return wrapper;
         };
     },
-    button (text = null, label = null, icon = null) {
+    button (text = null, label = null, icon = null, hasText = true) {
         /**
          * Create a button element. Used to keep buttons consistent.
          * 
@@ -218,7 +218,7 @@ export const utils = {
         const button = document.createElement("button");
         button.classList.add("btn", text);
         button.type = "button";
-        if (text) button.textContent = text.charAt(0).toUpperCase() + text.slice(1);
+        if (text && hasText) button.textContent = text.charAt(0).toUpperCase() + text.slice(1);
         if (label) {
             button.ariaLabel = label
             button.title = label;

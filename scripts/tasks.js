@@ -1,9 +1,8 @@
 /*---------------------------------- IMPORT ----------------------------------*/
-import { utils } from "./utils.js";
-import { user } from "./user.js";
-import { toast } from "./toast.js";
 import { companion } from "./companion.js";
-//import { toast } from "./toast.js";
+import { utils } from "./utils.js";
+import { toast } from "./toast.js";
+import { user } from "./user.js";
 
 /*--------------------------- TO-DO LIST FUNCTIONS ---------------------------*/
 export const tasks = {
@@ -85,6 +84,7 @@ export const tasks = {
          * 
          * @function list - Renders the to-do list.
          * @function task - Renders a task in the to-do list.
+         * @function compact - Render a compact task display in the calendar.
          */
         list () {
             /**
@@ -155,6 +155,15 @@ export const tasks = {
             text.textContent = task.text;
             wrapper.appendChild(text);
 
+            // Create the checkbox.
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.classList.add("task-check");
+            checkbox.id = `check-${task.id}`;
+            if (task.completed) {
+                checkbox.checked = true;
+            };
+
             // Add due date, if any.
             if (task.dueDate) {
                 const due = document.createElement("time");
@@ -163,15 +172,6 @@ export const tasks = {
                 due.textContent = `Due: ${task.dueDate}`;
                 due.dateTime = task.dueDate;
                 wrapper.appendChild(due);
-            };
-
-            // Create the checkbox.
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.classList.add("task-check");
-            checkbox.id = `check-${task.id}`;
-            if (task.completed) {
-                checkbox.checked = true;
             };
 
             // Check if the task has subtasks.
@@ -268,13 +268,13 @@ export const tasks = {
             options.id = `task-dropdown-content-${task.id}`;
             dropWrapper.appendChild(options);
 
+            /*// Create the goal button.
             const goal = document.createElement("button");
             goal.classList.add("task-goal");
             goal.id = `task-goal-${task.id}`;
             goal.textContent = "Set as goal";
             goal.type = "button";
-            // TODO: Add event listener to the "set as prioritized task" button.
-            options.appendChild(goal);
+            options.appendChild(goal);*/
 
             // Create the edit button.
             const edit = document.createElement("button");
@@ -354,22 +354,63 @@ export const tasks = {
         user.save();
         toast.add("Task deleted successfully.", "success");
     },
+    currentlyOpen: null,
     openMenu (id) {
         /**
          * Open the task menu.
+         * 
+         * @param {number} id - The ID of the task to open the menu for.
          */
         const dropdown = document.getElementById(`task-dropdown-content-${id}`);
         const menu = document.getElementById(`task-menu-${id}`);
         const icon = document.getElementById(`task-menu-icon-${id}`);
-        dropdown.classList.toggle("closed");
-        if (dropdown.classList.contains("closed")) {
-            menu.ariaLabel = "Open task menu";
-            menu.ariaExpanded = false;
-            icon.classList.toggle("bi-chevron-up");
-        } else {
-            menu.ariaLabel = "Close task menu";
+
+        // Check if another menu is open.
+        if (tasks.currentlyOpen && tasks.currentlyOpen !== id) {
+            // Close the open menu, and edit its aria attributes.
+            const openMenu = document.getElementById(`task-menu-${tasks.currentlyOpen}`);
+            const openDropdown = document.getElementById(`task-dropdown-content-${tasks.currentlyOpen}`);
+            openDropdown.classList.add("closed");
+            openMenu.ariaExpanded = false;
+            openMenu.ariaLabel = "Open task menu";
+
+            // Remove the "bi-chevron-up" class from the open icon.
+            const openIcon = document.getElementById(`task-menu-icon-${tasks.currentlyOpen}`);
+            openIcon.classList.toggle("bi-chevron-up");
+
+            // Open the new menu, and edit its aria attributes.
+            dropdown.classList.remove("closed");
             menu.ariaExpanded = true;
+            menu.ariaLabel = "Close task menu";
+
+            // Add the "bi-chevron-up" class to the new icon.
             icon.classList.toggle("bi-chevron-up");
+
+            // Set the currently open menu to the new menu.
+            tasks.currentlyOpen = id;
+        } else {
+            // Toggle the open/close state of the menu.
+            if (dropdown.classList.contains("closed")) {
+                dropdown.classList.remove("closed");
+                menu.ariaExpanded = true;
+                menu.ariaLabel = "Close task menu";
+
+                // Toggle the "bi-chevron-up" class on the icon.
+                icon.classList.add("bi-chevron-up");
+
+                // Set the currently open menu to the new menu.
+                tasks.currentlyOpen = id;
+            } else {
+                dropdown.classList.add("closed");
+                menu.ariaExpanded = false;
+                menu.ariaLabel = "Open task menu";
+
+                // Toggle the "bi-chevron-up" class on the icon.
+                icon.classList.remove("bi-chevron-up");
+
+                // Set the currently open menu to null.
+                tasks.currentlyOpen = null;
+            };
         };
     },
     edit (id) {
@@ -446,12 +487,9 @@ export const tasks = {
                 Array.from(subtaskSelect.options).forEach(option => {
                     if (Number(option.value) === task.parentID) {
                         option.selected = true;
-                        console.log("Selected option: ", option);
                     };
                 });
             };
-
-            // TODO: Add primary goal input.
 
             // Add the save and cancel buttons.
             const controls = document.createElement("div");
@@ -530,9 +568,9 @@ export const tasks = {
             const newDue = document.getElementById(`task-editing-due-${id}`);
             if (newDue) user.tasks[taskIndex].dueDate = newDue.value;
 
-            // Update dependencies.
+            // Add the task as a subtask of the selected task.
             const newSubtask = document.getElementById(`task-add-subtask-${id}`);
-            if (newSubtask) {
+            if (newSubtask && newSubtask.value !== "") {
                 const parentTaskID = Number(newSubtask.value);
                 user.tasks[taskIndex].parentID = parentTaskID;
 
@@ -544,9 +582,20 @@ export const tasks = {
                         console.log(`[tasks.save]: Added task with ID: ${id} as a subtask of task with ID: ${parentTaskID}`);
                     };
                 };
-            };
 
-            // TODO: Update primary goal.
+            // Remove the parent task if the subtask is empty.
+            } else if (newSubtask && newSubtask.value === "") {
+                user.tasks[taskIndex].parentID = null;
+
+                // Remove the task from the parent's childIDs array.
+                const parentTask = user.tasks.find(task => task.childIDs.includes(id));
+                if (parentTask) {
+                    parentTask.childIDs = parentTask.childIDs.filter(childID => childID !== id);
+                    if (user.debug === true) {
+                        console.log(`[tasks.save]: Removed task with ID: ${id} from the subtasks of task with ID: ${parentTask.id}`);
+                    };
+                };
+            };
 
             // Save the changes, and re-render the task.
             user.tasks[taskIndex].updated = Date.now();
@@ -615,6 +664,8 @@ export const tasks = {
     hierarchy: {
         /**
          * Functions for task hierarchies.
+         * 
+         * @function add - Add a subtask selector to a task form.
          */
         add (target = null, id = null) {
             /**
@@ -623,11 +674,16 @@ export const tasks = {
              * @param {object} target - The target element to append the dependency selector to.
              * @param {number} id - The ID of the task to add a dependency to.
              */
-            console.log(id);
+            // Remove the existing subtask selector.
+            if (document.getElementById("task-add-subtask")) {
+                document.getElementById("task-add-subtask").remove();
+            };
+
             // Create the task select element.
             const select = document.createElement("select");
             select.classList.add("task-hierarchy", "task-subtask");
             select.name = `task-add-subtask`;
+            select.id = `task-add-subtask`;
 
             // Create the default select option.
             const defaultOption = document.createElement("option");
@@ -710,7 +766,6 @@ export const tasks = {
 
             // Append the wrapper to the target element.
             if (target === "return") {
-                console.log("Returning the hierarchy wrapper.");
                 return wrapper;
             } else {
                 // Remove the "add as subtask" button.

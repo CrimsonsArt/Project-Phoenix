@@ -34,7 +34,7 @@ export const companion = {
             const wrapper = document.getElementById("companion");
 
             // If the dialog is already open, close it.
-            if (document.getElementById("dialog")) {
+            if (wrapper.querySelector(".dialog") || document.getElementById("dialog-open")) {
                 companion.dialog.close();
                 return;
             };
@@ -93,32 +93,32 @@ export const companion = {
             // Get the current time.
             const time = new Date().getHours();
             if (time >= 3 && time < 5) {
-                dialogContent.textContent = `Good morning${name}! You are up really early!`;
+                dialogContent.textContent = `Good morning${name}! You're up really early!`;
             } else if (time >= 5 && time < 8) {
                 dialogContent.textContent = `Good morning${name}! Ready to start the day?`;
             } else if (time >= 8 && time < 10) {
-                dialogContent.textContent = `Good morning${name}! Let’s tackle your goals for today.`;
+                dialogContent.textContent = `Good morning${name}! Let's tackle your goals for today.`;
             } else if (time >= 10 && time < 12) {
-                dialogContent.textContent = `Good morning${name}! How’s your morning going so far?`;
+                dialogContent.textContent = `Good morning${name}! How's your morning going so far?`;
             } else if (time >= 12 && time < 14) {
                 dialogContent.textContent = `Good afternoon${name}! Have you had lunch yet?`;
             } else if (time >= 14 && time < 17) {
-                dialogContent.textContent = `Good afternoon${name}! Let’s keep the momentum going.`;
+                dialogContent.textContent = `Good afternoon${name}! Let's keep the momentum going.`;
             } else if (time >= 17 && time < 19) {
                 dialogContent.textContent = `Good evening${name}! Time to wind down?`;
             } else if (time >= 19 && time < 21) {
                 dialogContent.textContent = `Good evening${name}! How was your day?`;
             } else if (time >= 21 && time < 23) {
-                dialogContent.textContent = "It’s getting late! Don’t forget to relax.";
+                dialogContent.textContent = "It's getting late! Don't forget to relax.";
             } else {
-                dialogContent.textContent = "You’re up late! Is there anything I can help with?";
+                dialogContent.textContent = "You're up late! Is there anything I can help with?";
             };
             dialog.appendChild(dialogContent);
 
             // Add a close button.
             const dialogClose = document.createElement("button");
             dialogClose.textContent = "Close";
-            dialogClose.id = "dialog-greet-close";
+            dialogClose.id = "dialog-close";
             dialogClose.ariaLabel = "Close the dialog.";
             dialogClose.title = "Close the dialog.";
             dialogClose.type = "button";
@@ -131,7 +131,9 @@ export const companion = {
 
             // Close the dialog after 5 seconds.
             setTimeout (() => {
-                companion.dialog.close("dialog-greet");
+                if (document.getElementById("dialog-greet")) {
+                    companion.dialog.close("dialog-greet");
+                };
             }, 5000); // 5 seconds = 5000 milliseconds.
         },
         say (text) {
@@ -158,7 +160,7 @@ export const companion = {
             // Add a close button.
             const dialogClose = document.createElement("button");
             dialogClose.textContent = "Close";
-            dialogClose.id = "dialog-say-close";
+            dialogClose.id = "dialog-close";
             dialogClose.ariaLabel = "Close the dialog.";
             dialogClose.title = "Close the dialog.";
             dialogClose.type = "button";

@@ -179,6 +179,26 @@ export const user = {
         // Reload the page.
         location.reload();
     },
+    openSettings (state = null) {
+        /**
+         * Open the settings modal.
+         */
+        const settings = document.getElementById("settings");
+        if (!settings) return console.warn("[user.openSettings]: Settings element not found. If this issue persists, please report it on GitHub.");
+
+        if (settings.style.display === "block" || state === "close") {
+            /*if (user.debug === true)*/ console.log("[user.openSettings]: Closing settings modal.");
+            settings.style.display = "none";
+            settings.classList.add("closed");
+        } else {
+            if (document.querySelector("#toast-list") && !document.querySelector("#toast-list").classList.contains("closed-menu")) {
+                toast.toggle();
+            };
+            if (user.debug === true) console.log("[user.openSettings]: Opening settings modal.");
+            settings.style.display = "block";
+            settings.classList.remove("closed");
+        };
+    },
     debugMode () {
         /**
          * Toggle debug mode.
