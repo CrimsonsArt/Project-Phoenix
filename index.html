@@ -27,7 +27,7 @@
         </header>
         <main>
             <section id="calendar-container" class="container">
-                <h2>Calendar</h2>
+                <h2 id="calendar-title">Calendar</h2>
             </section>
 
             <section id="tasks" class="container">
@@ -44,26 +44,23 @@
                         </p>
                     </div>
                     <div id="pomodoro-controller" class="controller">
-                        <button id="pom-start" type="button" title="Start timer" aria-label="Start timer"><span id="pomodoro-activity-icon" class="bi bi-play-fill" aria-hidden="true"></span></button>
-                        <button id="pom-stop" type="button" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
+                        <button id="pom-start" class="btn" type="button" title="Start timer" aria-label="Start timer"><span id="pomodoro-activity-icon" class="bi bi-play-fill" aria-hidden="true"></span></button>
+                        <button id="pom-stop" class="btn" type="button" title="Stop timer" aria-label="Stop timer"><span class="bi bi-stop-fill" aria-hidden="true"></span></button>
                     </div>
                 </section>
                 <section id="todo">
                     <h3>Todo list</h3>
                     <form id="task-form">
-                        <fieldset id="task-field">
-                            <legend>New task</legend>
-                            <div class="form-field">
-                                <label for="todo-task">New task:</label>
-                                <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
-                            </div>
-                            <div class="form-field">
-                                <label for="todo-due">Due date:</label>
-                                <input type="date" id="todo-due">
-                            </div>
-                            <button id="add-hierarchy" type="button" title="Add the task in a hierarchy with another task" aria-label="Add the task in a hierarchy with another task">Add hierarchy</button>
-                        </fieldset>
-                        <button id="add-task" type="submit" title="Add task" aria-label="Add task">Add task<!-- <span class="bi bi-plus-circle" aria-hidden="true"></span>--></button>
+                        <div class="form-field">
+                            <label for="todo-task">New task:</label>
+                            <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="todo-due">Due date:</label>
+                            <input type="date" id="todo-due">
+                        </div>
+                        <button id="add-hierarchy" class="btn" type="button" title="Add the task in a hierarchy with another task" aria-label="Add the task in a hierarchy with another task">Add hierarchy<span class="icon bi bi-diagram-2"></span></button>
+                        <button id="add-task" class="btn" type="submit" title="Add task" aria-label="Add task">Add task<span class="icon bi bi-plus-circle" aria-hidden="true"></span></button>
                     </form>
                     <ul id="todo-list" class="task-list">
                     </ul>

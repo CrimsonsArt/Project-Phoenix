@@ -54,10 +54,23 @@ export const calendar = {
             // Add the table title.
             const nav = document.createElement("div");
             nav.id = "calendar-nav"
-            nav.textContent = `${calendar.months[calendar.info.month]} ${calendar.info.year}`;
+            //nav.textContent = `${calendar.months[calendar.info.month]} ${calendar.info.year}`;
             table.appendChild(nav);
+            //const title = document.createElement("h2");
+            const title = document.getElementById("calendar-title");
+            title.innerHTML = "";
+            const labelSpan = document.createElement("span");
+            labelSpan.textContent = "Calendar: ";
+            labelSpan.classList.add("sr-only");
+            //title.id = "calendar-title";
+            const dateSpan = document.createElement("span");
+            dateSpan.id = "calendar-date";
+            dateSpan.textContent = `${calendar.months[calendar.info.month]} ${calendar.info.year}`;
+            title.appendChild(labelSpan);
+            title.appendChild(dateSpan);
+            //nav.appendChild(title);
 
-            // Create the month and year wrappers.
+            /*// Create the month and year wrappers.
             const monthWrapper = document.createElement("span");
             monthWrapper.id = "calendar-nav-month-wrapper";
             const yearWrapper = document.createElement("span");
@@ -67,7 +80,7 @@ export const calendar = {
             const monthLabel = document.createElement("label");
             monthLabel.classList.add("sr-only");
             monthLabel.textContent = "Month:";
-            monthWrapper.appendChild(monthLabel);
+            //monthWrapper.appendChild(monthLabel);
 
             const monthSelect = document.createElement("select");
             monthSelect.classList.add("set-calendar");
@@ -79,13 +92,13 @@ export const calendar = {
                 if (index === calendar.info.month) option.selected = true;
                 monthSelect.appendChild(option);
             });
-            monthWrapper.appendChild(monthSelect);
+            //monthWrapper.appendChild(monthSelect);
 
             // Create the year label and input, and append them to the wrapper.
             const yearLabel = document.createElement("label");
             yearLabel.classList.add("sr-only");
             yearLabel.textContent = "Year:";
-            yearWrapper.appendChild(yearLabel);
+            //yearWrapper.appendChild(yearLabel);
 
             const yearInput = document.createElement("input");
             yearInput.classList.add("set-calendar");
@@ -94,27 +107,33 @@ export const calendar = {
             yearInput.min = "1900";
             yearInput.max = "2100";
             yearInput.value = calendar.info.year;
-            yearWrapper.appendChild(yearInput);
+            //yearWrapper.appendChild(yearInput);
+
+            const monthWrapper = utils.wrapInput(monthLabel, monthSelect);
+            const yearWrapper = utils.wrapInput(yearLabel, yearInput);
 
             // Append the month and year wrappers to the title.
-            nav.innerHTML = "";
-            nav.appendChild(monthWrapper).addEventListener("change", () => {
+            const navElements = document.createElement("div");
+            navElements.id = "calendar-nav-elements";
+            nav.appendChild(navElements);
+
+            navElements.appendChild(monthWrapper).addEventListener("change", () => {
                 calendar.info.month = parseInt(monthSelect.value, 10);
                 calendar.render.table(calendar.info.year, calendar.info.month);
             });
-            nav.appendChild(yearWrapper).addEventListener("change", () => {
+            navElements.appendChild(yearWrapper).addEventListener("change", () => {
                 calendar.info.year = parseInt(yearInput.value, 10);
                 calendar.render.table(calendar.info.year, calendar.info.month);
             });
 
             // Create a navigation wrapper.
             //const navWrapper = document.createElement("div");
-            nav.classList.add("row");
-            //navWrapper.id = "calendar-nav";
+            //nav.classList.add("row");
+            //navWrapper.id = "calendar-nav";*/
 
             // Create the "previous month" button.
             const prev = document.createElement("button");
-            prev.classList.add("set-calendar");
+            prev.classList.add("set-calendar", "btn");
             prev.ariaLabel = "Go to the previous month";
             prev.title = "Go to the previous month";
             prev.textContent = "Previous";
@@ -123,7 +142,7 @@ export const calendar = {
 
             // Create the "next month" button.
             const next = document.createElement("button");
-            next.classList.add("set-calendar");
+            next.classList.add("set-calendar", "btn");
             next.ariaLabel = "Go to the next month";
             next.title = "Go to the next month";
             next.textContent = "Next";
@@ -131,15 +150,19 @@ export const calendar = {
             next.id = "calendar-nav-next";
 
             // Add a button to go to the current month.
-            const current = document.createElement("button");
-            current.classList.add("set-calendar");
+            const current = utils.button("current", "Go to now", "house", false);
+            /*const current = document.createElement("button");
+            current.classList.add("set-calendar", "btn");
             current.ariaLabel = "Go to this month";
             current.title = "Go to this month";
             current.textContent = "Current";
-            current.type = "button";
+            current.type = "button";*/
             current.id = "calendar-nav-current";
 
             // Add the buttons to the nav wrapper, and append it to the header.
+            //const navButtons = document.createElement("div");
+            //navButtons.id = "calendar-nav-buttons";
+            //nav.appendChild(navButtons);
             nav.appendChild(prev).addEventListener("click", calendar.control.previous);
             nav.appendChild(next).addEventListener("click", calendar.control.next);
             nav.appendChild(current).addEventListener("click", () => {
@@ -355,11 +378,7 @@ export const calendar = {
                 cell.appendChild(wrapper);
 
                 // Create the close button.
-                const close = document.createElement("button");
-                close.textContent = "Close";
-                close.ariaLabel = "Close the day view.";
-                close.title = "Close the day view.";
-                close.type = "button";
+                const close = utils.button("close", "Close the day view, and return to the calendar.", "x-lg", false);
                 close.id = "close-day-view";
                 wrapper.appendChild(close).addEventListener("click", () => calendar.control.close(cell));
 
@@ -452,7 +471,6 @@ export const calendar = {
             // Create the wrapper.
             const wrapper = document.createElement("div");
             wrapper.id = "day-controls";
-            cell.appendChild(wrapper);
 
             // Create the open day button.
             const openButton = document.createElement("button");
@@ -462,6 +480,15 @@ export const calendar = {
             openButton.id = "open-day-view";
             openButton.type = "button";
             wrapper.appendChild(openButton).addEventListener("click", () => calendar.control.open(cell));
+
+            // Get the element to insert the button after.
+            const dayNumberElement = cell.querySelector("time");
+            if (dayNumberElement) {
+                dayNumberElement.insertAdjacentElement("afterend", wrapper);
+            } else {
+                toast.log("Day number element not found. Please report this error on GitHub.", "error");
+                console.error("[calendar.control.select]: Day number element not found. Please report this error on GitHub.");
+            };
         },
         open (cell) {
             /**

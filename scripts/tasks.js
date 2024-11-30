@@ -103,26 +103,38 @@ export const tasks = {
             // Render the root tasks.
             rootTasks.forEach(task => {
                 const parentTask = tasks.render.task(task.id);
+                console.log("Rendering root task: ", task);
                 wrapper.appendChild(parentTask);
 
                 // Render subtasks recursively.
                 function renderSubtasks(task, parentElement) {
                     if (task.childIDs.length > 0) {
-                        const subtaskList = document.createElement("ul");
-                        subtaskList.classList.add("has-subtasks");
-                        parentElement.appendChild(subtaskList);
+                        // Keep track of rendered subtasks.
+                        let renderedSubtasks = [];
+                        let subtaskList = parentElement.querySelector(".subtasks");
+
+                        // Clear the subtask list if it exists, or create a new one.
+                        if (!subtaskList) {
+                            subtaskList = document.createElement("ul");
+                            subtaskList.classList.add("has-subtasks");
+                            parentElement.appendChild(subtaskList);
+                        } else {
+                            subtaskList.innerHTML = "";
+                        };
 
                         // Find the subtask.
                         task.childIDs.forEach(subtaskID => {
                             const subtask = user.tasks.find(task => task.id === subtaskID);
 
-                            // Render the subtask.
-                            if (subtask) {
+                            // Render the subtask, unless it's already rendered.
+                            if (subtask && !renderedSubtasks.includes(subtask.id)) {
+                                console.log("Rendering subtask: ", subtask);
                                 const subtaskElement = tasks.render.task(subtask.id);
                                 subtaskList.appendChild(subtaskElement);
 
                                 // Recursively render any subtasks of this subtask.
                                 renderSubtasks(subtask, subtaskElement);
+                                renderedSubtasks.push(subtask.id);
                             };
                         });
                     };
@@ -252,7 +264,7 @@ export const tasks = {
 
             // Create the menu button.
             const menu = document.createElement("button");
-            menu.classList.add("task-menu");
+            menu.classList.add("task-menu", "btn");
             menu.id = `task-menu-${task.id}`;
             menu.ariaLabel = "Open task menu.";
             menu.ariaExpanded = false;
@@ -271,20 +283,9 @@ export const tasks = {
             options.id = `task-dropdown-content-${task.id}`;
             dropWrapper.appendChild(options);
 
-            /*// Create the goal button.
-            const goal = document.createElement("button");
-            goal.classList.add("task-goal");
-            goal.id = `task-goal-${task.id}`;
-            goal.textContent = "Set as goal";
-            goal.type = "button";
-            options.appendChild(goal);*/
-
             // Create the edit button.
-            const edit = document.createElement("button");
-            edit.classList.add("task-edit");
+            const edit = utils.button("edit", "Edit task", "pencil-square");
             edit.id = `task-edit-${task.id}`;
-            edit.textContent = "Edit";
-            edit.type = "button";
             options.appendChild(edit);
             edit.addEventListener("click", () => tasks.edit(task.id));
 
@@ -351,6 +352,22 @@ export const tasks = {
 
         // Remove the task from the user.tasks array.
         user.tasks = user.tasks.filter(task => task.id !== id);
+
+        // If the task has a parent, remove it from the parent's childIDs array.
+        if (task.parentID !== null) {
+            const parentTask = user.tasks.find(task => task.id === task.parentID);
+            if (parentTask) {
+                parentTask.childIDs = parentTask.childIDs.filter(childID => childID !== id);
+                if (user.debug === true) {
+                    console.log(`[tasks.delete]: Removed task with ID: ${id} from the subtasks of task with ID: ${parentTask.id}`);
+                };
+            };
+        };
+
+        // If tasks.currentlyOpen is the deleted task, set it to null.
+        if (tasks.currentlyOpen === id) {
+            tasks.currentlyOpen = null;
+        };
 
         // Log to console, and save changes.
         toast.add("Task and its subtasks has successfully been deleted.", "success");
@@ -433,7 +450,8 @@ export const tasks = {
             };
 
             // Get the task wrapper, and clear it.
-            const wrapper = document.getElementById(`task-${id}`);
+            //const wrapper = document.getElementById(`task-${id}`);
+            const wrapper = document.querySelector(`#task-${id} .task-wrapper`);
             wrapper.innerHTML = "";
 
             // Create the edit form.
@@ -455,10 +473,11 @@ export const tasks = {
             const editLabel = document.createElement("label");
             editLabel.htmlFor = `task-editing-text-${id}`;
             editLabel.textContent = "Edit task: ";
-            //editLabel.classList.add("sr-only");
+            editLabel.classList.add("sr-only");
 
             // Wrap the input and label.
             const editWrap = utils.wrapInput(editLabel, editInput);
+            editWrap.classList.add("edit-task-text");
 
             // Append the wrapped input to the form.
             editForm.appendChild(editWrap);
@@ -473,7 +492,7 @@ export const tasks = {
             const dueLabel = document.createElement("label");
             dueLabel.htmlFor = `task-editing-due-${id}`;
             dueLabel.textContent = "Due date: ";
-            //dueLabel.classList.add("sr-only");
+            dueLabel.classList.add("sr-only");
 
             // Add the due date to the input, if it exists.
             if (task.dueDate) {
@@ -482,10 +501,17 @@ export const tasks = {
 
             // Wrap the due date input and label.
             const dueWrap = utils.wrapInput(dueLabel, dueInput);
+            dueWrap.classList.add("edit-task-due");
 
             // Add subtask selector.
             const subtaskWrap = tasks.hierarchy.add("return", id);
+            subtaskWrap.classList.add("edit-task-subtask");
+            subtaskWrap.id = `edit-subtask-wrapper-${id}`;
+
+            // Get the subtask select and label element.
             const subtaskSelect = subtaskWrap.querySelector("select");
+            const subtaskLabel = subtaskWrap.querySelector("label");
+            subtaskLabel.classList.add("sr-only");
 
             // Set the selected option to the parent task.
             if (task.parentID !== null && subtaskSelect) {
@@ -521,6 +547,11 @@ export const tasks = {
                     tasks.cancel(id);
                 };
             });
+
+            // If tasks.currentlyOpen is the task to edit, set it to null.
+            if (tasks.currentlyOpen === id) {
+                tasks.currentlyOpen = null;
+            };
 
             // Focus on the text input element.
             editInput.focus();

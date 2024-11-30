@@ -1,4 +1,5 @@
 /*---------------------------------- IMPORT ----------------------------------*/
+import { calendar } from "./calendar.js";
 import { utils } from "./utils.js";
 import { user } from "./user.js";
 import { toast } from "./toast.js";
@@ -70,7 +71,7 @@ export const events = {
             };
 
             // Add the title.
-            const title = document.createElement("h6");
+            const title = document.createElement("h5");
             title.classList.add("full-event-title");
             title.textContent = data.title;
             wrapper.appendChild(title);
@@ -133,7 +134,7 @@ export const events = {
 
             // Add the controls wrapper.
             const controls = document.createElement("div");
-            controls.id = "full-event-controls";
+            controls.classList.add("full-event-controls");
             wrapper.appendChild(controls);
 
             // Add the edit button.
@@ -174,6 +175,8 @@ export const events = {
             // Create the add event button.
             const addButton = document.createElement("button");
             addButton.type = "button";
+            addButton.classList.add("btn");
+            addButton.id = "add-new-event";
             addButton.ariaLabel = "Add a new event to this day.";
             addButton.title = "Add a new event to this day.";
             addButton.textContent = "Add new event";
@@ -200,22 +203,22 @@ export const events = {
             title.textContent = "Planner";
             wrapper.appendChild(title);
 
-            // Create the event list wrapper.
+            /*// Create the event list wrapper.
             const listWrapper = document.createElement("div");
             listWrapper.id = "planner-list-wrapper";
-            wrapper.appendChild(listWrapper);
+            wrapper.appendChild(listWrapper);*/
 
-            // Create the event list title.
+            /*// Create the event list title.
             const listTitle = document.createElement("h5");
             listTitle.textContent = "Events for this day:";
-            listWrapper.appendChild(listTitle);
+            listWrapper.appendChild(listTitle);*/
 
             // Create the list of events.
             const list = document.createElement("ul");
             list.dataset.date = cell.dataset.date;
             list.dataset.weekday = cell.dataset.weekday;
             list.id = "planner-list";
-            listWrapper.appendChild(list);
+            wrapper.appendChild(list);
 
             // Find events for today, and add them to the planner.
             events.find(cell.dataset.date, list, "full");
@@ -427,8 +430,14 @@ export const events = {
             data.recurring.isRecurring = true;
 
             // Add the day of the week for the event.
-            if (data.date.start) {
-                data.recurring.weekday = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.weekday;
+            if (data.date.start) { // TODO: Fix this.
+                if (document.querySelector(`.cell[data-date="${data.date.start}"]`)) {
+                    data.recurring.weekday = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.weekday;
+                } else {
+                    if (user.debug === true) {
+                        console.error(`[events.add]: Could not find the weekday for the date ${data.date.start}. This is a known bug and will be fixed in a future release.`);
+                    };
+                }
             };
 
             if (select.value === "custom") {
@@ -475,6 +484,16 @@ export const events = {
 
                 // Remove the edit form and re-render the event.
                 events.render.full(data, document.querySelector(`.full-event[data-id="${data.id}"]`));
+                // TODO: Re-render the add event button.
+                // Re-render the planner control panel.
+                const cell = document.getElementById("day-view").parentElement;
+                events.render.plannerControls(cell);
+
+                /*const dayView = document.getElementById("day-view");
+                const cell = dayView.parentElement;
+                dayView.remove();
+                calendar.render.cell.expanded(cell);
+                console.log("Re-rendering day view after updating event.");*/
 
             // If the event is not found, log an error.
             } else {
@@ -785,12 +804,18 @@ export const events = {
 
                 // Add repeat event data.
                 if (data.recurring.isRecurring) {
+                    // TODO: Add the repeat options.
                     document.getElementById(`edit-event-${id}-repeat`).checked = true;
 
                     // Add the day of the week for the event.
-                    if (data.date.start) {
+                    if (data.date.start && document.querySelector(`.cell[data-date="${data.date.start}"]`)) {
                         data.recurring.day = document.querySelector(`.cell[data-date="${data.date.start}"]`).dataset.day;
-                    };
+                    }/* else {
+                        if (document.getElementById(`${id}-start-date`)) {
+                            const startDate = document.getElementById(`edit-event-${id}-start-date`);
+                            console.log(startDate);
+                        };
+                    }*/;
 
                     toggleRepeatEvent(`edit-event-${id}`);
                     if (data.recurring.isCustom === true) {

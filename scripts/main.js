@@ -113,7 +113,15 @@ window.onload = function() {
         const shortDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     
         headings.forEach((heading, index) => {
-            heading.textContent = isSmallScreen ? shortDays[index] : fullDays[index];
+            if (isSmallScreen) {
+                if (heading.classList.contains("expanded-column")) {
+                    heading.textContent = fullDays[index];
+                } else {
+                    heading.textContent = shortDays[index];
+                }
+            } else {
+                heading.textContent = fullDays[index];
+            };
         });
     };
 

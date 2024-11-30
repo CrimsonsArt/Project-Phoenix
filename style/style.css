@@ -52,6 +52,8 @@ h1 a, footer h2 a {
     text-decoration: none;
 }
 h2 {
+    font-size: 2em;
+    margin-top: 15px;
     text-align: center;
 }
 
@@ -62,11 +64,14 @@ h2 {
     text-align: center;
 }
 .btn:has(.icon) {
+    align-items: center;
     display: flex;
     flex-flow: row nowrap;
+    justify-content: center;
 }
 .btn .icon {
     order: -1;
+    padding-right: 5px;
 }
 .delete {
     color: darkred;
@@ -177,6 +182,9 @@ footer {
     padding-top: 5px;
     position: relative;
 }
+.toast .btn .icon {
+    padding-right: 0;
+}
 .toast-title {
     font-size: 1.2em;
 }
@@ -239,46 +247,43 @@ footer {
 #settings-form .form-field label {
     margin-right: 5px;
 }
-/*#import-file { // TODO: Style file input.
-    height: 0.1px;
-    opacity: 0;
-    overflow: hidden;
-    position: absolute;
-    width: 0.1px;
-    z-index: -1;
-}
-#import-file + label {
-    background-color: black;
-    color: white;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 1.25em;
-    font-weight: 700;
-}
-#import-file:focus + label, #import-file + label:hover {
-    background-color: red;
-}*/
 
 
 /*--------------------------------- CALENDAR ---------------------------------*/
 #calendar-table {
+    border-left: var(--borders);
+    border-top: var(--borders);
     display: flex;
     flex-flow: column nowrap;
 }
 #calendar-nav {
-    border: var(--borders);
+    align-items: center;
+    border-right: var(--borders);
+    display: flex;
+    flex-flow: row nowrap;
 }
-.set-calendar {
+#calendar-nav button {
+    border-top: var(--borders);
+    font-size: 1em;
+    height: 100%;
+    min-height: 25px;
+    min-width: 70px;
+    padding: 0;
+    width: 100%;
 }
-#calendar-nav-month-wrapper {
+#calendar-nav button:not(:nth-of-type(2)) {
+    border-right: var(--borders);
 }
-#calendar-nav-year-wrapper {
+#calendar-nav button:nth-of-type(1) {
+    flex-grow: 1;
 }
-#calendar-nav-previous {
+#calendar-nav button:nth-of-type(3) {
+    flex-shrink: 2;
+    min-width: 70px;
 }
-#calendar-nav-current {
-}
-#calendar-nav-next {
+#calendar-nav button:nth-of-type(2) {
+    flex-grow: 1;
+    order: 1;
 }
 .row {
     align-content: stretch;
@@ -288,16 +293,17 @@ footer {
 }
 .cell {
     align-content: center;
-    border: var(--borders);
+    border-right: var(--borders);
+    border-bottom: var(--borders);
     display: table-cell;
     flex: 1 1 0;
     min-height: 70px;
     overflow: hidden;
     text-align: center;
-    width: 0;
 }
 .day-header {
     background-color: var(--tertiary-color);
+    border-top: var(--borders);
     color: rgb(32, 24, 17);
     font-size: 1.2em;
     font-weight: bold;
@@ -311,6 +317,20 @@ footer {
 .faded {
     color: var(--faded-font-color);
 }
+
+/* CALENDAR - HIGHLIGHTS */
+/*.today {
+    border: 2px solid red;
+}
+.event {
+    border: 2px solid green;
+}
+.deadline {
+    border: 2px solid magenta;
+}
+.journal-entry {
+    border: 2px solid blue;
+}*/
 
 /* TASKS & EVENT CALENDAR DISPLAYS */
 .compact-event:not(.more-events), .compact-task {
@@ -330,32 +350,170 @@ footer {
 .day-header.shrunk-day:not(.expanded-column) {
     display: none; /* Hide other days and weeks. */
 }
+.day-header.expanded-column {
+    border: var(--borders);
+    border-left: none;
+}
 .expanded-day {
-    background-color: var(--tertiary-color);
+    background-color: var(--secondary-color);
     flex: 100;
-    padding: 3%;
+    padding: 1%;
     position: relative;
 }
 #day-view {
+    align-content: center;
     display: flex;
     flex-flow: row nowrap;
-    justify-content: space-around;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
 }
-.expanded-day #day-title {
+.expanded-day h3 {
+    border-bottom: var(--borders);
     font-size: 2em;
+    left: 9px;
+    margin: 0;
     position: absolute;
+    text-align: left;
     top: 0;
-    left: 0;
+    width: calc(100% - 2%);
 }
-#day-view h4 {
+#planner h4, #journal h4 {
+    border-bottom: var(--borders);
     font-size: 1.75em;
+    margin: 75px 0 16px 0;
+    text-align: left;
 }
 #close-day-view {
+    background-color: var(--primary-color);
+    border: none;
+    color: var(--main-font-color);
+    font-size: 2em;
+    height: 40px;
     position: absolute;
     top: 0;
-    right: 0;
+    right: 1%;
+    width: 40px;
+    z-index: 994;
+}
+#close-day-view .icon {
+    padding-right: 0;
 }
 
+#planner, #journal {
+    display: flex;
+    flex-flow: column nowrap;
+    height: 100%;
+    justify-content: space-between;
+    margin: 0 1%;
+    width: 100%;
+}
+#planner-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.full-event {
+    background-color: var(--tertiary-color);
+    border: var(--borders);
+    color: black;
+    display: flex;
+    flex-flow: column nowrap;
+    margin-bottom: 15px;
+    padding-top: 15px;
+}
+.full-event-title {
+    font-size: 1.5em;
+    margin: 0;
+    padding-bottom: 5px;
+}
+.full-event-date {}
+.full-event-time, .full-event-description {
+    margin: 7px 0;
+    padding: 0 5px;
+}
+.full-event-location {}
+.full-event-controls, #journal-controls {
+    align-items: center;
+    border-top: var(--borders);
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+    margin-top: 15px;
+    width: 100%;
+}
+.full-event-controls button {
+    width: 100%;
+}
+.full-event-controls button:last-of-type {
+    border-left: var(--borders);
+}
+#planner-controls button, #journal-save {
+    border: var(--borders);
+    height: 100%;
+    width: 100%;
+}
+
+#journal-form {
+    border: var(--borders);
+    height: 100%;
+}
+#journal-form .form-field:not(:last-of-type) {
+    border-bottom: var(--borders);
+}
+#journal-form .form-field:not(:first-of-type) {
+    display: grid;
+    grid-template-columns: [label] 175px [input] 1fr;
+    width: 100%;
+}
+#journal-text {
+    background-color: var(--tertiary-color);
+    border: none;
+    color: black;
+    font-size: 1.2em;
+    height: 100%;
+    margin: 0;
+    min-width: calc(100% - 10px);
+    overflow: visible;
+    padding: 5px;
+}
+#journal-form input, #journal-form select {
+    grid-area: input;
+}
+#journal-form label {
+    border-right: var(--borders);
+    grid-area: label;
+    padding-left: 5px;
+    text-align: left;
+}
+#journal-form input {
+    background-color: var(--tertiary-color);
+    border: none;
+}
+#journal-controls {
+    border: none;
+    margin: 0;
+}
+#journal-controls button {
+    height: 100%;
+    width: 100%;
+}
+#journal-save {
+    border: none;
+}
+#journal-cancel {
+    border: none;
+    border-left: var(--borders);
+}
+#journal-entry {
+    background-color: var(--tertiary-color);
+    border: var(--borders);
+    color: rgb(31, 31, 31);
+}
+#journal-edit {
+    border-top: var(--borders);
+    width: 100%;
+}
 
 /*---------------------------------- TASKS -----------------------------------*/
 #tasks {
@@ -368,22 +526,34 @@ footer {
     margin-bottom: 25%;
     width: 95%;
 }
-#tasks h2 {
-}
 #todo h3 {
     text-align: center;
 }
+
+#task-form {
+    align-items: baseline;
+    border-bottom: var(--borders);
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    margin: 5px 0;
+    padding: 10px 0 0 0;
+}
+#task-form input {
+    margin-right: 5px;
+    padding: 0;
+}
+
 .has-subtasks {
     padding: 0 0 0 calc(1em + 10px);
 }
 .task {
     list-style: none;
 }
-.task-wrapper {
-    align-items: flex-start;
+.task-wrapper:not(:has(.edit-task-wrapper)) {
     border-bottom: 1px solid var(--primary-color);
     display: grid;
-    grid-template-columns: [checkbox] 25px [task] auto [due] auto [timestamp] 90px [dropdown] 31px;
+    grid-template-columns: [checkbox] 25px [task] auto [due] auto [timestamp] 100px [dropdown] 31px;
     margin-top: 5px;
 }
 .task-check {
@@ -428,6 +598,49 @@ footer {
     width: 100px;
     z-index: 996;
 }
+
+.edit-task-wrapper {
+    border-bottom: 1px solid var(--primary-color);
+    display: grid;
+    grid-template-columns: [text] 1fr [subtask] 150px [due] auto [controls] auto;
+    margin-top: 5px;
+    width: 100%;
+}
+.edit-task-wrapper .form-field {
+    display: flex;
+    flex-flow: row nowrap;
+}
+.form-field.edit-task-text {
+    grid-area: text;
+    justify-self: flex-start;
+    width: 100%;
+}
+.form-field.edit-task-text input {
+    width: 100%;
+}
+.form-field.edit-task-due {
+    grid-area: due;
+    justify-self: flex-end;
+}
+.edit-task-due label {
+    margin: 0 5px;
+}
+.form-field.edit-task-subtask {
+    grid-area: subtask;
+}
+.form-field.edit-task-subtask select {
+    max-width: 150px;
+}
+.edit-task-wrapper .controls {
+    align-items: stretch;
+    display: flex;
+    flex-flow: row nowrap;
+    grid-area: controls;
+    justify-content: space-between;
+    justify-self: end;
+    width: 100%;
+}
+
 .optionGroup {
     font-weight: bold;
     font-style: italic;
@@ -484,7 +697,7 @@ footer {
     bottom: 0;
     position: fixed;
     right: 0;
-    transition: bottom 0.3s ease, right 0.3s ease;
+    transition: bottom 0.3s ease, right 0.4s ease;
     z-index: 999;
     width: 350px;
 }

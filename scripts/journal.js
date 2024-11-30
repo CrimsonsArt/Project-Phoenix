@@ -172,7 +172,7 @@ export const journal = {
         form.id = "journal-form";
         wrapper.appendChild(form);
 
-        // Create the textarea fieldset.
+        /*// Create the textarea fieldset.
         const textareaFieldset = document.createElement("fieldset");
         textareaFieldset.id = "journal-textarea";
         form.appendChild(textareaFieldset);
@@ -180,28 +180,28 @@ export const journal = {
         // Create the textarea fieldset legend.
         const textareaLegend = document.createElement("legend");
         textareaLegend.textContent = "Journal entry";
-        textareaFieldset.appendChild(textareaLegend);
+        textareaFieldset.appendChild(textareaLegend);*/
 
         // Create the journal textarea label.
         const textareaLabel = document.createElement("label");
         textareaLabel.setAttribute("for", "journal-text");
         textareaLabel.textContent = "Journal entry:";
-        //textareaLabel.classList.add("sr-only");
+        textareaLabel.classList.add("sr-only");
 
         // Create the journal textarea.
         const textarea = document.createElement("textarea");
         textarea.id = "journal-text";
         textarea.placeholder = "Today I...";
-        textarea.rows = "5";
+        textarea.rows = "10";
         textarea.autocomplete = "off";
         textarea.spellcheck = "true";
         textarea.required = "true";
 
         // Wrap the textarea label and input, and append it to the form.
         const textareaWrapper = utils.wrapInput(textareaLabel, textarea);
-        textareaFieldset.appendChild(textareaWrapper);
+        form.appendChild(textareaWrapper);
 
-        // Create the checkup fieldset.
+        /*// Create the checkup fieldset.
         const checkInFieldset = document.createElement("fieldset");
         checkInFieldset.id = "journal-checkup";
         form.appendChild(checkInFieldset);
@@ -209,7 +209,7 @@ export const journal = {
         // Create the checkup legend.
         const checkInLegend = document.createElement("legend");
         checkInLegend.textContent = "Feelings check in";
-        checkInFieldset.appendChild(checkInLegend); 
+        checkInFieldset.appendChild(checkInLegend);*/
 
         // Create the mood select label.
         const selectLabel = document.createElement("label");
@@ -221,11 +221,11 @@ export const journal = {
         const select = document.createElement("select");
         select.id = "journal-mood";
         //select.required = "true";
-        const options = ["--- Select ---", "good", "neutral", "bad"];
+        const options = ["--- Select ---", "fantastic", "good", "neutral", "bad", "terrible"];
         options.forEach(option => {
             const opt = document.createElement("option");
             opt.value = option;
-            opt.textContent = option;
+            opt.textContent = option.charAt(0).toUpperCase() + option.slice(1);
             select.appendChild(opt);
             if (option === "--- Select ---") {
                 opt.value = "";
@@ -235,61 +235,82 @@ export const journal = {
 
         // Wrap the mood select label and input, and append it to the form.
         const selectWrapper = utils.wrapInput(selectLabel, select);
-        checkInFieldset.appendChild(selectWrapper);
+        form.appendChild(selectWrapper);
 
         // Create the thoughts label.
         const thoughtsLabel = document.createElement("label");
         thoughtsLabel.setAttribute("for", "journal-thoughts");
-        thoughtsLabel.textContent = "What's on your mind?";
+        thoughtsLabel.textContent = "Mind is: ";
         //thoughtsLabel.classList.add("sr-only");
 
         // Create the thoughts input.
         const thoughts = document.createElement("input");
         thoughts.id = "journal-thoughts";
         thoughts.type = "text";
-        thoughts.placeholder = "What's on your mind?";
+        thoughts.placeholder = "Mind is... (e.g. anxious, calm, etc.)";
         thoughts.autocomplete = "off";
         thoughts.spellcheck = "true";
 
         // Wrap the thoughts label and input, and append it to the form.
         const thoughtsWrapper = utils.wrapInput(thoughtsLabel, thoughts);
-        checkInFieldset.appendChild(thoughtsWrapper);
+        form.appendChild(thoughtsWrapper);
 
         // Create the physical feelings label.
         const physicalLabel = document.createElement("label");
         physicalLabel.setAttribute("for", "journal-physical");
-        physicalLabel.textContent = "How do you feel physically?";
+        physicalLabel.textContent = "Body feels: ";
         //physicalLabel.classList.add("sr-only");
 
         // Create the physical feelings input.
         const physical = document.createElement("input");
         physical.id = "journal-physical";
         physical.type = "text";
-        physical.placeholder = "How do you feel physically?";
+        physical.placeholder = "Body feels... (e.g. tired, sore, etc.)";
         physical.autocomplete = "off";
         physical.spellcheck = "true";
 
         // Wrap the physical feelings label and input, and append it to the form.
         const physicalWrapper = utils.wrapInput(physicalLabel, physical);
-        checkInFieldset.appendChild(physicalWrapper);
+        form.appendChild(physicalWrapper);
 
         // Create the next steps label.
         const nextLabel = document.createElement("label");
         nextLabel.setAttribute("for", "journal-next");
-        nextLabel.textContent = "What do you want to do next?";
+        nextLabel.textContent = "Next course of action: ";
         //nextLabel.classList.add("sr-only");
 
         // Create the next steps input.
         const next = document.createElement("input");
         next.id = "journal-next";
         next.type = "text";
-        next.placeholder = "What do you want to do next?";
+        next.placeholder = "Next course of action...";
         next.autocomplete = "off";
         next.spellcheck = "true";
 
         // Wrap the next steps label and input, and append it to the form.
         const nextWrapper = utils.wrapInput(nextLabel, next);
-        checkInFieldset.appendChild(nextWrapper);
+        form.appendChild(nextWrapper);
+
+        // Create the controls wrapper.
+        const controls = document.createElement("div");
+        controls.id = "journal-controls";
+        form.appendChild(controls);
+
+        // Create the save button.
+        //const save = document.createElement("button");
+        const save = utils.button("save", "Save the journal entry", "floppy");
+        save.id = "journal-save";
+        save.type = "submit";
+        controls.appendChild(save);
+
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+            if (entry) {
+                journal.add(entry);
+            } else {
+                journal.add();
+            };
+        });
 
         // If an ID is provided, populate the form.
         if (entry) {
@@ -314,11 +335,12 @@ export const journal = {
 
             // Create the cancel button.
             const cancel = document.createElement("button");
+            cancel.classList.add("btn");
             cancel.ariaLabel = "Cancel editing the journal entry.";
             cancel.title = "Cancel editing the journal entry.";
             cancel.textContent = "Cancel";
             cancel.id = "journal-cancel";
-            form.appendChild(cancel).addEventListener("click", function() {
+            controls.appendChild(cancel).addEventListener("click", function() {
                 document.getElementById("journal").remove();
                 if (entry) {
                     journal.render(entry.date);
@@ -327,21 +349,5 @@ export const journal = {
                 };
             });
         };
-
-        // Create the save button.
-        //const save = document.createElement("button");
-        const save = utils.button("save", "Save the journal entry", "floppy");
-        save.id = "journal-save";
-        save.type = "submit";
-        form.appendChild(save);
-
-        form.addEventListener("submit", function(event) {
-            event.preventDefault();
-            if (entry) {
-                journal.add(entry);
-            } else {
-                journal.add();
-            };
-        });
     }
 };
