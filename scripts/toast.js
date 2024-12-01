@@ -7,6 +7,7 @@ export const toast = {
     /**
      * Controls toast functionality.
      * 
+     * @param {boolean} isOpen - If the toast log is open or not.
      * @function add - Show a toast message.
      * @function load - Load toast messages.
      * @function render - Render toast messages.
@@ -66,9 +67,6 @@ export const toast = {
          * 
          * @param {object} data - The toast data to render.
          * @param {boolean} isNew - If the toast is new or not.
-         * 
-         * TODO: Allow hovering over toast to pause the removal of the toast.
-         * TODO: Ensure that alike toasts are grouped together, if they happen after each other.
          */
         const wrapper = document.createElement("li");
         const title = data.title.charAt(0).toUpperCase() + data.title.slice(1);

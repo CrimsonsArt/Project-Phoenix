@@ -27,7 +27,7 @@ export const tasks = {
          */
         const taskInput = document.getElementById("todo-task");
         const taskDue = document.getElementById("todo-due");
-        if (taskInput.value != "") { // Check if task input is not empty.
+        if (taskInput.value !== "") { // Check if task input is not empty.
             const task = { // Create task object.
                 id: user.nextTaskId,
                 date: Date.now(),
@@ -44,7 +44,7 @@ export const tasks = {
             };
 
             const subtask = document.getElementById("task-add-subtask");
-            if (subtask && subtask.value !== "") {
+            if (subtask && subtask.value) {
                 console.log("Adding subtask to parent task.");
                 // Add the task as a subtask of the selected task.
                 const parentTaskID = Number(subtask.value);
@@ -78,7 +78,8 @@ export const tasks = {
 
         // If task input is empty.
         } else {
-            toast.add("Task title can't be empty.", "info"); // Info toast.
+            //toast.add("Task title can't be empty.", "info"); // Info toast.
+            // BUG: Might be happening due to possibly being called twice.
         };
     },
     render: {
@@ -103,7 +104,6 @@ export const tasks = {
             // Render the root tasks.
             rootTasks.forEach(task => {
                 const parentTask = tasks.render.task(task.id);
-                console.log("Rendering root task: ", task);
                 wrapper.appendChild(parentTask);
 
                 // Render subtasks recursively.
@@ -128,7 +128,6 @@ export const tasks = {
 
                             // Render the subtask, unless it's already rendered.
                             if (subtask && !renderedSubtasks.includes(subtask.id)) {
-                                console.log("Rendering subtask: ", subtask);
                                 const subtaskElement = tasks.render.task(subtask.id);
                                 subtaskList.appendChild(subtaskElement);
 
@@ -450,7 +449,6 @@ export const tasks = {
             };
 
             // Get the task wrapper, and clear it.
-            //const wrapper = document.getElementById(`task-${id}`);
             const wrapper = document.querySelector(`#task-${id} .task-wrapper`);
             wrapper.innerHTML = "";
 
@@ -505,6 +503,7 @@ export const tasks = {
 
             // Add subtask selector.
             const subtaskWrap = tasks.hierarchy.add("return", id);
+            // TODO: Add as an array of subtasks.
             subtaskWrap.classList.add("edit-task-subtask");
             subtaskWrap.id = `edit-subtask-wrapper-${id}`;
 
@@ -737,10 +736,20 @@ export const tasks = {
                 const hierarchicalTasks = user.tasks.filter(task => task.parentID !== null || task.childIDs.length > 0);
                 const nonHierarchicalTasks = user.tasks.filter(task => task.parentID === null && task.childIDs.length === 0);
 
+                // Set to keep track of rendered task IDs.
+                const renderedTaskIds = new Set();
+
                 // Recursive function to render tasks hierarchically.
                 function renderHierarchy(taskId, level = 0) {
+                    // Find the task.
                     const task = user.tasks.find(task => task.id === taskId);
                     if (!task) return;
+
+                    // Check if the task has already been rendered.
+                    if (renderedTaskIds.has(task.id)) return;
+
+                    // Mark the task as rendered.
+                    renderedTaskIds.add(task.id);
 
                     // Create and append the option.
                     const option = document.createElement("option");
@@ -759,7 +768,9 @@ export const tasks = {
 
                     // Render child tasks recursively.
                     if (task.childIDs.length > 0) {
-                        task.childIDs.forEach(childID => renderHierarchy(childID, level + 1));
+                        task.childIDs.forEach(childID => {
+                            renderHierarchy(childID, level + 1);
+                        });
                     };
                 };
 
@@ -790,6 +801,7 @@ export const tasks = {
             // Create the subtask label element.
             const label = document.createElement("label");
             label.textContent = `This task is a subtask of: `;
+            label.classList.add("sr-only");
 
             // Add id if entered.
             if (id) {
@@ -808,12 +820,14 @@ export const tasks = {
             if (target === "return") {
                 return wrapper;
             } else {
-                // Remove the "add as subtask" button.
-                const button = document.getElementById("add-hierarchy");
-                if (button) {
-                    button.remove();
+                if (document.getElementById("task-add-subtask")) {
+                    document.getElementById("task-add-subtask").replaceWith(select);
+                } else if (document.getElementById("add-hierarchy")) {
+                    document.getElementById("add-hierarchy").replaceWith(select);
+                    if (document.getElementById("task-add-subtask")) {
+                        document.getElementById("task-add-subtask").insertAdjacentElement("beforebegin", label);
+                    };
                 };
-                document.getElementById("task-field").appendChild(wrapper);
             };
         }
     }

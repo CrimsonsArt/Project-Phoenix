@@ -1,12 +1,12 @@
 /*---------------------------------- IMPORT ----------------------------------*/
-import { user } from "./user.js"; // File is clean and ready for use.
-import { utils } from "./utils.js"; // File is clean and ready for use.
+import { user } from "./user.js";
+import { utils } from "./utils.js";
 import { toast } from "./toast.js";
-import { tasks } from "./tasks.js"; // File is clean and ready for use.
-import { events } from "./events.js"; // File is clean and ready for use.
+import { tasks } from "./tasks.js";
+import { events } from "./events.js";
 import { journal } from "./journal.js";
-import { calendar } from "./calendar.js"; // File is clean and ready for use.
-import { pomodoro } from "./pomodoro.js"; // File is clean and ready for use.
+import { calendar } from "./calendar.js";
+import { pomodoro } from "./pomodoro.js";
 import { companion } from "./companion.js";
 
 // TODO: Add a cheat for setting the current date.
@@ -16,12 +16,16 @@ window.onload = function() {
     /**
      * Onload function that runs when the page is loaded.
      */
-
     /*---------------------------- INITIALIZATION ----------------------------*/
     // Load testing cheats.
     window.pomodoro = pomodoro;
     window.toast = toast;
     window.user = user;
+
+    // Ensure that debug mode is disabled by default.
+    if (user.debug) {
+        user.debug = false;
+    };
 
     // Load user data from local storage.
     user.load();
@@ -138,7 +142,9 @@ window.onload = function() {
     // Add event listener for the add task button.
     const taskButton = document.getElementById("add-task");
     if (taskButton) {
-        taskButton.addEventListener("click", tasks.add);
+        taskButton.addEventListener("click", () => {
+            tasks.add();
+        });
     };
 
     // Add event listener for the add dependency button.
@@ -147,12 +153,21 @@ window.onload = function() {
         dependencyButton.addEventListener("click", () => tasks.hierarchy.add());
     };
 
+    // Stop the default form submission and add the task.
+    const form = document.getElementById("task-form");
+    form.addEventListener("submit", (event) => {
+        event.preventDefault(); // Prevent the form from submitting.
+        tasks.add(); // Add the task.
+        document.getElementById("todo-task").value = "";
+    });
+
     // Add event listener for pressing enter in the task input, to add the task.
     const taskInput = document.getElementById("todo-task");
     taskInput.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
             event.preventDefault(); // Prevent form from submitting.
             tasks.add(); // Add the task.
+            document.getElementById("todo-task").value = "";
         };
     });
 

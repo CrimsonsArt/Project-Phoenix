@@ -51,14 +51,10 @@
                 <section id="todo">
                     <h3>Todo list</h3>
                     <form id="task-form">
-                        <div class="form-field">
-                            <label for="todo-task">New task:</label>
-                            <input type="text" id="todo-task" placeholder="New task" autocomplete="off" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="todo-due">Due date:</label>
-                            <input type="date" id="todo-due">
-                        </div>
+                        <label for="todo-task" class="sr-only">New task:</label>
+                        <input type="text" id="todo-task" placeholder="New task..." autocomplete="off">
+                        <label for="todo-due" class="sr-only">Due date:</label>
+                        <input type="date" id="todo-due" title="You can add a due date to this task.">
                         <button id="add-hierarchy" class="btn" type="button" title="Add the task in a hierarchy with another task" aria-label="Add the task in a hierarchy with another task">Add hierarchy<span class="icon bi bi-diagram-2"></span></button>
                         <button id="add-task" class="btn" type="submit" title="Add task" aria-label="Add task">Add task<span class="icon bi bi-plus-circle" aria-hidden="true"></span></button>
                     </form>

@@ -88,8 +88,6 @@ export const journal = {
          * Renders a daily journal.
          * 
          * @param {string} date - The date to render the journal for.
-         * 
-         * TODO: Improve the layout of the journal.
          */
         // Create the wrapper, and append it to the day view.
         const wrapper = document.createElement("div");
