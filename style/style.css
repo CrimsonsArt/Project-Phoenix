@@ -133,9 +133,9 @@ footer {
     background-color: var(--primary-color);
     display: flex;
     flex-flow: row nowrap;
-    font-size: 0.8em;
+    font-size: 0.7em;
     justify-content: space-between;
-    padding: 0 1%;
+    padding: 0 1% 1% 1%;
 }
 
 
@@ -259,6 +259,8 @@ footer {
     border-top: var(--borders);
     display: flex;
     flex-flow: column nowrap;
+    height: 100%;
+    width: 100%;
 }
 #calendar-title::after {
     content: "";
@@ -296,6 +298,9 @@ footer {
 #calendar-nav button:nth-of-type(2) {
     flex-grow: 1;
     order: 1;
+}
+#calendar-nav-current span {
+    padding: 0;
 }
 .row {
     align-content: stretch;
@@ -547,6 +552,7 @@ footer {
     margin-bottom: 25%;
     padding: 15px 0;
     width: 95%;
+    z-index: 1;
 }
 #todo h3 {
     margin-bottom: 0;
@@ -614,10 +620,12 @@ footer {
     list-style: none;
 }
 .task-wrapper:not(:has(.edit-task-wrapper)) {
+    background-color: rgb(155, 171, 198, 0.5);
     border-bottom: 1px solid var(--primary-color);
     display: grid;
     grid-template-columns: [checkbox] 25px [task] auto [due] auto [timestamp] 100px [dropdown] 31px;
     margin-top: 5px;
+    position: relative;
 }
 .task-check {
     grid-area: checkbox;
@@ -657,7 +665,9 @@ footer {
 }
 .task-progress {
     display: none;
-    grid-area: progress;
+    z-index: -1;
+}
+progress[value] {
 }
 .task-dropdown-content {
     border: var(--borders);

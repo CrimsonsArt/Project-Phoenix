@@ -220,13 +220,8 @@ export const tasks = {
                 // Optional: Add a text label for progress.
                 const progressLabel = document.createElement("span");
                 progressLabel.classList.add("progress-label");
-                progressLabel.textContent = `${Math.round((completed / total) * 100)}%`;
-
-                // Optional: Add a screen reader span for progress.
-                const progressSpan = document.createElement("span");
-                progressSpan.classList.add("sr-only");
-                progressSpan.textContent = " completed";
-                progressLabel.appendChild(progressSpan);
+                progressLabel.textContent = `${Math.round((completed / total) * 100)}% completed`;
+                progressLabel.classList.add("sr-only");
 
                 // Wrap the progress bar and label.
                 const progressWrapper = utils.wrapInput(progressBar, progressLabel);
